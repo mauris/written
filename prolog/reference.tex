@@ -1,0 +1,568 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{geometry}
+\usepackage{amsmath}
+\usepackage{dirtytalk}
+\usepackage{graphicx}
+\usepackage{enumerate}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{multicol}
+
+\setlength\columnsep{30pt}
+
+\geometry{
+ 	a4paper,
+	total={170mm,257mm},
+ 	left=20mm,
+ 	top=20mm,
+}
+
+\title{
+	 \large 518: Logic and AI Programming \\
+	 \huge Prolog Reference
+}
+\date{16 Nov 2017}
+\author{
+	Sam Yong \\
+	\small \href{mailto:sam.yong17@imperial.ac.uk}{sam.yong17@imperial.ac.uk}
+}
+
+
+\begin{document}
+  \maketitle
+  
+  \begin{multicols}{2}
+  
+  \section*{Preface}  
+  
+  \paragraph{} This Prolog reference has been condensed from the lecture slides and notes provided by Dr Fariba Sadri, Claudia Schulz and Romain Barnoud in the Imperial College London, Department of Computing's 518: Logic and AI Programming course.
+  
+  \paragraph{} Please note that the ordering of this reference may not correspond to the sequence introduced in the lecture slides and notes from CATe. This order is how I feel I would understand the topic better. 
+  
+  \section{Introduction to Prolog}    
+  
+  \subsection{Prolog Terms}
+  
+  \paragraph{A Prolog term} is one of the following:
+  
+  \begin{enumerate}
+  \item Atom/Constant: starts with a lower-case letter or anything between quotes. e.g.: \textit{john, computing\_MSc, x123, 'logic and ai'.}
+  \item Number: an integer or float. e.g.: \textit{0, 42, -1729, 2.718, 6.626E-34}
+  \item Variable: starts with a upper-case letter or an underscore. e.g.: \textit{My\_variable, X, \_Anonymous, \_123, \_} 
+  \item Compound Term\footnote{Note that they are terms, not functions}: in the form of $functor(t_1,..., t_n)$, where $functor$ is a constant name applied to $n$ terms. $n$ is called the arity of the term.\footnote{Constants are 0-arity terms}. e.g.: \textit{dob(alice, 1970), world\_record('100m', 9.58, date(16, august, 2009)), 'long name here'(X, cst, \_)}
+  \end{enumerate}
+  
+  \noindent A {\bf ground term} is a term that contains no variable. For example:
+  
+  \begin{lstlisting}
+  has_plant(kelvin, ginger)
+  age(james, 20)
+  \end{lstlisting}
+  
+  \subsection{Predicate Signature}
+  
+  \paragraph{Predicate Signature} Like a function signature, the predicate signature tells which parameters are expected and what kind of parameters are expected for the predicates. In particular:
+  
+  \begin{enumerate}
+  \item[\bf +Arg1:] $Arg1$ is expected {\bf not} to be a variable (but may contain variables).
+  \item[\bf -Arg2:] $Arg2$ is expected to be a variable.
+  \item[\bf ?Arg3:] No assumptions is made on whether $Arg3$ is a variable or not.
+  \end{enumerate}
+  
+  \section{Substitution}
+  
+  \paragraph{Definition} A substitution is a mapping from variables to terms, as such:
+  
+  $$\theta = \{ X_1 \mapsto t_1, X_2 \mapsto t_2, ..., X_n \mapsto t_n \}$$
+  
+  When a substitution $\theta$ is applied to a term $t$, it is written $s = t\theta$, where the new term $s$ is identical to $t$ with $\forall i \in [1, n]$, $X_i$ is replaced with $t_i$. $s$ is called an instance of $t$.
+  
+  \paragraph{Examples} Some examples of substitution are:
+  
+  \begin{enumerate}
+  \item $t = f(A,B),\\ \theta = \{A \mapsto x, B \mapsto y\}$\\ gives $s=t\theta=f(x, y)$
+  \item $t = g(X, f(c, X), Y),\\ \theta = \{X \mapsto a, Y \mapsto Z\}$\\ gives $s=t\theta=g(a, f(c, a), z)$
+  \item $t = h(X, Y, Z),\\ \theta = \{X \mapsto W, Y \mapsto f(W), Z \mapsto f(b)\}$\\ gives $s=t\theta=h(W, f(W), f(b))$
+  \end{enumerate}
+  
+  \section{Unification}
+  
+  \paragraph{Definition} Two terms $T_1$ and $T_2$ unify iff $\exists$ a subtitution $\theta$ s.t. $T_1\theta \equiv T_2\theta$.
+  
+  \paragraph{Examples} Some examples of unification are:
+  
+  \begin{enumerate}
+  \item $john$ unifies with $john$, iff $\theta = \{\}$.
+  \item $alice$ unifies with $Alice$, iff $\theta = \{Alice \mapsto alice\}$. Recall that $Alice$, having a upper-case first letter, is a variable.
+  \item $\_000$ unifies with $Variable$, iff $\theta = \{\_000 \mapsto Variable\}$ or $\theta = \{Variable \mapsto \_000\}$.
+  \item $p(X, 2)$ unifies with $p(f(g), Y)$, iff $\theta = \{X \mapsto f(g), Y \mapsto 2\}$. Recall that $\theta$ needs to be applied to both terms.
+  \item $p(X, f(Y))$ unifies with $p(f(f(b)), X)$, iff $\theta = \{X \mapsto f(f(b)), Y \mapsto f(b)\}$.
+  \end{enumerate}
+  
+  The following are some examples of non-unification:
+  
+  \begin{enumerate}
+  \item $3$ does not unify with $3.0$.
+  \item $518$ does not unify with $'518'$. Recall that $'518'$ is an atom/constant term while $518$ (without quotes) is a number term.
+  \item $g(a, b, c)$ does not unify with $h(a, b, c)$. $g$ and $h$, being compound terms cannot be substituted\footnote{Only variables can be substituted}.
+  \item $f(a, X)$ does not unify with $f(X, b)$. The variable $X$ cannot be mapped to two different terms.
+  \item $p(X, f(Y))$ does not unify with $p(a, X)$. Like previous example, $X$ cannot be mapped to $a$ and $f(Y)$ at the same time.
+  \end{enumerate}
+  
+  \section{Equality}
+  
+  \paragraph{} There are four equality predicates in Prolog: $=$, $==$, $is$ and $=:=$. Suppose $S$, $T$ and $X$ are terms and Expr, Expr1, Expr2 are arithmetic expressions, the following statements hold:
+  
+  \begin{enumerate}
+  \item $S = T$ iff $S$ and $T$ unify.
+  \item $S == T$ iff $S$ and $T$ are identical.
+  \item $X is Expr$ iff the result of evaluating $Expr$ unifies with $X$.
+  \item $Expr1 =:= Expr2$ iff $Expr1$ and $Expr2$ both evaluate to the {\bf same number}.
+  \end{enumerate}
+  
+  The following are the opposite predicates for the four equality predicates:
+  
+  \begin{enumerate}
+  \item The negation of $=$ is $\backslash=$.
+  \item The negation of $==$ is $\backslash==$.
+  \item The negation of $is$ is undefined.
+  \item The negation of $=:=$ is $=\backslash=$.
+  \end{enumerate}
+  
+  \section{Search Strategy}
+  
+  \paragraph{Query} A query is a conjunction of goals $G1, G2, ..., Gn$ written as such:
+  
+  $$?- G1, G2, ..., Gn.$$
+  
+  \paragraph{Answer} An answer to a query is one substitution $\theta$ s.t. $G1\theta, G2\theta, ..., Gn\theta$ are the logical consequences of the program.
+  
+  Prolog uses a search strategy find one such substitution or prove that such substitution does not exist.
+  
+  \subsection{Algorithm}
+  
+  \paragraph{} To solve a given query $?- G1, G2, ..., Gn.$
+  
+  \begin{enumerate}
+  \item Start with solving first goal $G1$.
+  \item To solve $G1$, find a fact / clause $H := B1, B2, ..., Bm$ where $H$ unifies with $G1$ (i.e. $\exists\theta, G1\theta \equiv H\theta$). If there are more than one clause that satisfies the above condition, we have reached a choice point: select potential clauses from top to bottom. 
+  \begin{enumerate}
+  \item If $G1$ is the only goal in the query (i.e. $n=1$) and the selected clause is a fact (i.e. $H.$, $m=0$). {\bf $\implies$ succeed}
+  \item - If such a clause and substitution exist, extend and solve the query "$?- B1\theta, B2\theta, ..., Bm\theta, G2\theta, ..., Gn\theta.$".
+  \item - If no such clause or substitution exists, {\bf backtrack} to the last choice point and pick next satisfiable clause.
+  \item If there are no more choice points (i.e. all clauses for all choice points have been tried), {\bf $\implies$ fail}
+  \end{enumerate}
+  \end{enumerate}
+  
+  \paragraph{Search Tree} A search tree can be used to visualize the steps that the Prolog search strategy algorithm takes when answering queries.
+  
+  \begin{enumerate}
+  \item At each step, the applicable clauses represent alternative evaluation paths (different branches of the search tree).
+  \item Prolog searches the tree left-to-right, depth-first, to find successful evaluation paths.
+  \item If a leaf query has no applicable clause, the path/branch of the search tree fails.
+  \item If a leaf query is an empty conjunction, the path/branch of the search tree succeeds.
+  \end{enumerate}
+  
+  \section{Recursion}
+  
+  \section{Lists}  
+  
+  \subsection{Introduction}
+  
+  \paragraph{} Lists are useful to represent sequences or collection of things. For example, instead of writing multiple predicates as such:
+  
+  \begin{lstlisting}
+  dept(eng, aero).
+  dept(eng, bio_eng).
+  dept(eng, computing).
+  dept(eng, eee).
+  dept(eng, mech_eng).
+  dept(sci, chemistry).
+  dept(sci, maths).
+  dept(sci, physics).
+  dept(business, finance).
+  dept(business, management).
+  \end{lstlisting}
+  
+  the predicates can be simplified to:
+  
+  \begin{lstlisting}
+  dept(eng, [aero, bio_eng, computing,
+   eee, mech_eng]).
+  dept(sci, [chemistry, maths, physics]).
+  dept(business, [finance, management]).
+  \end{lstlisting}
+  
+  In Prolog, elements in a list can be any Prolog terms, including a list. For example $[a, 1, f(X, Y), [4, Z, 6], 2.0]$ is a valid Prolog expression representing a list.
+  
+  \subsection{Definition}
+  
+  \say{A list is a data structure that represents a sequence of any number of terms.} - Wisdom.
+  
+  \paragraph{} A Prolog list is one of the following:
+  
+  \begin{enumerate}
+  \item $[]$ - an empty list; or,
+  \item $[H|T]$ - where $H$ is a term and $T$ is a list (recursive definition). $H$ being the first item of the list is called the {\bf head} and $T$ being the remaining of the list is called the {\bf tail}.
+  \end{enumerate}
+  
+  \noindent The following expressions are equivalent:
+  
+  \begin{equation*}
+  \begin{aligned}
+  \big [ a \vert [ b \vert [ c \vert [ d \vert []]]] \big] & \equiv [a,b,c,d] \\
+  & \equiv [a|[b,c,d]] \\
+  & \equiv [a,b|[c,d]] \\
+  & \equiv [a,b,c|[d]] \\
+  & \equiv [a,b,c,d|[]]
+  \end{aligned}
+  \end{equation*}  
+  
+  \noindent Note that the empty list $[]$ has an undefined head and an undefined tail.  
+  
+  \subsection{Lists Library}
+  
+  \paragraph{} Prolog provides some built-in predicates for manipulating lists via the "lists" library. \footnote{Documentation available at \url{https://sicstus.sics.se/sicstus/docs/4.3.0/html/sicstus/lib_002dlists.html}}
+  
+  \paragraph{} To load the library, you can either use the query:
+  
+  \begin{lstlisting}
+  ?- use_module(library(lists)).
+  \end{lstlisting}
+  
+  or add the following rule to your program:
+
+  \begin{lstlisting}
+  :- use_module(library(lists)).
+  \end{lstlisting}
+  
+  \subsection{Built-in Lists Predicates}
+  
+  \subsubsection{Membership}
+  
+  \paragraph{nonmember/2} Test if an element is in a list:
+  
+  \begin{lstlisting}
+  member(?Element, ?List)
+  \end{lstlisting} 
+  
+  Returns $true$ if $Element$ occurs in $List$, $false$ otherwise.
+
+  \paragraph{nonmember/2} Test if an element is not in a list:
+  
+  \begin{lstlisting}
+  nonmember(?Element, ?List)
+  \end{lstlisting} 
+  
+ Returns $true$ if $Element$ does not occur in $List$, $false$ otherwise.
+  
+  \subsubsection{List Operations}
+
+  \paragraph{append/3} Test if an element is not in a list:  
+  
+  \begin{lstlisting}
+  append(?List1, ?List2, ?List3)
+  \end{lstlisting} 
+  
+  Returns $true$ if $List3$ is the list consisting of $List1$ followed by $List2$, $false$ otherwise.
+  
+  \paragraph{length/2} Test if a list is of a certain length:
+  
+  \begin{lstlisting}
+  length(?List, ?Length)
+  \end{lstlisting} 
+  
+  Returns $true$ if $List$ contains $Length$ number of elements, $false$ otherwise.
+  
+  \paragraph{rev/2} Test if a two lists are the reverse of each other:
+  
+  \begin{lstlisting}
+  rev(+List, ?Reversed)
+  \end{lstlisting} 
+  
+  Returns $true$ if $List$ and $Reversed$ contain the same elements but in reverse order, $false$ otherwise.
+  
+  \paragraph{sort/2} Sorts a list:\footnote{See it. Say it. Sorted.}
+  
+  \begin{lstlisting}
+  sort(+List, -Sorted)
+  \end{lstlisting} 
+  
+  Elements from $List$ are sorted in ascending order and duplicated elements are removed. The resulting list is unified with $Sorted$.
+  
+  \paragraph{rev/2} Test if a two lists are the permutations of each other:
+  
+  \begin{lstlisting}
+  perm(+List, -Perm)
+  \end{lstlisting} 
+  
+  Returns $true$ if $List$ and $Perm$ are permutations of each other, $false$ otherwise.
+  
+  \paragraph{subseq0/2} Test if a list is a sub-sequence of another:
+  
+  \begin{lstlisting}
+  subseq0(+Seq, -SubSeq)
+  \end{lstlisting} 
+  
+  Returns $true$ if $SubSeq$ is a sub-sequence of $Seq$, $false$ otherwise.
+  
+  \subsection{User-Defined Predicates}
+
+  \paragraph{belongs\_to/2}: Test if an element belongs to a list:
+  
+  \begin{lstlisting}
+  belongs_to(?Element, ?List)
+  \end{lstlisting} 
+  
+  Returns $true$ if $List$ contains the element $Element$, $false$ otherwise. $belongs_to/2$ can be defined as follows:
+
+  \begin{lstlisting}
+  % Base case: X is the head of L
+  belongs_to(X, L) :-
+      L = [X|_].
+  % Recursive case: search for X in the tail of L
+  belongs_to(X, L) :-
+      L = [H|T],
+      belongs_to(X, T).
+  \end{lstlisting} 
+  
+  We can get a more concise expression by simplifying the definition as such:
+
+  \begin{lstlisting}
+  belongs_to(X, [X|_]).
+  belongs_to(X, [H|T]) :-
+      belongs_to(X, T).
+  \end{lstlisting} 
+  
+  \paragraph{concat/3} Concatenate two lists into the third:
+  
+  \begin{lstlisting}
+  concat(?List1, ?List2, ?List3)
+  \end{lstlisting} 
+  
+  $List1$ and $List2$ are concatenated together and the resulting list is unified with $List3$. $concat/3$ can be defined as follows:
+
+  \begin{lstlisting}
+  concat(L1, L2, L3) :-
+      L1 = [], L3 = L2.
+  concat(L1, L2, L3) :- 
+      L1 = [H1|T1],
+      concat(T1, L2, T3),
+      L3 = [H1|T3].
+  \end{lstlisting} 
+  
+  We can get a more concise expression by simplifying the definition as such:
+
+  \begin{lstlisting}
+  concat([], L, L).
+  concat([H1|T1], L2, [H1|T3]) :- 
+      concat(T1, L2, T3).
+  \end{lstlisting}
+  
+  \paragraph{even\_odd/3} Partition a list into a list of its even elements and another list of its odd elements:
+  
+  \begin{lstlisting}
+  even_odd(?List, ?Even, ?Odd)
+  \end{lstlisting} 
+  
+  $List$ is partitioned into two lists $Even$ and $Odd$ where $Even$ contains all even numbered elements in $List$ and $Odd$ contains all odd numbered elements in $List$. $even_odd/3$ can be defined as follows:
+
+  \begin{lstlisting}
+  even_odd([], [], []).
+  even_odd(L1, L2, L3) :- 
+      L1 = [N|TList],
+      N mod 2 =:= 0,
+	  L2 = [N|TEven],
+      even_odd(TList, TEven, L3).
+  even_odd(L1, L2, L3) :- 
+      L1 = [N|TList],
+      N mod 2 =:= 1,
+	  L3 = [N|TOdd],
+      even_odd(TList, L2, TOdd).
+  \end{lstlisting} 
+  
+  We can get a more concise expression by simplifying the definition as such:
+
+  \begin{lstlisting}
+  even_odd([], [], []).
+  even_odd([N|TList], [N|TEven], L3) :- 
+      N mod 2 =:= 0,
+      even_odd(TList, TEven, L3).
+  even_odd([N|TList], L2, [N|TOdd]) :- 
+      N mod 2 =:= 1,
+      even_odd(TList, L2, TOdd).
+  \end{lstlisting} 
+  
+  \paragraph{last/2} Test if an element is the last element of a list:
+  
+  \begin{lstlisting}
+  last(?Element, ?List)
+  \end{lstlisting} 
+  
+  Returns $true$ if $Element$ is the last element of $List$, $false$ otherwise. $last/2$ can be defined as follows using the $append/2$:
+  
+  \begin{lstlisting}
+  last(E, [E]).
+  last(E, L) :-
+      append(_, [E], L).
+  \end{lstlisting} 
+  
+  $last/2$ can also be defined without using $append/2$ as follows:  
+  
+  \begin{lstlisting}
+  last(E, [E]).
+  last(E, [X,Y|L]) :-
+      last(E, [Y|L]).
+  \end{lstlisting} 
+  
+  \paragraph{len/2} Test if an list is of a certain length:
+  
+  \begin{lstlisting}
+  len(?List, ?Count)
+  \end{lstlisting} 
+  
+  Returns $true$ if $List$ has $Count$ number of elements, $false$ otherwise. $len/2$ can be defined using {\bf direct recursion} as follows:
+  
+  \begin{lstlisting}
+  len([], 0).
+  len(L, N) :-
+	L = [E|T],
+	len(T, N1),
+	N is N1+1.
+  \end{lstlisting} 
+  
+  We can get a more concise expression by simplifying the definition as such:  
+  
+  \begin{lstlisting}
+  len([], 0).
+  len([E|T], N) :-
+	len(T, N1),
+	N is N1+1.
+  \end{lstlisting} 
+
+  If our goal is just to {\bf check} if the number of elements in the list equals to the $Count$ parameter, we can implement a faster solution $len2/2$ by writing it as such:
+  
+  \begin{lstlisting} 
+  len2([], 0).
+  len2([E|T], N) :-
+    N1 is N-1,
+  	len2(T, N1).
+  \end{lstlisting}
+  
+  If you try to submit a query for a variable in the $Count$ parameter like $?- len2([1, 2, 3, 4, 5], N).$, Prolog will throw an error "Arguments are not sufficiently instantiated" because N is not instantiated.
+  
+  $len/2$ can also be implemented with an accumulator which improves the runtime performance:
+  
+  \begin{lstlisting} 
+  len3(L, N) :- len_acc(L, 0, N).
+  len_acc([], N, N).
+  len_acc([E|T], CurrentN, N) :-
+	NewN is CurrentN+1,
+	len_acc(T, NewN, N).
+  \end{lstlisting}  
+  
+  \paragraph{list\_double/2} Check if every element in a list is double of its corresponding element in another list.
+  
+  \begin{lstlisting}
+  list_double(?List1, ?List2)
+  \end{lstlisting} 
+  
+  Returns $true$ if every element in $List2$ is double of its corresponding element in $List1$. $list\_double/2$ can be defined as follows:
+
+  \begin{lstlisting}
+  list_double([E1], [E2]) :-
+    E2 is E1*2.
+  list_double([E1|T1], [E2|T2]) :-
+    E2 is E1*2,
+    list_double(T1, T2).
+  \end{lstlisting} 
+  
+  \paragraph{sum/2} Calculate the sum of all elements in a list.
+  
+  \begin{lstlisting}
+  sum(?List, ?Sum)
+  \end{lstlisting} 
+  
+  Returns $true$ if summation of all elements in $List$ is equal to $Sum$. $sum/2$ can be defined using {\bf direct recursion} as follows:
+
+  \begin{lstlisting}
+  sum([], 0).
+  sum([H|T], S) :- sum(T, N), S is H+N.
+  \end{lstlisting} 
+  
+  However, using an accumulator would improve the performance of the summation:
+  
+  \begin{lstlisting}
+  sum2(L, S) :- sum_acc(L, 0, S).
+  sum_acc([], S, S).
+  sum_acc([E|T, CurrentSum, Sum) :-
+    NewSum is CurrentSum + E,
+    sum_acc(T, NewSum, Sum).
+  \end{lstlisting} 
+  
+  \paragraph{list\_avg/2} Calculate the average over all elements in a list.
+  
+  \begin{lstlisting}
+  list_avg(?List, ?Avg)
+  \end{lstlisting} 
+  
+  Returns $true$ if average of all elements in $List$ is equal to $Avg$. Using $sum/2$ and $len/2$ predicates define earlier, $list_avg/2$ can be defined as follows:
+
+  \begin{lstlisting}
+  list_avg(L, A) :-
+    sum(L, S),
+    len(L, N),
+    A is S/N.
+  \end{lstlisting}
+ 
+  \paragraph{access\_element/3} Retrieve an element of a list by index.
+  
+  \begin{lstlisting}
+  access_element(?Index, ?List, ?Element)
+  \end{lstlisting}
+  
+  Returns $true$ if the element of index $Index$ in $List$ is $Element$. $access\_element/2$ can be defined as follows:
+
+  \begin{lstlisting}
+  access_element(1, [H|_], H).
+  access_element(N, [_|T], X) :-
+    N1 is N-1,
+    access_element(N1, T, X).
+  \end{lstlisting}
+  
+  \paragraph{remove/3} Remove an element from a list.
+  
+  \begin{lstlisting}
+  remove(?Element, ?List, ?Rest)
+  \end{lstlisting}
+  
+  Returns $true$ if the removal of all instances of $Element$ in $List$ unifies with $Rest$. $remove/3$ can be defined as follows:
+
+  \begin{lstlisting}
+  remove(_, [], []).
+  remove(X, [H|T], RL) :-
+    X \= H,
+    remove(X, T, L),
+    RL = [H|L].
+  remove(H, [H|T], RL) :-
+    remove(X, T, L),
+    RL = L.
+  \end{lstlisting}  
+  
+  \paragraph{a2b/2} Check if every occurrence of $a$ in a list occurs as $b$ in another list.
+  
+  \begin{lstlisting}
+  a2b(?List1, ?List2)
+  \end{lstlisting}
+  
+  Returns $true$ if every occurrence of $a$ in $List1$ occurs as $b$ in $List2$. Note that here $a$ and $b$ are constants (variables start with upper case letter). $a2b/2$ can be defined as follows:
+
+  \begin{lstlisting}
+  a2b([], []).
+  a2b([a|T1], [b|T2]) :-
+    a2b(T1, T2).
+  \end{lstlisting}   
+  
+  \end{multicols}
+\end{document}

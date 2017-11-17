@@ -525,7 +525,9 @@
 
   \begin{lstlisting}
   sum([], 0).
-  sum([H|T], S) :- sum(T, N), S is H+N.
+  sum([H|T], S) :-
+    sum(T, N),
+    S is H+N.
   \end{lstlisting} 
   
   However, using an accumulator would improve the performance of the summation:

@@ -345,7 +345,7 @@
   concat(?List1, ?List2, ?List3)
   \end{lstlisting} 
   
-  $List1$ and $List2$ are concatenated together and the resulting list is unified with $List3$. $concat/3$ can be defined as follows:
+  $List1$ and $List2$ are concatenated together and returns true if the resulting list is unified with $List3$, false otherwise. $concat/3$ can be defined as follows:
 
   \begin{lstlisting}
   concat(L1, L2, L3) :-

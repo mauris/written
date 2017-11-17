@@ -563,6 +563,21 @@
   a2b([a|T1], [b|T2]) :-
     a2b(T1, T2).
   \end{lstlisting}   
+
+  \paragraph{permutation/2} Check if two lists are permutations of each other.
   
+  \begin{lstlisting}
+  permutation(+List1, +List2)
+  \end{lstlisting}
+  
+  Returns $true$ if $List1$ is a permutation of $List2$. As both $List1$ and $List2$ are expected to not be a variable, this method cannot be used to generate permutations of a given list. $permutation/2$ can be defined as follows:
+
+  \begin{lstlisting}
+  permutation([], []).
+  permutation([H|T], L) :-
+    remove(H, L, J),
+    permutation(T, J).
+  \end{lstlisting}  
+
   \end{multicols}
 \end{document}

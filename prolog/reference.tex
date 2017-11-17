@@ -615,6 +615,27 @@
     remove(H, L, J),
     permutation(T, J).
   \end{lstlisting}  
+  
+  \paragraph{bubble/2} Sorts a list using the Bubble Sort algorithm.
+  
+  \begin{lstlisting}
+  bubble(?List, ?SortedList)
+  \end{lstlisting}
+  
+  $List$ is sorted using the Bubble Sort algorithm\footnote{For a visualisation of the Bubble Sort algorithm, head over to \href{https://visualgo.net/en/sorting}{https://visualgo.net/en/sorting}.} and returns true if the resulting list is unified with $List3$, false otherwise. $permutation/2$ can be defined using the earlier defined $remove/3$ as follows:
 
+  \begin{lstlisting}
+  bubble(L, L) :- sorted(L).
+  bubble(L, SL) :-
+    append(L1, [X,Y|Rest],L),
+    X>Y,
+    append(L1, [Y,X|Rest], NewL),
+    bubble(NewL, SL).
+  sorted(L) :-
+    \+ (append(L1, [X,Y|Rest], L), X>Y).
+  \end{lstlisting}  
+
+  $\backslash+$ is the "not provable" operator. It succeeds if its argument is not provable and fails if its argument is provable\footnote{See \href{https://stackoverflow.com/a/1712056/126039}{https://stackoverflow.com/a/1712056/126039}}. Hence the $sorted(L)$ definition can be read as \say{L is sorted iff there is no two elements in the list sorted in descending order.}
+ 
   \end{multicols}
 \end{document}

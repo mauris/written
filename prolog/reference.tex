@@ -72,6 +72,20 @@
   \item[\bf ?Arg3:] No assumptions is made on whether $Arg3$ is a variable or not.
   \end{enumerate}
   
+  \subsection{Debugging}
+  
+  \paragraph{} Debugging in the Prolog query environment can be done using the $trace.$ and $notrace.$ terms. To start tracing how a query is answered, type and enter:
+  
+  \begin{lstlisting}
+  ?- trace.
+  \end{lstlisting}
+  
+  Notice that the prompt changes from $?-$ to $[trace]  ?-$ which indicates that you are now in trace mode. Any subsequent queries except $notrace$ will be executed with each step of the search strategy shown. To turn off tracing, type and enter:
+  
+  \begin{lstlisting}
+  [trace]  ?- notrace.
+  \end{lstlisting}
+  
   \section{Substitution}
   
   \paragraph{Definition} A substitution is a mapping from variables to terms, as such:

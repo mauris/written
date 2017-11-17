@@ -64,6 +64,24 @@
   age(james, 20)
   \end{lstlisting}
   
+  \subsection{Test and Generate}
+  
+  There are two ways to use goals in Prolog. You can either test to verify a fact or generate to yield possible variables that apply to the goals. For example, a test is written such as:
+  
+  \begin{lstlisting}
+  ?- permutation([1, 3, 2], [3, 2, 1]).
+  true.
+  \end{lstlisting}
+  
+  In tests, Prolog does nothing more than returning true when the query succeed and false when the query fail. A generate is written as such:
+  
+  \begin{lstlisting}
+  ?- remove(3, [1, 3, 2], L).
+  L = [1, 2].
+  \end{lstlisting}
+  
+  In generate, all sets of non-variable terms that substitute all variables in the query to satisfy the query are printed.
+  
   \subsection{Predicate Signature}
   
   \paragraph{Predicate Signature} Like a function signature, the predicate signature tells which parameters are expected and what kind of parameters are expected for the predicates. In particular:

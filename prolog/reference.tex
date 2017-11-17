@@ -82,6 +82,14 @@
   
   In generate, all sets of non-variable terms that substitute all variables in the query to satisfy the query are printed.
   
+  \subsection{Declarative vs Procedural}
+  
+  \paragraph{Consider the rule $A :- B, C.$} The declarative meaning\footnote{or logical interpretation} is $A \impliedby B \land C$, which means A is true if B is true and C is true. However, how Prolog interprets the rule\footnote{i.e. procedural meaning} is to first prove $A$, prove $B$, and then prove $C$ in that specific order. 
+  
+  \paragraph{Now, consider the rule $A :- B.\ A :- C.$} The declarative meaning is $A \impliedby B \lor C$, which means $A$ is true if $B$ is true or $C$ is true. However, how Prolog interprets the rule is to first prove $B$ to prove $A$. If $B$ does not succeed, then prove $C$ to prove $A$. 
+  
+  \paragraph{Lastly, consider $p :- p.$} The declarative meaning is $p \impliedby p$, which by definition is a tautology. However, how Prolog interprets the rule is to prove $p$, prove $p$, ...  which causes an infinite loop.
+  
   \subsection{Predicate Signature}
   
   \paragraph{Predicate Signature} Like a function signature, the predicate signature tells which parameters are expected and what kind of parameters are expected for the predicates. In particular:

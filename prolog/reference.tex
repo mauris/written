@@ -212,7 +212,57 @@
   
   \section{Recursion}
   
-  \paragraph{} TODO
+  \paragraph{Definition} A {\bf recursive} predicate is a predicate that calls itself. For example:
+  
+  \begin{lstlisting}
+  recursive_predicate(X1, ..., Xn) :-
+    goal1,
+    ...
+    goalP,
+    recursive_predicate(Y1, ..., Yn),
+    goalQ,
+    ...,
+    goalR.
+  \end{lstlisting}
+  
+  A recursive predicate is {\bf tail recursive} iff the recursion occurs in the last goal of each recursive rule. 
+  
+  Recursions need at least one base case so that the algorithm knows when to terminate the recursion and backtrack. The base case(s) is/are usually placed before the recursion case(s).
+  
+  \subsection{Loops}
+  
+  Loops do not exist in Prolog as Prolog is primarily a declarative language rather than procedural (like C++). However, recursion can be used to replace loops as such:
+  
+  \begin{lstlisting}
+  while_loop(I, N, X1, ...) :-
+    I =:= N,
+    % end of the loop.
+  
+  while_loop(I, N, X1, ...) :-
+    I < N,
+    % do work in loop
+    NewI is I+1,
+    while_loop(NewI, N, Y1, ...).
+  \end{lstlisting}
+  
+  \subsection{Examples}  
+  
+  \paragraph{factorial/2} Calculate the factorial $f(n) = n!$:
+  
+  \begin{lstlisting}
+  factorial(?N, ?Result)
+  \end{lstlisting} 
+  
+  Returns $true$ if $Result$ unifies with the factorial of $N$, $false$ otherwise. $factorial/2$ can be defined as follows:
+  
+  \begin{lstlisting}
+  factorial(0, 1).
+  factorial(F, FN) :-
+    N > 0,
+    M is N-1,
+    factorial(M, FM),
+    FN is N*FM.
+  \end{lstlisting}
   
   \section{Lists}  
   
@@ -406,7 +456,7 @@
   concat(?List1, ?List2, ?List3)
   \end{lstlisting} 
   
-  $List1$ and $List2$ are concatenated together and returns true if the resulting list is unified with $List3$, false otherwise. $concat/3$ can be defined as follows:
+  $List1$ and $List2$ are concatenated together and returns $true$ if the resulting list is unified with $List3$, $false$ otherwise. $concat/3$ can be defined as follows:
 
   \begin{lstlisting}
   concat(L1, L2, L3) :-

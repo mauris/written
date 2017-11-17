@@ -570,7 +570,7 @@
   permutation(+List1, +List2)
   \end{lstlisting}
   
-  Returns $true$ if $List1$ is a permutation of $List2$. As both $List1$ and $List2$ are expected to not be a variable, this method cannot be used to generate permutations of a given list. $permutation/2$ can be defined as follows:
+  Returns $true$ if $List1$ is a permutation of $List2$. As both $List1$ and $List2$ are expected to not be a variable, this method cannot be used to generate permutations of a given list. $permutation/2$ can be defined using the earlier defined $remove/3$ as follows:
 
   \begin{lstlisting}
   permutation([], []).

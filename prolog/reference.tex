@@ -301,6 +301,25 @@
   
   Returns $true$ if $List$ and $Reversed$ contain the same elements but in reverse order, $false$ otherwise.
   
+  The $rev/2$ predicate can also be easily defined in direct recursion or using accumulator. The following is an implementation of $rev/2$ using direct recursion:
+  
+  \begin{lstlisting}
+  rev2([], []).
+  rev2([H|T], R) :-
+    rev2(T, RT),
+    append(RT, [H], R).
+  \end{lstlisting}
+  
+  The following is then an implementation of $rev/2$ using an accumulator:
+  
+  \begin{lstlisting}
+  rev3(L, RL) :-
+    rev_acc(L, [], RL).
+  rev_acc([], Acc, Acc).
+  rev_acc([H|T], Acc, RL) :-
+    rev_acc(T, [H|Acc], RL).
+  \end{lstlisting}
+  
   \paragraph{sort/2} Sorts a list:\footnote{See it. Say it. Sorted. - TfL}
   
   \begin{lstlisting}

@@ -543,13 +543,11 @@
 
   \begin{lstlisting}
   remove(_, [], []).
-  remove(X, [H|T], RL) :-
+  remove(X, [H|T], [H||L]) :-
     X \= H,
-    remove(X, T, L),
-    RL = [H|L].
-  remove(H, [H|T], RL) :-
-    remove(X, T, L),
-    RL = L.
+    remove(X, T, L).
+  remove(H, [H|T], L) :-
+    remove(X, T, L).
   \end{lstlisting}  
   
   \paragraph{a2b/2} Check if every occurrence of $a$ in a list occurs as $b$ in another list.

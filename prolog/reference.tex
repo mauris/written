@@ -355,12 +355,10 @@
   Returns $true$ if $List$ contains the element $Element$, $false$ otherwise. $belongs_to/2$ can be defined as follows:
 
   \begin{lstlisting}
-  % Base case: X is the head of L
   belongs_to(X, L) :-
       L = [X|_].
-  % Recursive case: search for X in the tail of L
   belongs_to(X, L) :-
-      L = [H|T],
+      L = [_|T],
       belongs_to(X, T).
   \end{lstlisting} 
   
@@ -368,7 +366,7 @@
 
   \begin{lstlisting}
   belongs_to(X, [X|_]).
-  belongs_to(X, [H|T]) :-
+  belongs_to(X, [_|T]) :-
       belongs_to(X, T).
   \end{lstlisting} 
   

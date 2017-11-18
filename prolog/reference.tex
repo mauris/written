@@ -48,7 +48,7 @@
   
   \subsection{Syntax}
   
-  \subsubsection{Clauses}  
+  \subsubsection{Clauses}
   
   \paragraph{Prolog programs} are sequences of clauses. Clauses can be:
   
@@ -64,6 +64,30 @@
   There must be no space between "$p$" and the open parenthesis "$($".
   
   The clause $H :- C_1, C_2, ..., C_k.$ can also be read as $\forall X_1, ... X_m (C_1 \land ... \land C_k \implies H)$ in predicate logic.
+  
+  \subsubsection{Anonymous Variables} 
+  
+  \paragraph{} Variables that only appear once in a rule can be made {\bf anonymous}, i.e. they do not have to be named in the rule. An underscore "$\_$" can be used in place of such variables, for example:
+  
+  \begin{lstlisting}
+  needs(_, computers).
+  \end{lstlisting}
+  
+  Two or more underscores in the same rule are used to represent different variables, for example:
+  
+  \begin{lstlisting}
+  happy(S) :-
+    likes(_, logic),
+    likes(_, _prolog).
+  \end{lstlisting}
+  
+  \noindent is understood as:
+  
+  \begin{lstlisting}
+  happy(S) :-
+    likes(X, logic),
+    likes(Y, _prolog).
+  \end{lstlisting}
   
   \subsubsection{Prolog Terms}
   

@@ -44,9 +44,28 @@
   \paragraph{License} This reference is made publicly available under the MIT License. You should not have paid anyone money in exchange for this document. If you have paid someone for it, well too bad. The source code for this document can be found public available on my Github repository\footnote{\href{https://github.com/mauris/written}{https://github.com/mauris/written}}. If you wish to help improve this document, feel free to open an issue on the Github repository.
   \end{footnotesize}
   
-  \section{Introduction to Prolog}    
+  \section{Introduction to Prolog}
   
-  \subsection{Prolog Terms}
+  \subsection{Syntax}
+  
+  \subsubsection{Clauses}  
+  
+  \paragraph{Prolog programs} are sequences of clauses. Clauses can be:
+  
+  \begin{enumerate}
+  \item Conditional Clause: $H :- C_1, C_2, ..., C_k.$; or,
+  \item Unconditional Clause $H.$
+  \end{enumerate}
+  
+  \noindent Notice that clauses need to terminate with "$.$". If an unconditional clause contains no variables, the clause can also be called a {\bf fact} while all other Prolog clauses are called {\bf rules}. $H$ and $\forall i C_i$ are each an atomic formula in the form:
+  
+  $p(t_1, t_2, ... t_n)$ or $p$
+  
+  There must be no space between "$p$" and the open parenthesis "$($".
+  
+  The clause $H :- C_1, C_2, ..., C_k.$ can also be read as $\forall X_1, ... X_m (C_1 \land ... \land C_k \implies H)$ in predicate logic.
+  
+  \subsubsection{Prolog Terms}
   
   \paragraph{A Prolog term} is one of the following:
   

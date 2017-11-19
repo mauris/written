@@ -84,6 +84,15 @@
     has_car_accident(R).
   \end{lstlisting}
   
+  \paragraph{Negation} To negate a condition, the expression "$\backslash+$" is used before the condition. For example:
+  
+  \begin{lstlisting}
+  can_buy_alcohol(P) :-
+    \+ underage(P).
+  \end{lstlisting}
+  
+  \noindent is read as "P can buy alcohol if P is {\bf not} underage."
+  
   \subsubsection{Anonymous Variables} 
   
   \paragraph{} Variables that only appear once in a rule can be made {\bf anonymous}, i.e. they do not have to be named in the rule. An underscore "$\_$" can be used in place of such variables, for example:

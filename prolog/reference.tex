@@ -57,13 +57,13 @@
   \item Unconditional Clause $H.$
   \end{enumerate}
   
-  \noindent Notice that clauses need to terminate with "$.$". If an unconditional clause contains no variables, the clause can also be called a {\bf fact} while all other Prolog clauses are called {\bf rules}. $H$ and $\forall i C_i$ are each an atomic formula in the form:
+  \noindent Notice that clauses need to terminate with "$.$". If an unconditional clause contains no variables, the clause can also be called a {\bf fact} while all other Prolog clauses are called {\bf rules}. $\forall i\ C_i$ are also known as {\bf conditions} of the clause. $H$ and $\forall i\ C_i$ are each an atomic formula in the form:
   
   $p(t_1, t_2, ... t_n)$ or $p$
   
   \noindent There must be no space between "$p$" and the open parenthesis "$($".
   
-  The clause $H :- C_1, C_2, ..., C_k.$ can also be read as $\forall X_1, ... X_m (C_1 \land ... \land C_k \implies H)$ in predicate logic. 
+  The clause $H :- C_1, C_2, ..., C_k.$ can also be read as $\forall X_1, ... X_m (C_1 \land ... \land C_k \implies H)$ in predicate logic. $H$ only holds if $\forall i C_i$ conditions hold.
   
   \paragraph{Commas} can be considered as AND operators (or conjunctions) in a Prolog statement as mentioned in the previous paragraph.
   

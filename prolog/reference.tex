@@ -61,9 +61,28 @@
   
   $p(t_1, t_2, ... t_n)$ or $p$
   
-  There must be no space between "$p$" and the open parenthesis "$($".
+  \noindent There must be no space between "$p$" and the open parenthesis "$($".
   
-  The clause $H :- C_1, C_2, ..., C_k.$ can also be read as $\forall X_1, ... X_m (C_1 \land ... \land C_k \implies H)$ in predicate logic.
+  The clause $H :- C_1, C_2, ..., C_k.$ can also be read as $\forall X_1, ... X_m (C_1 \land ... \land C_k \implies H)$ in predicate logic. 
+  
+  \paragraph{Commas} can be considered as AND operators (or conjunctions) in a Prolog statement as mentioned in the previous paragraph.
+  
+  \paragraph{Semi-colons} To represent disjunction in bodies of rules, the semi-colon "$;$" symbol can be used as such:
+  
+  \begin{lstlisting}
+  has_jam(R) :-
+    has_road_works(R);
+    has_car_accident(R).
+  \end{lstlisting}
+  
+  Disjunction in rules can also be broken into separate clauses. The clause above can be also written as:
+  
+  \begin{lstlisting}
+  has_jam(R) :-
+    has_road_works(R).
+  has_jam(R) :-
+    has_car_accident(R).
+  \end{lstlisting}
   
   \subsubsection{Anonymous Variables} 
   

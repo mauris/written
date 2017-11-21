@@ -225,7 +225,7 @@
   \item $p(X, f(Y))$ does not unify with $p(a, X)$. Like previous example, $X$ cannot be mapped to $a$ and $f(Y)$ at the same time.
   \end{enumerate}
   
-  \section{Equality}
+  \section{Comparison \& Equality}
   
   \paragraph{} There are four equality predicates in Prolog: $=$, $==$, $is$ and $=:=$. Suppose $S$, $T$ and $X$ are terms and Expr, Expr1, Expr2 are arithmetic expressions, the following statements hold:
   
@@ -244,6 +244,25 @@
   \item The negation of $is$ is undefined.
   \item The negation of $=:=$ is $=\backslash=$.
   \end{enumerate}
+  
+  There's a standard ordering of terms, which is defined as:
+  
+  \noindent \small Variables\textless Floats\textless Integers\textless Atoms\textless Compound Terms
+  
+  Variables are sorted by their appearances; Numbers are compared according to their natural order (but floats are always smaller than integers\footnote{SWI Prolog uses a different system for ordering numbers. See \href{http://www.swi-prolog.org/pldoc/man?section=compare}{http://www.swi-prolog.org/pldoc/man?section=compare}}); Atoms are compared to atoms alphabetically; and, Compound terms are compared by: their arity, then functor name alphabetically, then recursively their arguments from left to right. 
+  
+  Term comparisons can be done using the following:
+  
+  \begin{enumerate}
+  \item $P == Q$ to check if two terms are of equal order.
+  \item $P \backslash== Q$ to check if two terms are of unequal order.
+  \item $P @< Q$ to check if term $P$ is of order less than $Q$.
+  \item $P @=< Q$ to check if term $P$ is of order less than or equal to $Q$.
+  \item $P @> Q$ to check if term $P$ is of order more than $Q$.
+  \item $P @>= Q$ to check if term $P$ is of order more than or equal to $Q$.
+  \end{enumerate}
+  
+  Alternatively, the built-in $compare/3$ predicate can be used.
   
   \section{Search Strategy}
   

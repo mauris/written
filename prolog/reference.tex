@@ -354,13 +354,27 @@
   dept(business, management).
   \end{lstlisting}
   
-  the predicates can be simplified to:
+  the predicates can be simplified by changing them to:
   
   \begin{lstlisting}
   dept(eng, [aero, bio_eng, computing,
    eee, mech_eng]).
   dept(sci, [chemistry, maths, physics]).
   dept(business, [finance, management]).
+  \end{lstlisting}
+  
+  As you may notice, you no longer can test for facts by performing for example $dept(sci, maths).$ because the facts are represented in list. To test for the facts, it is possible to add an additional predicate as such:
+
+  \begin{lstlisting}
+  dept(X, Y) :-
+    dept(X, L),
+    member(Y, L).
+  \end{lstlisting}
+  
+  and you will be able to test if the fact was stated using the statement:
+
+  \begin{lstlisting}
+  ?- dept(eng, aero).
   \end{lstlisting}
   
   In Prolog, elements in a list can be any Prolog terms, including a list. For example $[a, 1, f(X, Y), [4, Z, 6], 2.0]$ is a valid Prolog expression representing a list.

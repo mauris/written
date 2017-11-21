@@ -616,7 +616,7 @@
       last(E, [Y|L]).
   \end{lstlisting} 
   
-  \paragraph{len/2} Test if an list is of a certain length:
+  \paragraph{len/2} While $length/2$ has been defined, it is still possible to test and generate the length of a list by writing some predicates. Test if an list is of a certain length:
   
   \begin{lstlisting}
   len(?List, ?Count)
@@ -636,7 +636,7 @@
   
   \begin{lstlisting}
   len([], 0).
-  len([E|T], N) :-
+  len([_|T], N) :-
 	len(T, N1),
 	N is N1+1.
   \end{lstlisting} 
@@ -645,7 +645,7 @@
   
   \begin{lstlisting} 
   len2([], 0).
-  len2([E|T], N) :-
+  len2([_|T], N) :-
     N1 is N-1,
   	len2(T, N1).
   \end{lstlisting}

@@ -826,6 +826,151 @@
   \end{lstlisting}  
 
   $\backslash+$ is the "not provable" operator. It succeeds if its argument is not provable and fails if its argument is provable\footnote{See \href{https://stackoverflow.com/a/1712056/126039}{https://stackoverflow.com/a/1712056/126039}}. Hence the $sorted(L)$ definition can be read as \say{L is sorted in ascending order iff there is no two elements in L in descending order.}
- 
+  
+  \section{Aggregation}
+  
+  \subsection{Introduction}
+  
+  \paragraph{} Given the following premises of parent-child(ren) relationships:
+  
+  \begin{lstlisting}
+  parents_children([tom, mary], [jane]).
+  parents_children([serene], [chloe, jacob]).
+  parents_children([alice], [ben, elliot, luna]).
+  \end{lstlisting}  
+  
+  You can use the $member/2$ to test if a parent-child relationship exists:
+  
+  \begin{lstlisting}
+  parent_child(P, C) :-
+  	parents_children(PL, CL),
+  	member(P, PL),
+  	member(C, CL).
+  \end{lstlisting}
+  
+  \noindent However, if the premises are given as such:
+  
+  \begin{lstlisting}
+  parent_child(tom, jane).
+  parent_child(mary, jane).
+  parent_child(serene, chloe).
+  parent_child(serene, jacob).
+  parent_child(alice, ben).
+  parent_child(alice, elliot).
+  parent_child(alice, luna).
+  \end{lstlisting}  
+  
+  \noindent We ask ourselves:
+  
+  \begin{enumerate}[\hspace{0.6cm}]
+  \item How do we get the list of parents?
+  \item How do we get the list of children?
+  \item How do we get the list of children of a parent?
+  \end{enumerate}
+  
+  \paragraph{} For such purpose, Prolog has three built-in predicates:
+  
+  \begin{enumerate}[\hspace{0.6cm}-]
+  \item $findall/3$
+  \item $bagof/3$
+  \item $setof/3$
+  \end{enumerate}
+  
+  \subsection{Built-in Predicates}
+  
+  \paragraph{findall/3} Builds a list of all instances of $T$ which the goal with $T$ succeeds.
+  
+  \begin{lstlisting}
+  findall(+T, +Goal, -List)
+  \end{lstlisting}
+  
+  We can use $findall/3$ to build the list of all children belonging to a parent:
+
+  \begin{lstlisting}
+  parent_of(P, CL) :-
+    findall(C, parent_child(P, C), CL).
+  \end{lstlisting}
+  
+  If you run the following, you will get their corresponding results:
+  
+  \begin{lstlisting}
+  ?- parent_of(mary, L).
+  L = [jane].
+
+  ?- parent_of(alice, L).
+  L = [ben, elliot, luna].
+
+  ?- parent_of(mummy, L).
+  L = [].
+  % kid you need to learn your mum's name.
+  \end{lstlisting}
+
+   As it is how the predicate is expected to behave, you will get something funny if you enter something like:
+   
+  \begin{lstlisting}
+  ?- findall(hello, parent_child(P, C), L).
+  L = [hello, hello, hello, hello,
+    hello, hello, hello].
+  \end{lstlisting}
+  
+  This is because the $parent\_child(P, C)$ will succeed seven times (seven facts), and add hello into the list $L$ every time the goal succeeds. You can also concatenate the terms as such:
+  
+  \begin{lstlisting}
+  ?- findall(P-C, parent_child(P, C), L).
+  L = [tom-jane, mary-jane, serene-chloe,
+    serene-jacob, alice-ben, alice-elliot,
+    alice-luna].
+  \end{lstlisting}
+  
+  In the event that the $Goal$ cannot be proven, $List$ will then be unified with the empty list $[]$. An instance $T\theta$ may appear several times in $List$ if there are different successful paths to prove $Goal\theta$.
+  
+  Free variables in $Goal$ are existentially quantified and are not part of the answer, i.e. in the example of $findall(hello, parent\_child(P, C), L).$, the free variables $P$ and $C$ are used to check for existence rather than returned as part of the answer.
+  
+  \paragraph{bagof/3} Builds a list of all instances of $T$ which the goal with $T$ succeeds. The difference between $bagof/3$ and $findall/3$ is that $bagof/3$ will find the substitution $\theta$ of free variables\footnote{All possible substitutions are generated through backtracking.} in $Goal$ and $List$ is list of the instances of $T$ st $Goal\theta$ succeeds. If there are no free variables in $Goal$, $bagof/3$ works exactly like $findall/3$.
+  
+  \begin{lstlisting}
+  bagof(+T, +Goal, -List)
+  \end{lstlisting}
+  
+  We can introduce free variables in our parent-child example as such:
+  
+  \begin{lstlisting}
+  ?- bagof(C, parent_child(P, C), L).
+  P = alice,
+  L = [ben, elliot, luna] ;
+  P = mary,
+  L = [jane] ;
+  P = serene,
+  L = [chloe, jacob] ;
+  P = tom,
+  L = [jane].
+  \end{lstlisting}
+  
+  Prolog will return the substitutions of $P$ - the free variable - along with the corresponding list $L$ as answers to the query.
+  
+  The other distinction between $bagof/3$ and $findall/3$ is that if $Goal$ cannot be proven, $bagof/3$ returns $false$ instead of having $List$ unify with the empty list $[]$ as with $findall/3$.
+
+  \paragraph{setof/3} Builds a list of all instances of $T$ which the goal with $T$ succeeds. The difference between $setof/3$ and $bagof/3$ is that $setof/3$ will sort $List$.
+  
+  \begin{lstlisting}
+  setof(+T, +Goal, -List)
+  \end{lstlisting}
+  
+  \subsection{Nesting}
+  
+  \paragraph{} In $findall/3$, $bagof/3$ and $setof/3$, it is possible to nest goals. For example, to find the list of parents with the list of children:
+  
+  \begin{lstlisting}
+  ?- bagof(P, bagof(C, parent_child(P, C), CL), PL).
+  CL = [ben, elliot, luna],
+  PL = [alice] ;
+  CL = [chloe, jacob],
+  PL = [serene] ;
+  CL = [jane],
+  PL = [mary, tom].
+  \end{lstlisting}
+  
+  $findall/3$ does not work in this example as it requires the free variable $P$ in the inner $Goal$ to  be bounded to the outer $bagof$.
+
   \end{multicols}
 \end{document}

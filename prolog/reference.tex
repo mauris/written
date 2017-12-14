@@ -93,7 +93,13 @@
     \+ underage(P).
   \end{lstlisting}
   
-  \noindent is read as "P can buy alcohol if P is {\bf not} underage."
+  \noindent is read as "P can buy alcohol if P is {\bf not} underage." Multiple clauses can also be negated by using $()$ parentheses: 
+  
+  \begin{lstlisting}
+  road_is_clear(R) :-
+    \+ (has_road_works(R);
+      has_car_accident(R)).
+  \end{lstlisting}
   
   \subsubsection{Anonymous Variables} 
   

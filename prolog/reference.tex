@@ -143,6 +143,58 @@
   age(james, 20)
   \end{lstlisting}
   
+  \subsection{Execution Modes}  
+  
+  \paragraph{} Prolog\footnote{There are several implementations of Prolog, such as Sicstus and SWI Prolog.} is a console / terminal program that acts takes in the sequences of clauses in sequence of prompt and result. When Prolog starts, the program will show a prompt like this: \vspace{0.3cm}
+  
+  \noindent \includegraphics[scale=0.55]{terminal.png}
+  
+  \paragraph{} The prompt shows as "$?-$" and you can enter Prolog clauses at the prompt. To exit Prolog, use the $halt/0$ built-in predicate by typing in "$halt.$" to exit.
+  
+  \paragraph{} Since there is a need to distinguish between fact clauses for the execution environment and query clauses, Prolog offers another built-in predicate $consult/1$ for this purpose. There are two ways to enter facts into the current Prolog environment:
+  
+  \begin{enumerate}
+  \item \lstinline{consult(user).} or \lstinline{[user].} - Changes the prompt into facts input mode. When in this mode, you can directly enter fact clauses. When done, enter the EOF character (usually Ctrl+D) and Prolog will go back to the query mode.
+  \item \lstinline{consult('filename.pl').} - Load facts from a file named "filename.pl" (you can change this to another name of a file that exists on the file system). The fact clauses can be saved as a file in plain text and loaded in this way.
+  \end{enumerate}
+  
+  \paragraph{Listing} To view all currently loaded predicates, you can use $listing/0$. The $listing/1$, where it is defined as \lstinline{listing(Predicate/n).} predicate can be used to show all definitions of \lstinline{Predicate} with $n$ terms.
+  
+  \paragraph{Saving to file} To save your listing as a file, you can use the following query clauses:
+  
+  \begin{lstlisting}
+  ?- tell('filename.pl').
+  ?- listing.
+  ?- told.
+  \end{lstlisting}
+  
+  \subsection{Getting out}
+  
+  \paragraph{} If you were to write a program like this:
+  
+  \begin{lstlisting}
+  stuck(_) :- stuck(_).
+  \end{lstlisting}
+  
+  \noindent ... and if you run the query:
+  
+  \begin{lstlisting}
+  ?- stuck(a).
+  \end{lstlisting}
+  
+  \noindent You'll find that Prolog gets stuck at the query because of an infinite loop. To pause the query execution, press the "Ctrl+C" key and Prolog will then show a prompt asking for the next course of action. Pressing "h" will show the full menu and "a" to abort the execution.
+  
+  \begin{lstlisting}
+  ?- stuck(a).
+  ^CAction (h for help) ? Options:
+  a:       abort      b:      break
+  c:       continue   e:      exit
+  g:       goals      s:      C-backtrace
+  t:       trace      p:      Show PID
+  h (?):   help
+  Action (h for help) ? 
+  \end{lstlisting}
+
   \subsection{Test and Generate}
   
   There are two ways to use goals in Prolog. You can either test to verify a fact or generate to yield possible variables that apply to the goals. For example, a test is written such as:
@@ -173,7 +225,7 @@
   
   \paragraph{Predicate Signature} Like a function signature, the predicate signature tells which parameters are expected and what kind of parameters are expected for the predicates. In particular:
   
-  \begin{enumerate}
+  \begin{enumerate}[\hspace{1.4cm}]
   \item[\bf +Arg1:] $Arg1$ is expected {\bf not} to be a variable (but may contain variables).
   \item[\bf -Arg2:] $Arg2$ is expected to be a variable.
   \item[\bf ?Arg3:] No assumptions is made on whether $Arg3$ is a variable or not.

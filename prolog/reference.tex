@@ -24,7 +24,7 @@
 	 \large 518: Logic and AI Programming \\
 	 \huge Prolog Reference
 }
-\date{14 Dec 2017}
+\date{15 Dec 2017}
 \author{
 	Sam Yong \\
 	\small \href{mailto:sam.yong17@imperial.ac.uk}{sam.yong17@imperial.ac.uk}
@@ -1023,6 +1023,108 @@
   \end{lstlisting}
   
   $findall/3$ does not work in this example as it requires the free variable $P$ in the inner $Goal$ to  be bounded to the outer $bagof$.
+  
+  \subsection{Comparison Operators}
+  
+  \paragraph{Unification \& Identity} The following operators test for unification and if two terms are identical:
+  
+  \noindent \begin{tabular}{ | p{2cm} | p{4cm} | p{1.4cm} | }
+  \hline
+  \bf Comparison & \bf Succeeds if & \bf Evaluates \\
+  \hline
+  
+  \begin{lstlisting}
+  X = Y
+  \end{lstlisting} & $X$ and $Y$ unify & N \\
+  \hline  
+  
+  \begin{lstlisting}
+  X \= Y
+  \end{lstlisting} & $X$ and $Y$ do not unify (i.e. 
+  \begin{lstlisting}
+  \+ (X = Y)
+  \end{lstlisting}) & N \\
+  \hline
+  
+  \begin{lstlisting}
+  T1 == T2
+  \end{lstlisting} & $T1$ and $T2$ are identical (e.g. names of variables have to be the same)& N \\
+  \hline
+  
+  \begin{lstlisting}
+  T1 \== T2
+  \end{lstlisting} & $X$ and $Y$ are not identical & N \\
+  \hline
+  \end{tabular}
+  
+  \paragraph{Evaluation} The following operators test values of two expressions:
+  
+  \noindent \begin{tabular}{ | p{2cm} | p{4cm} | p{1.4cm} | }
+  \hline
+  \bf Comparison & \bf Succeeds if & \bf Evaluates \\
+  \hline
+  
+  
+  \begin{lstlisting}
+  E1 =:= E2
+  \end{lstlisting} & values of expressions E1 and E2 are equal & Y \\
+  \hline
+  
+  \begin{lstlisting}
+  E1 =\= E2
+  \end{lstlisting} & values of expressions E1 and E2 are not equal & Y \\
+  \hline
+  
+  \begin{lstlisting}
+  E1 < E2
+  \end{lstlisting} & numerical value of expression E1 is less than numerical value of expression E2 & Y \\
+  \hline
+  
+  \begin{lstlisting}
+  E1 =< E2
+  \end{lstlisting} & numerical value of expression E1 is less than or equal to numerical value of expression E2 & Y \\
+  \hline
+  
+  \begin{lstlisting}
+  E1 > E2
+  \end{lstlisting} & numerical value of expression E1 is more than numerical value of expression E2 & Y \\
+  \hline
+  
+  \begin{lstlisting}
+  E1 >= E2
+  \end{lstlisting} & numerical value of expression E1 is more than or equal to numerical value of expression E2 & Y \\
+  \hline
+  \end{tabular}
+  
+  \paragraph{Standard Ordering} The following operators test standard ordering of two terms:
+  
+  \noindent 
+  \begin{tabular}{ | p{2cm} | p{4cm} | p{1.4cm} | }
+  \hline
+  \bf Comparison & \bf Succeeds if & \bf Evaluates \\
+  \hline
+  
+  \begin{lstlisting}
+  T1 @< T2
+  \end{lstlisting} & T1 is alphabetically less than T2 on the standard ordering & N \\
+  \hline
+  
+  \begin{lstlisting}
+  T1 @=< T2
+  \end{lstlisting} & T1 is alphabetically less than or equal to T2 on the standard ordering & N \\
+  \hline
+  
+  \begin{lstlisting}
+  T1 @> T2
+  \end{lstlisting} & T1 is alphabetically more than T2 on the standard ordering & N \\
+  \hline
+  
+  \begin{lstlisting}
+  T1 @>= T2
+  \end{lstlisting} & T1 is alphabetically more than or equal to T2 on the standard ordering & N \\
+  \hline
+  
+  \end{tabular}
 
   \end{multicols}
 \end{document}

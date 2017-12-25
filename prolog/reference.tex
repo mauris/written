@@ -1032,6 +1032,59 @@
   
   \paragraph{} In the aggregate predicates \lstinline{setof/3} and \lstinline{bagof/3}, you can use the existential quantifier operator \lstinline{^/2}. For example in the statement \lstinline{setof(T, V^Goal, L)}, the variable $V$ is existentially quantified and thus will not be bound in the goal - reproducing the behaviour of \lstinline{findall/3}. More variables can also be existentially quantified by chaining the \lstinline{^}, for example: \lstinline{bagof(T, V1^V2^V3^Goal, L)}.
   
+  \section{Conditionals}
+  
+  \paragraph{} The typical if-else conditional statements can be written in a Prolog clause in the following way:
+  
+  \begin{lstlisting}
+  (Test -> ThenClause; ElseClause)
+  \end{lstlisting}
+  
+  \noindent For example, it can be used as such:
+  
+  \begin{lstlisting}
+  sift([H|T], X, R) :-
+    sift(T, X, RR),
+    (H > X -> R = RR; R = [H|RR]).
+  \end{lstlisting}
+  
+  \noindent \emph{•}This is equivalent to writing it as two separate statements:
+  
+  \begin{lstlisting}
+  sift([H|T], X, R) :-
+    H > X,
+    sift(T, X, RR),
+    R = RR.
+  sift([H|T], X, R) :-
+    H =< X,
+    sift(T, X, RR),
+    R = [H|RR].
+  \end{lstlisting}
+  
+  Hence, ignoring variables and given that
+  
+  \begin{lstlisting}
+  H :-
+    G1,
+    ...,
+    (Test -> ThenClause; ElseClause),
+    ...
+    Gn.
+  \end{lstlisting}
+  
+  \noindent It is effectively equivalent to writing
+  
+  \begin{lstlisting}
+  H :-
+    G1,
+    ...,
+    Cond,
+    ...
+    Gn.
+  Cond :- Test, !, ThenClause.
+  Cond :- ElseClause.
+  \end{lstlisting}
+  
   \section{Comparison Operators}
   
   \paragraph{Unification \& Identity} The following operators test for unification and if two terms are identical:

@@ -1028,7 +1028,7 @@
   
   \paragraph{} In the aggregate predicates \lstinline{setof/3} and \lstinline{bagof/3}, you can use the existential quantifier operator \lstinline{^/2}. For example in the statement \lstinline{setof(T, V^Goal, L)}, the variable $V$ is existentially quantified and thus will not be bound in the goal - reproducing the behaviour of \lstinline{findall/3}. More variables can also be existentially quantified by chaining the \lstinline{^}, for example: \lstinline{bagof(T, V1^V2^V3^Goal, L)}.
   
-  \subsection{Comparison Operators}
+  \section{Comparison Operators}
   
   \paragraph{Unification \& Identity} The following operators test for unification and if two terms are identical:
   

@@ -319,7 +319,7 @@
   
   \begin{enumerate}
   \item \lstinline{P == Q} to check if two terms are of equal order.
-  \item \lstinline{P \backslash== Q} to check if two terms are of unequal order.
+  \item \lstinline{P \== Q} to check if two terms are of unequal order.
   \item \lstinline{P @< Q} to check if term $P$ is of order less than $Q$.
   \item \lstinline{P @=< Q} to check if term $P$ is of order less than or equal to $Q$.
   \item \lstinline{P @> Q} to check if term $P$ is of order more than $Q$.
@@ -330,7 +330,7 @@
   
   \section{Search Strategy}
   
-  \paragraph{Query} A query is a conjunction of goals $G1, G2, ..., Gn$ written as such:
+  \paragraph{Query} A query is a conjunction of goals \lstinline{G1, G2, ..., Gn} written as such:
   
   \begin{lstlisting}
   ?- G1, G2, ..., Gn.
@@ -881,7 +881,7 @@
     \+ (append(L1, [X,Y|Rest], L), X>Y).
   \end{lstlisting}  
 
-  $\backslash+$ is the "not provable" operator. It succeeds if its argument is not provable and fails if its argument is provable\footnote{See \href{https://stackoverflow.com/a/1712056/126039}{https://stackoverflow.com/a/1712056/126039}}. Hence the $sorted(L)$ definition can be read as \say{L is sorted in ascending order iff there is no two elements in L in descending order.}
+  \lstinline{\+} is the "not provable" operator. It succeeds if its argument is not provable and fails if its argument is provable\footnote{See \href{https://stackoverflow.com/a/1712056/126039}{https://stackoverflow.com/a/1712056/126039}}. Hence the $sorted(L)$ definition can be read as \say{L is sorted in ascending order iff there is no two elements in L in descending order.}
   
   \section{Aggregation}
   

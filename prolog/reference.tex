@@ -1059,7 +1059,7 @@
     (H > X -> R = RR; R = [H|RR]).
   \end{lstlisting}
   
-  \noindent \emph{•}This is equivalent to writing it as two separate statements:
+  \noindent This is equivalent to writing it as two separate statements:
   
   \begin{lstlisting}
   sift([H|T], X, R) :-
@@ -1095,6 +1095,20 @@
   Cond :- Test, !, ThenClause.
   Cond :- ElseClause.
   \end{lstlisting}
+  
+  \paragraph{Nested Conditionals} Conditionals can also be nested. The following example of \lstinline{common/3} that lists all unique common items of two lists shows how conditionals can be nested:
+  
+  \begin{lstlisting}
+  common(_, [], []).
+  common(L1, [H|T], I) :-
+    common(L1, T, RI),
+    (member(H, L1) ->
+      (\+ member(H, RI) ->
+        append([H], RI, I); I = RI);
+        I = RI).
+  \end{lstlisting}
+  
+  Notice how in first conditional that checks for \lstinline{member(H, L1)} another conditional statement lies within the ThenClause. Without the use of these two conditionals in nesting, the second \lstinline{common/3} predicate would have to be otherwise defined four times.
   
   \section{Comparison Operators}
   

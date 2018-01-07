@@ -580,7 +580,7 @@
   
   Elements from $List$ are sorted in ascending order and duplicated elements are removed. The resulting list is unified with $Sorted$.
   
-  \paragraph{rev/2} Test if a two lists are the permutations of each other:
+  \paragraph{perm/2} Test if a two lists are the permutations of each other:
   
   \begin{lstlisting}
   perm(+List, -Perm)
@@ -785,7 +785,7 @@
   \begin{lstlisting}
   sum2(L, S) :- sum_acc(L, 0, S).
   sum_acc([], S, S).
-  sum_acc([E|T, CurrentSum, Sum) :-
+  sum_acc([E|T], CurrentSum, Sum) :-
     NewSum is CurrentSum + E,
     sum_acc(T, NewSum, Sum).
   \end{lstlisting} 

@@ -1,0 +1,340 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{geometry}
+\usepackage{amsmath}
+\usepackage{dirtytalk}
+\usepackage{graphicx}
+\usepackage{enumerate}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage[nodayofweek]{datetime}
+\longdate
+\usepackage{amsfonts}
+\usepackage{multicol}
+\usepackage{amsthm}
+\usepackage{comment}
+
+\theoremstyle{plain}
+\newtheorem{thm}{Theorem}[section]
+
+\theoremstyle{definition}
+\newtheorem{defn}[thm]{Definition} % definition numbers are dependent on theorem numbers
+\newtheorem{exmp}[thm]{Example} % same for example numbers
+
+\setlength\columnsep{30pt}
+
+\geometry{
+ 	a4paper,
+	total={170mm,257mm},
+ 	left=20mm,
+ 	top=20mm,
+}
+
+\lstset{basicstyle=\footnotesize\ttfamily,breaklines=true}
+
+\title{
+	 \huge 303: Systems Verification\\
+	 \huge -- Reference --
+}
+\date{\today}
+\author{
+	Sam Yong \\
+	\small \href{mailto:sam.yong17@imperial.ac.uk}{sam.yong17@imperial.ac.uk}
+}
+
+
+\begin{document}
+\maketitle
+
+\begin{multicols}{2}
+
+\section*{Foreword}  
+
+\paragraph{} This reference was made as an condensation from the lecture slides and notes provided by Prof. Alessio R. Lomuscio, Prof. Michael Huth and Prof. Mark D. Ryan in the Imperial College London, Department of Computing's 303: Systems Verification.
+
+\paragraph{} The ordering of this reference may not correspond to the sequence introduced in the lectures, lecture slides and notes. This order is how I feel I would understand the topic better.
+
+\begin{footnotesize}
+\paragraph{License} This reference is made publicly available under the MIT License. You should not have paid anyone money in exchange for this document. If you have paid someone for it, well too bad. The source code for this document can be found public available on my Github repository\footnote{\href{https://github.com/mauris/written}{https://github.com/mauris/written}}. If you wish to help improve this document, feel free to open an issue on the Github repository.
+\end{footnotesize}
+
+\section{Model Checking}
+
+\begin{enumerate}
+\item We would like to check if a system $S$ satisfies a property $P$.
+\item We build an "appropriate" model $M_S$ for $S$ that represents all possible computations of interest of $S$.
+\item We define an appropriate formula $\phi P$ capturing property $P$.
+\item We check automatically if $\phi P$ is satisfied on $M_S$: i.e. $$M_S \models \phi P$$
+\end{enumerate}
+
+\section{Modal Languages}
+
+\paragraph{} Modal logic offers:
+\begin{enumerate}
+\item A natural way of handling the concepts of temporal flows, knowledge, belief, necessity, possibility etc.
+\item A clear and natural semantics.
+\item A heritage of techniques for proving meta-logical results about modal systems\footnote{such as decidability, completeness, computational complexity, etc.}
+\end{enumerate}
+
+\subsection{Syntax vs Semantics}
+
+\paragraph{Syntax} has to do with how we write formulas. It defines the logical language that we use when writing formulas.
+
+\paragraph{Semantics} focuses on giving an interpretation to formulas constructed according to the syntax.
+
+\subsection{Syntax}
+
+\paragraph{Modality} We use an extension of propositional calculus by an operator, $\Box$, that we refer to as \textit{modality} or \textit{box}.
+
+\begin{defn}\label{defn:Syntax} Assume a set of propositional variables $P$, the set of $\mathcal{L}$ of valid formulas of propositional modal logic defined by: \end{defn}
+
+\begin{itemize}
+\item \textbf{true} $\in \mathcal{L}$.
+\item any $p \in P \implies p \in \mathcal{L}$.
+\item If $\phi, \psi \in \mathcal{L}$, then $\lnot \phi, \phi \land \psi, \Box \phi \in \mathcal{L}$.
+\item Nothing else is in $\mathcal{L}$,
+\end{itemize}
+
+We refer $\phi, \psi,...$ to arbitrary formulas in $\mathcal{L}$ and $p, q, ...$ to atoms in $P$. It is convenient to use other connectives derived from Definition \ref{defn:Syntax}:
+
+\begin{itemize}
+\item \textbf{false} $\equiv$ $\lnot$\textbf{true}.
+\item $\phi \lor \psi \equiv \lnot(lnot\phi \land \lnot\psi)$.
+\item $\phi \implies \psi \equiv \lnot\phi\lor\psi \equiv \lnot(\phi \land \lnot\psi)$.
+\item $\Diamond\phi \equiv \lnot\Box\lnot\phi$.
+\end{itemize}
+
+\noindent The modal operator $\Diamond$ is the dual of $\Box$ and is read as "diamond".
+
+\subsection{Modality Readings}
+
+\paragraph{Intuitive Meaning} We can develop the whole of modal theory without any reference to the intuitive meaning of the modalities. There are some meanings of the modal box such as:
+
+\medskip 
+\noindent
+{\small
+\bgroup
+\def\arraystretch{1.5}
+\begin{tabular}{ | p{1.8cm} || p{2.4cm} | p{2.4cm} | }
+\hline
+\bf Meaning of $\Box$ & \bf Reading of $\Box\phi$ & \bf Reading of $\Diamond\phi$ \\
+\hline
+\hline
+
+Temporal & Forever in the future $\phi$ holds & Sometime in the future $\phi$ will hold \\
+\hline
+
+Epistemic & It is known that $\phi$ holds & It is considered (epistemically) possible that $\phi$ will hold \\
+\hline
+
+Doxastic & It is believed that $\phi$ holds & It is considered (doxastically) possible that $\phi$ will hold \\
+\hline
+
+Deontic & $\phi$ is obligatory & $\phi$ is allowed \\
+\hline
+
+Provability & It is provable that $\phi$ & It is consistent that $\phi$ \\
+\hline
+
+Necessitation & It is necessary that $\phi$ holds & It is possible that $\phi$ hold \\
+\hline
+
+\end{tabular}
+\egroup
+}
+
+\begin{exmp}In the \textit{Epistemic} meaning, $\Box\Box\phi$ is read as "$\phi$ is known to be known".\end{exmp}
+\begin{exmp}In the \textit{Epistemic} meaning, $\Box\Diamond\phi$ is read as "$\phi$ is known to be regarded as possible".\end{exmp}
+\begin{exmp}In the \textit{Temporal} meaning, $\phi \implies \Box\phi$ is read as "If $\phi$ is true now, then $\phi$ will always be true."\end{exmp}
+\begin{exmp}In the \textit{Temporal} meaning, $\Box\phi \implies \Diamond\phi$ is read as "If $\phi$ is forever true, then $\phi$ will be true sometime in the future." \end{exmp}
+
+\paragraph{Combination of Operators} It is also possible to combine $\Box$ operators with different interpretation. Let $\Box_T$ be the modality with Temporal meaning and $\Box_K$ be the modality with Epistemic meaning. $\Box_T\Box_K\phi$ is read as "It is forever known that $\phi$ holds."
+
+\subsection{Kripe Frame}
+
+\begin{defn}A Kripe frame $F$ is a pair $F = (W, R)$ where $W \neq \emptyset$ is a set of possible worlds and $R \subset W \times W$ is a relation $R$ defined on $W$.\end{defn}
+
+\paragraph{} We indicate elements of W as $w$, $w'$, etc. or $s$, $s'$, etc. when in the context of temporal logic These are also called states or points.
+
+\begin{exmp}$(N, suc)$, the set of natural numbers with the relation successor, is a Kripke frame.\end{exmp}
+
+\paragraph{} Since Kripke frames are unvalued structures (i.e. we cannot evaluate formulas on them), we need Kripke models to evaluate formulas.
+
+\subsection{Kripe Models}
+
+\begin{defn}A Kripke model $M$ is a pair $M = (F, \pi)$ where $F$ is a Kripe frame and $\pi: P \mapsto \mathcal{P}(W)$ is a valuation for the atoms. \end{defn}
+
+\paragraph{} Intuitively, $\pi(p)={w_1, w_2}$ represents the fact that the atom $p$ is true at states $w_1$ and $w_2$, and is false at $W \backslash \{w_1, w_2\}$. 
+
+\paragraph{} By slight abuse of notation, we can indicate a Kripke model $M$ as a triple $M = (W, R, \pi)$, where $F = (W, R)$ is its underlying Kripke frame. 
+
+\subsection{Satisfaction}
+
+\begin{defn}The satisfaction of a formula $\phi\in\mathcal{L}$ at a world $w\in W$ of a model $M$ (formally $(M, w) \models \phi$, is inductively defined as follows:\end{defn}
+
+\begin{itemize}
+\item $(M, w) \models $ \textbf{true}
+\item $(M, w) \models p \impliedby w \in \pi(p)$
+\item $(M, w) \models \lnot\phi \impliedby \lnot((M, w)\models \phi)$
+\item $(M, w) \models \phi \land \psi \impliedby ((M,w) \models \phi) \land ((M, w) \models \psi)$
+\item $(M, w) \models \Box\psi \impliedby\\ (\forall w' \in W (w R w' \implies (M, w') \models \psi)$
+\item $(M, w) \models \Diamond\psi \impliedby\\ (\exists w' \in W (w R w' \land (M, w') \models \psi)$
+\end{itemize}
+
+\noindent We read $(M, w) \models \phi$ as "$\phi$ is true at $w$ in model $M$".
+
+\section{Linear Temporal Logic}
+
+\paragraph{} LTL asssumes time is a linear sequence of determined discrete events. 
+
+\begin{itemize}
+\item The modal box $\Box$ is written as $G$ representing "forever in the future (globally)"
+\item Its dual $\Diamond$ is represented by $F$ representing "at some point in the future."
+\end{itemize}
+
+\subsection{Operators}
+
+\begin{itemize}
+\item $G\phi$ represent situations in which "$\phi$ is forever \textbf{true} from now on."
+\item $F\phi$ encode situations in which "$\phi$ will become \textbf{true} at some point in future." Since $F$ is the dual of $G$, $F\phi ::= \lnot G\lnot\phi$.
+\item $X\phi$ represent situations where "$\phi$ holds at the next time instant."
+\item $U$ is a binary operator, written in the form $\phi U \psi$ which represents that "$\phi$ holds until $\psi$ becomes \textbf{true} (at least once)." Note that even after $\psi$ becomes \textbf{true}, $\phi$ doesn't necessary have to become false (i.e. it can continue to hold).
+\item $R$ is also a binary operator, written in the form $\phi R \psi$, representing "$\psi$ holds until $\phi$ becomes \textbf{true} (or $\phi$ releases $\psi$)." Since $R$ is the dual of $U$, $\phi R \psi ::= \lnot(\lnot\psi U\lnot\phi)$
+\item $W$ is a weaker version of $U$ (weak until) which relaxes the constraint that $\psi$ needs to be true at some point in time, defined as $\phi W\psi ::= (\phi U \psi)\lor G\phi$.
+\end{itemize}
+
+\subsection{Syntax}
+
+\begin{defn}The syntax of LTL is given by the following Backus–Naur form (BNF):\end{defn}
+
+\begin{align*}
+\phi ::= p \\
+\lnot\phi \\
+\phi \land \phi  \\
+X\phi \\
+G\phi \\
+\phi U \phi
+\end{align*}
+
+\begin{comment}
+TODO: Add the entry that G and F can be constructed from U
+\end{comment}
+
+\subsection{Semantics}
+
+\begin{defn}A model for LTL is a Kripke model $M = (W, R, \pi)$ st $R$ is a serial relation. A path $\rho$ in a model is a \textit{infinite sequence of states} $s_0, s_1, ...$ st $\forall i \geq 0,\ (s_i, s_{i+1})\in R$. \end{defn}
+
+A path $\rho$ represents a possible evolution of the system. A state may belong to more than one path, i.e. for any state there may be more than one successor depending on which path we are considering.
+
+\begin{defn}$\rho^i$ indicates the suffix of path $\rho = s_0,s_1,...$, Since a path $\rho$ is infinite, its suffix $\rho^i$ is also infinite and hence is also a path.\end{defn}
+
+\subsubsection{Satisfaction on Paths}
+\begin{defn}\label{defn:ltlsatisfaction}
+Given a formula $\phi$, a model $M$ and a path $\rho = s_0, s_1, s_2,...$ on $M$, satisfaction for the LTL connectives is defined as follows:
+\end{defn}
+
+\begin{itemize}
+\item $(M, \rho) \models p \Longleftrightarrow s_0 \in \pi(p)$
+\item $(M, \rho) \models \lnot\phi \Longleftrightarrow \lnot ((M, \rho)\ \models \phi)\\ \Longleftrightarrow (M, \rho) \not\models \phi$
+\item $(M, \rho) \models \phi\land\psi \Longleftrightarrow (M, \rho) \models \phi \land (M, \rho) \models \psi$
+\item $(M, \rho) \models X\phi \Longleftrightarrow (M, \rho^1) \models \phi$
+\item $(M, \rho) \models G\phi \Longleftrightarrow \forall i \geq 0\ (M, \rho^i) \models \phi$
+\item $(M, \rho) \models \phi U\psi \Longleftrightarrow\\ \exists j \geq 0\ \lbrack\forall k \in [0, j)\ (M, \rho^k) \models \phi \land (M, \rho^j) \models \psi\rbrack$
+\end{itemize}
+
+\paragraph{} Using Definition \ref{defn:ltlsatisfaction}, we can derive the following additional satisfactions:
+
+\begin{itemize}
+\item $(M, \rho) \models F\phi \Longleftrightarrow \exists i \geq 0\ (M, \rho^i) \models \phi$
+\item $(M, \rho) \models \psi R\phi \Longleftrightarrow\\ \exists j \geq 0\ \lbrack \forall k \in [0, j]\ (M, \rho^k) \models \phi \land (M, \rho^j) \models \psi\rbrack\\ \lor \forall i \geq 0\ (M, \rho^i) \models \phi$
+\end{itemize}
+
+\subsubsection{Satisfaction on States}
+\begin{defn}
+Given a formula $\phi$, a model $M$ and a state $s$ in $M$, $\phi$ is true at $s$ in $M$ (written $(M, s) \models \phi$, if $\forall$ paths $\rho$ originating from $s$, we have $(M, \rho) \models \phi$. Formally, $$\forall \rho(s): (M, \rho) \models \phi \implies (M, s) \models \phi$$
+\end{defn}
+
+\paragraph{} In the case of LTL, the standard modal satisfaction definition on states involve quantification over \textit{all possible futures}.
+
+\section{Computation Tree Logic}
+
+\paragraph{} LTL allows us to talk about the temporal evolution of a system, but sometimes we would like to check whether or not something happens in one path but not in all. CTL accommodates this need. CTL's syntax allows one to \textit{quantify explicitly} over paths.
+
+\subsection{Syntax}
+\begin{defn}The syntax of CTL is given by the following BNF:\end{defn}
+
+\begin{align*}
+\phi ::= p \\
+\lnot\phi \\
+\phi \land \phi  \\
+EX\phi \\
+EG\phi \\
+E(\phi U \phi)
+\end{align*}
+
+\subsection{Operators}\label{subsec:Operators}
+
+\paragraph{} In CTL we have two different path quantification modifiers: $E$ and $A$. $E$ encodes an existential quantification on paths while $A$ encodes a universal quantification on paths. 
+
+\begin{itemize}
+\item $EX\phi$: "there exists a path from the current state st at the next state $\phi$ holds."
+\item $EG\phi$: "there exists a path from the current state st $\phi$ holds forever in the future."
+\item $E(\phi U\psi)$: "there exists a path from the current state st $\phi$ holds until $\psi$ becomes true."
+\end{itemize}
+
+\paragraph{} In CTL, dual operators can also be defined: 
+\begin{itemize}
+\item $AX\phi ::= \lnot EX \lnot\phi$
+\item $EX\phi ::= \lnot AX \lnot\phi$
+\item $AG\phi ::= \lnot EF \lnot\phi$
+\item $AF\phi ::= \lnot EG \lnot\phi$
+\item $EF\phi ::= \lnot AG \lnot\phi$
+\item $EG\phi ::= \lnot AF \lnot\phi$
+\end{itemize}
+
+\subsection{Semantics}
+\subsubsection{Satisfaction}
+\begin{defn}
+Given a formula $\phi$, a model $M = (W, R, \pi)$ and a state $s$ in $M$, the satisfaction of $\phi$ at $s$ in $M$ (written $(M, s) \models \phi$) is defined inductively as follows:
+\end{defn}
+
+\begin{itemize}
+\item $(M, s) \models p \Leftrightarrow s \in \pi(p)$
+\item $(M, s) \models EX\phi \Leftrightarrow\\ \exists \rho = s_0, s_1, ... \land s = s_0: (M, s_1) \models \phi$
+\item $(M, s) \models EG\phi \Leftrightarrow\\ \exists \rho = s_0, s_1, ... \land s = s_0: \forall i \geq 0: (M, s_i) \models \phi$
+\item $(M, s) \models EF\phi \Leftrightarrow\\ \exists \rho = s_0, s_1, ... \land s = s_0: \exists i \geq 0: (M, s_i) \models \phi$
+\item $(M, s) \models E(\phi U\psi) \Leftrightarrow\\ \exists \rho = s_0, s_1, ... \land s = s_0:\\ \exists j \geq 0\  \lbrack\forall k \in [0, j): (M, s_k) \models \phi \land (M, s_j) \models \psi\rbrack$
+\item $(M, s) \models E(\psi R\phi) \Leftrightarrow\\ \exists \rho = s_0, s_1, ... \land s = s_0:\\ \exists j \geq 0\  \lbrack\forall k \in [0, j]: (M, s_k) \models \phi \land (M, s_j) \models \psi\rbrack\\ \lor \forall i \geq 0\ (M, s_i) \models \phi$
+\item $(M, s) \models AG\phi \Leftrightarrow\\ \forall \rho = s_0, s_1, ... \land s = s_0: \forall i \geq 0: (M, s_i) \models \phi$
+\item $(M, s) \models AF\phi \Leftrightarrow\\ \forall \rho = s_0, s_1, ... \land s = s_0: \exists i \geq 0: (M, s_i) \models \phi$
+\item $(M, s) \models A(\phi U\psi) \Leftrightarrow\\ \forall \rho = s_0, s_1, ... \land s = s_0:\\ \exists j \geq 0\  \lbrack\forall k \in [0, j): (M, s_k) \models \phi \land (M, s_j) \models \psi\rbrack$
+\item $(M, s) \models A(\psi R\phi) \Leftrightarrow\\ \forall \rho = s_0, s_1, ... \land s = s_0:\\ \exists j \geq 0\  \lbrack\forall k \in [0, j]: (M, s_k) \models \phi \land (M, s_j) \models \psi\rbrack\\ \lor \forall i \geq 0\ (M, s_i) \models \phi$
+\end{itemize}
+
+\subsubsection{Skolemization}
+
+\paragraph{} $AFEG\phi \neq EGAF\phi$. The $EG\phi$ in $AFEG\phi$ is dependent on the path taken by the quantifier $AF$ and hence cannot be interchanged without changing its semantic meaning.
+
+\subsection{Semantic Equivalence}
+
+\paragraph{} The following are some semantic equivalence apart those seen in Section \ref{subsec:Operators}:
+
+\begin{itemize}
+\item $AG\phi \equiv \phi \land AXAG\phi$
+\item $EG\phi \equiv \phi \land EXEG\phi$
+\item $AF\phi \equiv \phi \lor AXAF\phi$
+\item $EF\phi \equiv \phi \lor EXEG\phi$
+\item $A(\phi U \psi) \equiv \psi \lor (\phi \land AX[A(\phi U \psi)])$
+\item $E(\phi U \psi) \equiv \psi \lor (\phi \land EX[E(\phi U \psi)])$
+\item $EG\phi \equiv \lnot A(\text{true}\ U \lnot\phi)$
+\item $EF\phi \equiv E(\text{true}\ U \phi)$
+\item $AG\phi \equiv \lnot EF \lnot\phi \equiv \lnot E(\text{true}\ U \lnot\phi)$
+\item $AF\phi \equiv \lnot EG \lnot\phi \equiv A(\text{true}\ U \phi)$
+\item $A(\phi U \psi) \equiv \lnot E(\lnot\psi U \lnot(\phi\lor\psi)) \land \lnot EG(\lnot \psi)\\
+ \equiv \lnot E(\lnot\psi U \lnot(\phi\lor\psi)) \land AF\psi\\
+ \equiv \lnot A(\phi R \psi)$
+\end{itemize}
+
+
+\end{multicols}
+\end{document}

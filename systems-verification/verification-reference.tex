@@ -99,7 +99,7 @@ We refer $\phi, \psi,...$ to arbitrary formulas in $\mathcal{L}$ and $p, q, ...$
 
 \begin{itemize}
 \item \textbf{false} $\equiv$ $\lnot$\textbf{true}.
-\item $\phi \lor \psi \equiv \lnot(lnot\phi \land \lnot\psi)$.
+\item $\phi \lor \psi \equiv \lnot(\lnot\phi \land \lnot\psi)$.
 \item $\phi \implies \psi \equiv \lnot\phi\lor\psi \equiv \lnot(\phi \land \lnot\psi)$.
 \item $\Diamond\phi \equiv \lnot\Box\lnot\phi$.
 \end{itemize}
@@ -196,7 +196,7 @@ Necessitation & It is necessary that $\phi$ holds & It is possible that $\phi$ h
 
 \begin{itemize}
 \item $G\phi$ represent situations in which "$\phi$ is forever \textbf{true} from now on."
-\item $F\phi$ encode situations in which "$\phi$ will become \textbf{true} at some point in future." Since $F$ is the dual of $G$, $F\phi ::= \lnot G\lnot\phi$.
+\item $F\phi$ encode situations in which "$\phi$ will become \textbf{true} at some point in future\footnote{includes the current point in time in the context of this literature. See Section \ref{subsubsec:LTLSemanticsPath} for formal definition.}." Since $F$ is the dual of $G$, $F\phi ::= \lnot G\lnot\phi$.
 \item $X\phi$ represent situations where "$\phi$ holds at the next time instant."
 \item $U$ is a binary operator, written in the form $\phi U \psi$ which represents that "$\phi$ holds until $\psi$ becomes \textbf{true} (at least once)." Note that even after $\psi$ becomes \textbf{true}, $\phi$ doesn't necessary have to become false (i.e. it can continue to hold).
 \item $R$ is also a binary operator, written in the form $\phi R \psi$, representing "$\psi$ holds until $\phi$ becomes \textbf{true} (or $\phi$ releases $\psi$)." Since $R$ is the dual of $U$, $\phi R \psi ::= \lnot(\lnot\psi U\lnot\phi)$
@@ -216,9 +216,6 @@ G\phi \\
 \phi U \phi
 \end{align*}
 
-\begin{comment}
-TODO: Add the entry that G and F can be constructed from U
-\end{comment}
 
 \subsection{Semantics}
 
@@ -228,7 +225,7 @@ A path $\rho$ represents a possible evolution of the system. A state may belong 
 
 \begin{defn}$\rho^i$ indicates the suffix of path $\rho = s_0,s_1,...$, Since a path $\rho$ is infinite, its suffix $\rho^i$ is also infinite and hence is also a path.\end{defn}
 
-\subsubsection{Satisfaction on Paths}
+\subsubsection{Satisfaction on Paths}\label{subsubsec:LTLSemanticsPath}
 \begin{defn}\label{defn:ltlsatisfaction}
 Given a formula $\phi$, a model $M$ and a path $\rho = s_0, s_1, s_2,...$ on $M$, satisfaction for the LTL connectives is defined as follows:
 \end{defn}
@@ -255,6 +252,24 @@ Given a formula $\phi$, a model $M$ and a state $s$ in $M$, $\phi$ is true at $s
 \end{defn}
 
 \paragraph{} In the case of LTL, the standard modal satisfaction definition on states involve quantification over \textit{all possible futures}.
+
+\subsection{Equivalences}
+
+\paragraph{} There are several useful equivalences that hold in LTL:
+
+\begin{itemize}
+\item $\lnot X\phi \equiv X \lnot\phi$
+\item $G(\phi \land \psi) \equiv G\phi \land G\psi$
+\item $F(\phi \lor \psi) \equiv F\phi \lor F\psi$
+\item $G\phi \equiv \text{false}\ R \phi\\ \equiv \lnot (\text{true}\ U \lnot\phi)$
+\item $F\phi \equiv \text{true}\ U \phi\\ \equiv \lnot (\text{false}\ R \lnot\phi)$
+\item $\phi U \psi \equiv \phi W \psi \land F\psi$
+\item $\phi W \psi \equiv (\phi U \psi) \lor G\phi\\
+ \equiv \phi U (\psi \lor G\phi)\\
+ \equiv \psi R (\psi \lor \phi)$
+\item $\psi R \phi \equiv \phi W (\phi \land \psi)\\
+ \equiv (\phi U (\phi \land \psi)) \lor G(\phi \land \psi)$
+\end{itemize}
 
 \section{Computation Tree Logic}
 
@@ -323,7 +338,7 @@ Given a formula $\phi$, a model $M = (W, R, \pi)$ and a state $s$ in $M$, the sa
 \item $AG\phi \equiv \phi \land AXAG\phi$
 \item $EG\phi \equiv \phi \land EXEG\phi$
 \item $AF\phi \equiv \phi \lor AXAF\phi$
-\item $EF\phi \equiv \phi \lor EXEG\phi$
+\item $EF\phi \equiv \phi \lor EXEF\phi$
 \item $A(\phi U \psi) \equiv \psi \lor (\phi \land AX[A(\phi U \psi)])$
 \item $E(\phi U \psi) \equiv \psi \lor (\phi \land EX[E(\phi U \psi)])$
 \item $EG\phi \equiv \lnot A(\text{true}\ U \lnot\phi)$
@@ -333,6 +348,15 @@ Given a formula $\phi$, a model $M = (W, R, \pi)$ and a state $s$ in $M$, the sa
 \item $A(\phi U \psi) \equiv \lnot E(\lnot\psi U \lnot(\phi\lor\psi)) \land \lnot EG(\lnot \psi)\\
  \equiv \lnot E(\lnot\psi U \lnot(\phi\lor\psi)) \land AF\psi\\
  \equiv \lnot A(\phi R \psi)$
+\end{itemize}
+
+\subsection{Non-Equivalences}
+
+\paragraph{} Formulas can differ in what they specify. For example, $AGAF\phi \not\equiv AFAG\phi$.
+
+\begin{itemize}
+\item $AGAF\phi$ states that however far I go into any path, I will always find another $\phi$ in all the paths from there. 
+\item $AFAG\phi$ states that in all the paths, eventually you only find paths where $\phi$ always holds.
 \end{itemize}
 
 

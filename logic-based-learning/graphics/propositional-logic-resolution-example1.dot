@@ -1,0 +1,10 @@
+digraph {
+  nodesep=0.6; 
+  ranksep=0.4;
+  node [shape=none, height=0.1]
+  0 [label=<w &or; r &or; q>];
+  1 [label=<w &or; s &or; &not;r>];
+  2 [label=<w &or; q &or; s>];
+  0 -> 2;
+  1 -> 2;
+}

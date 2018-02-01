@@ -1,0 +1,31 @@
+digraph {
+  nodesep=0.6; 
+  ranksep=0.4;
+  node [shape=none, height=0.1]
+  0 [label=<G<SUB>0</SUB>: &larr; proud(Z)>];
+  1 [label=<C<SUB>0</SUB>: proud(X<SUB>0</SUB>) &larr; parent(X<SUB>0</SUB>, Y<SUB>0</SUB>), newboarn(Y<SUB>0</SUB>)>];
+  2 [label=<{X<SUB>0</SUB>/Z}> fontcolor="blue"];
+  0 -> 2;
+  1 -> 2;
+  3 [label=<G<SUB>1</SUB>: &larr; parent(Z, Y<SUB>0</SUB>), newborn(Y<SUB>0</SUB>>];
+  2 -> 3;
+  
+  4 [label=<C<SUB>1</SUB>: parent(X<SUB>1</SUB>, Y<SUB>1</SUB>) &larr; father(X<SUB>1</SUB>, Y<SUB>1</SUB>)>];
+  5 [label=<{X<SUB>1</SUB>/Z, Y<SUB>1</SUB>/Y<SUB>0</SUB>}> fontcolor="blue"];
+  3 -> 5;
+  4 -> 5;
+  6 [label=<G<SUB>2</SUB>: &larr; father(Z, Y<SUB>0</SUB>), newborn(Y<SUB>0</SUB>)>];
+  5 -> 6;
+  
+  7 [label=<C<SUB>2</SUB>: father(adam, mary)>];
+  8 [label=<{Z/adam, Y<SUB>0</SUB>/mary}> fontcolor="blue"];
+  6 -> 8;
+  7 -> 8;
+  9 [label=<G<SUB>3</SUB>: &larr; newborn(mary)>];
+  8 -> 9;
+  
+  10 [label=<C<SUB>3</SUB>: newborn(mary)>];
+  11 [label=<G<SUB>4</SUB>: [ ]> fontcolor="red"];
+  9 -> 11;
+  10 -> 11;
+}

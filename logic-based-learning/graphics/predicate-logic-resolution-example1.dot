@@ -1,0 +1,35 @@
+digraph {
+  nodesep=0.6; 
+  ranksep=0.4;
+  node [shape=none, height=0.1]
+  0 [label=<&not;on(X, Y)&or;&not;green(X)&or;green(Y)>];
+  1 [label=<on(a, b)>];
+  2 [label=<&theta; = {X/b, Y/c}> fontcolor="blue"];
+  0 -> 2;
+  1 -> 2;
+  
+  3 [label=<&not;green(b) &or; green(c)>];
+  2 -> 3;
+  
+  4 [label=<&not; green(c)>];
+  5 [label=<&not; green(b)>];
+  3 -> 5;
+  4 -> 5:w;
+  
+  6 [label=<on(a, b)>];
+  7 [label=<&theta; = {X/a, Y/b}> fontcolor="blue"];
+  0 -> 7;
+  6 -> 7;
+  
+  8 [label=<&not;green(a)&or;green(b)>];
+  7 -> 8;
+  
+  9 [label=<green(a)>];
+  10 [label=<green(b)>];
+  8 -> 10;
+  9 -> 10:e;
+  
+  11 [label=<[ ]> fontcolor="red"];
+  10 -> 11;
+  5 -> 11;
+}

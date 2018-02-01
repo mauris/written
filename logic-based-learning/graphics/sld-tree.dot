@@ -1,0 +1,28 @@
+digraph {
+  nodesep=0.6; 
+  ranksep=0.4;
+  node [shape=none, height=0.1]
+  0 [label=<G<SUB>0</SUB>: &larr; proud(Z)>];
+  1 [label=<{X<SUB>0</SUB>/Z}> fontcolor="blue"];
+  0 -> 1;
+  2 [label=<G<SUB>1</SUB>: &larr; parent(Z, Y<SUB>0</SUB>), newborn(Y<SUB>0</SUB>)>];
+  1 -> 2;
+  
+  3 [label=<{X<SUB>1</SUB>/Z, Y<SUB>1</SUB>/Y<SUB>0</SUB>}> fontcolor="blue"];
+  2 -> 3;
+  4 [label=<G<SUB>2</SUB>: &larr; father(Z, Y<SUB>0</SUB>), newborn(Y<SUB>0</SUB>)>];
+  5 [label=<G<SUB>2</SUB>: &larr; mother(Z, Y<SUB>0</SUB>), newborn(Y<SUB>0</SUB>)>];
+  3 -> 4;
+  3 -> 5;
+  
+  6 [label=<G<SUB>4</SUB>: &#9724;> fontcolor="red"];
+  5 -> 6;
+  
+  7 [label=<{Z/adam, Y<SUB>0</SUB>/mary}> fontcolor="blue"];
+  4 -> 7;
+  8 [label=<G<SUB>3</SUB>: &larr; newborn(mary)>];
+  7 -> 8;
+  
+  9 [label=<G<SUB>4</SUB>: &#9723;> fontcolor="red"];
+  8 -> 9;
+}

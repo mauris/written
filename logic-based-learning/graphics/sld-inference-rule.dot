@@ -1,0 +1,10 @@
+digraph {
+  nodesep=0.6; 
+  ranksep=0.4;
+  node [shape=none, height=0.1]
+  0 [label=<&larr; &alpha;<SUB>1</SUB>, ..., &alpha;<SUB>m</SUB>>];
+  1 [label=<&alpha;<SUB>1</SUB>' &larr; &beta;<SUB>1</SUB>, ..., &beta;<SUB>n</SUB>>];
+  2 [label=<&larr; &beta;<SUB>1</SUB>&theta;, ..., &beta;<SUB>n</SUB>&theta;, &alpha;<SUB>2</SUB>&theta;&alpha;, ..., &alpha;<SUB>m</SUB>&theta;>];
+  0 -> 2;
+  1 -> 2;
+}

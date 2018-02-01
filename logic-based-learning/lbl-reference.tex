@@ -1,0 +1,334 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{geometry}
+\usepackage{amsmath}
+\usepackage{dirtytalk}
+\usepackage{graphicx}
+\usepackage{enumerate}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage[nodayofweek]{datetime}
+\longdate
+\usepackage{amsfonts}
+\usepackage{multicol}
+\usepackage{amsthm}
+\usepackage{comment}
+\usepackage[font=footnotesize,labelfont=bf]{caption}
+\usepackage{float}
+
+\theoremstyle{plain}
+\newtheorem{thm}{Theorem}[section]
+
+\theoremstyle{definition}
+\newtheorem{defn}[thm]{Definition} % definition numbers are dependent on theorem numbers
+\newtheorem{exmp}[thm]{Example} % same for example numbers
+
+\setlength\columnsep{30pt}
+
+\geometry{
+ 	a4paper,
+	total={170mm,257mm},
+ 	left=20mm,
+ 	top=20mm,
+}
+
+\lstset{basicstyle=\footnotesize\ttfamily,breaklines=true}
+
+\title{
+	 \huge 304: Logic-Based Learning\\
+	 \huge -- Reference --
+}
+\date{\today}
+\author{
+	Sam Yong \\
+	\small \href{mailto:sam.yong17@imperial.ac.uk}{sam.yong17@imperial.ac.uk}
+}
+
+
+\begin{document}
+\maketitle
+
+\begin{multicols}{2}
+
+\section*{Foreword}  
+
+\paragraph{} This reference was made as an condensation from the lecture slides and notes provided by Prof. Alessandra Russo, Prof. Stephen Muggleton and Mark Law in the Imperial College London, Department of Computing's 304: Logic-Based Learning.
+
+\paragraph{} The ordering of this reference may not correspond to the sequence introduced in the lectures, lecture slides and notes. This order is how I feel I would understand the topic better.
+
+\begin{footnotesize}
+\paragraph{License} This reference is made publicly available under the MIT License. You should not have paid anyone money in exchange for this document. If you have paid someone for it, well too bad. The source code for this document can be found public available on my Github repository\footnote{\href{https://github.com/mauris/written}{https://github.com/mauris/written}}. If you wish to help improve this document, feel free to open an issue on the Github repository.
+\end{footnotesize}
+
+\section{Background}
+\subsection{Forms of Reasoning}
+
+\paragraph{Deduction} Reasoning from the general to reach the particular: what follow necessarily from the given premises.
+
+\begin{itemize}
+\item \textbf{Rule}: All beans in this bag are white.
+\item \textbf{Case}: These beans are from this bag.
+\item \textbf{Result}: These beans are white.
+\end{itemize}
+
+\paragraph{Induction} Reasoning from the specifics to reach the general: process of deriving reliable generalisations from observations.
+
+\begin{itemize}
+\item \textbf{Rule}: These beans are from this bag.
+\item \textbf{Case}: These beans are white.
+\item \textbf{Result}: All beans in this bag are white.
+\end{itemize}
+
+\paragraph{Abduction} Reasoning from observations to explanations: process of using given general rules to establish causal relationships between existing knowledge and observations. 
+
+\begin{itemize}
+\item \textbf{Rule}: All beans in this bag are white.
+\item \textbf{Case}: These beans are white.
+\item \textbf{Result}: These beans are from this bag.
+\end{itemize}
+
+\subsection{Clausal Representation}
+\subsubsection{Propositional Logic}
+\paragraph{} We begin by introducing the clausal representation with the following definitions:
+
+\begin{itemize}
+\item \textbf{Theory}: a set (conjunction) of clauses\footnote{Clausal finite theories can also be seen as Conjunctive Normal Form (CNF) formulae.}.\\ e,g, $\{p \lor \lnot q; r; s\}$
+\item \textbf{Clause}: disjunction of literals.\\ e.g. $p \lor \lnot q$, $r$, $s$
+\item \textbf{Literal}: Atomic sentence or its negation.\\ e.g. $p$, $\lnot q$
+\end{itemize}
+
+\paragraph{} As we want to explore how inference tasks can be computed, we will restrict ourselves to the subset of predicate logic that is computational tractable and where efficient automated proof procedures that are able to compute logical inference exists. This subset of predicate logic is called Horn clauses\footnote{A subset of Prolog language.}. Every formula can be converted into a clausal theory:
+
+\begin{itemize}
+\item Elimination of $\implies$:\\ $(p \implies q) \longrightarrow \lnot p \lor q$
+\item Pushing $\lnot$ inwards:\\ $\lnot(p \lor q) \longrightarrow (\lnot p \land \lnot q)$
+\item Distribution of $\land$ and $\lor$:\\ $(\lnot p \land \lnot q) \lor \lnot p \longrightarrow (\lnot p \lor \lnot p) \land (\lnot q \lor \lnot p)$
+\item Collecting Terms:\\ $(\lnot p \lor \lnot p) \land (\lnot q \lor \lnot p) \longrightarrow \lnot p \land (\lnot q \lor \lnot p)$
+\end{itemize}
+
+\subsubsection{Predicate Logic}
+
+\paragraph {} In the case of predicate logic, atomic sentences may have terms with variables:
+
+\begin{itemize}
+\item \textbf{Theory}: a set (conjunction) of clauses.\\ e.g. $\{p(X) \lor \lnot r(a, f(b, X)); q(X, Y)\}$\\ All variables are understood to be universally quantified, i.e.\\ $\forall X, Y [r(a, f(b, X) \implies p(X)] \land \forall X, Y\ q(X, Y)$
+\end{itemize}
+
+\paragraph{Substitution} Since terms may have variables in predicate logic, substitution is needed to ground literals. For example, let $\theta = \{V_1/t_1, V_2/t_2, ..., V_n/t_n\}$ where $V_i$ is a variable and $t_i$ a term that replaces $V_i$. Suppose, 
+
+\begin{align*}
+&p(X, Y)\\
+\theta &= \{X/a, Y/g(b, Z)\}\\
+p(X, Y)\theta &= p(a, g(b, Z))
+\end{align*}
+
+\paragraph{Grounding} A literal is \textit{ground} if it contains no variables.
+
+\paragraph{Instance} A literal $l'$ is \textit{an instance of} $l$, if for some substitution $\theta$, $l' = l\theta$.
+
+\paragraph{Skolemisation} When converting FOL to CNF, we also need to perform skolemisation to remove existential quantifiers and move all universal quantifiers to the front. 
+
+\begin{itemize}
+\item An existential quantifier with no dependency can be skolemised by introducing a new constant. For example, $\exists X\ p(X) \longrightarrow p(c)$. The constant $c$ that is replacing $X$ must not clash in name with other existing constants.
+\item If an existential quantifier depends on another quantifier, a function symbol needs to be introduced. For example, $\forall X \exists Y p(X, Y) \longrightarrow \forall p(X, f(X))$.
+\end{itemize}
+
+\noindent All universal quantifiers need to be moved to the front. Variable name clashes must be resolved by renaming variables as the universal quantifiers are being moved to the front. Once they are at the front, all universal quantifiers at the front can all be removed. 
+
+\subsection{Horn Clauses}
+
+\begin{defn}Horn Clauses are a particular type of clauses with at most one positive literal only. The positive literal in the clauses is called the head and the other literals form the body of the clause.\end{defn}
+
+\begin{defn}Definite Clauses have exactly on positive literals.  e.g. $\lnot b_1 \lor\lnot b_2 \lor ... \lor\lnot b_n \lor h$. Definite Clauses (aka rules) can also be re-written as $h \Leftarrow b_1 \land b_2 \land ... \land b_n$.\end{defn}
+
+\begin{defn}Denials have no positive clauses. e.g. $\lnot b_1 \lor\lnot b_2 \lor ... \lor\lnot b_n$. Denials (aka constraints) can also be re-written as $\Leftarrow b_1 \land b_2 \land ... \land b_n$.\end{defn}
+
+\begin{defn}Facts are Definite Clauses that have no negative literals. e.g. $h$.\end{defn}
+
+\subsection{Resolution}
+
+\paragraph{} Resolution is a proof strategy to determine if a proposition can be satisfied by a clausal theory. Essentially, we will see that resolution is actually proof by contradiction (or in Latin, \textit{reductio ad absurdum} abbreviated as RAA).
+
+\subsubsection{Propositional Logic Resolution}
+
+\paragraph{Resolvent} Given two clauses of the form\\ $\{p \lor C_1; \lnot p \lor C_2\}$, the clause $C_1 \lor C_2$ is the inferred clause, called the \textit{resolvent} (conclusion of the premise).
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.25\textwidth]{graphics/propositional-logic-resolution-example1.png}
+\caption{In this example, $\lnot r$ and $r$ gets cancelled away and resolves the two statement $w \lor r \lor q$ and $w \lor s \lor \lnot r$ into $w \lor q \lor s$}
+\end{figure}
+
+\paragraph{Refutation Completeness} Resolution is complete as a refutation system. That is, if $S$ is a contradictory set of clauses, then resolution can refute $S$, i.e. $S \vdash [\ ]$ or $S \vdash \perp$. For example given the case of $p \models p \lor q$, resolution cannot be directly applied to the given clausal theory $Th = \{p\}$ and infer $p \lor q$. Instead, we have to express it as a refutation problem and show that $\{p, \lnot(p \lor q)\} \models [\ ]$. We then show that the set of clauses $\{p, \lnot p, \lnot q\}$ converted from $Th$ can derive the empty clause $[\ ]$.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.2\textwidth]{graphics/propositional-logic-resolution-example2.png}
+\caption{In the example to show $p \models p \lor q$, we need to first express it as a refutation problem then derive the empty clause using resolution. Not all clauses need to be used.}
+\end{figure}
+
+\paragraph{Resolution} Given a knowledge base of clauses $Kb$, if $Kb \vdash c$ by resolution then $Kb \models c$. 
+
+\begin{exmp}For example,
+\begin{align*}
+Kb &= \{\\
+	&s;\\
+	&s \implies c;\\
+	&c \land m \implies b;\\
+	&c \land f \implies g;\\
+	&f\\
+	\}&
+\end{align*}
+
+\noindent To prove that $Kb \models g$, we show that $Kb \cup \{\lnot g\} \models [\ ]$:
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.32\textwidth]{graphics/propositional-logic-resolution-example3.png}
+\caption{By resolution we show that $Kb \cup \{\lnot g\} \models [\ ]$, hence $Kb \models g$.}
+\end{figure}\end{exmp}
+
+\subsubsection{Predicate Logic Resolution}
+
+\paragraph{} Resolution in FOL is more complex: while it is still based on the idea of resolving opposite literals that appear in two clauses and deriving the empty clause, variables play an important role here. Literals may have unground terms (i.e. variables that yet to be substituted) which are understood as standing for all possible instances. Resolution could happen by referring to any such instances. Hence the role of the unification step is to identify which of these instances to use.
+
+\paragraph{Name Clashes} When resolving two clauses, all variables occurring should be renamed with unused variables to avoid name clashes. A variable $X$ in clause $C_1$ is not the same as another variable named $X$ in $C_2$.
+
+\paragraph{Resolution} Consider two opposite literals in two clauses which we want to resolve: We see if it is possible to find a substitution $\theta$ st when applied to both literals, $\theta$ makes the two literals equal. The resolution can then applied and the substitution has to be applied on all occurrences of those variables in the literals left in the resolvent. For example, suppose
+
+\begin{align*}
+Kb &= \{\\
+	&on(a, b);\\
+	&on(b, c);\\
+	&green(a);\\
+	&\lnot green(c)\\
+	\}&
+\end{align*}
+
+\noindent and we want to show that $Kb \models \exists X \exists Y (on(X, Y) \land green(X) \land \lnot green(Y))$, we can apply the following resolution:
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.5\textwidth]{graphics/predicate-logic-resolution-example1.png}
+\caption{The resolution takes the two substitutions (labelled blue) two create equally opposing literals for $on(X, Y)$.}
+\end{figure}
+
+\paragraph{} As we take the negation of the entailment, the existential quantifiers get eliminated and hence there is no need for skolemisation.
+
+\paragraph{Answers to Query} Answer to the query may also return unification values (substitution). However, it is possible to construct resolutions that never terminate.
+
+\subsection{Herbrand Theorem}
+
+\paragraph{} It is possible to handle some predicate logic cases by converting them into propositional logic form. Consider $Th$ be a set of clauses (a clausal theory).
+
+\paragraph{Herbrand Domain}\footnote{Also known as Herbrand Universe.} The set of all ground terms formed only using constants and function symbols that appear in $Th$.
+
+\paragraph{Herbrand Base} The set of all ground atoms that can be formed using the predicate symbols in $Th$ and terms in the Herbrand Domain.
+
+\paragraph{Grounding} The set of all $c_i\theta$ ground clauses st $c_i \in Th$ and the substitution $\theta$ replaces variables in $c_i$ by terms in the Herbrand Domain. The grounding of $Th$ is denoted as $ground(Th)$.
+
+\paragraph{Theorem} A clausal theory $Th$ is \textit{satisfiable} iff the grounding of $Th$ is \textit{satisfiable}. Since the grounding of $Th$ has no variables, it is essentially propositional. $Th$ is not satisfiable iff by resolution the grounding of $Th$ concludes to the empty clause.
+
+\begin{exmp}\label{exmp:HerbrandTheorem} Consider FOL sentence $S$ whose language $\mathcal{L}$ includes only the constants $b$, $c$, $l$:\end{exmp}
+
+$$S = \forall X, Y [\lnot p(b, Y) \lor p(c, l) \lor (p(b, X)\lor \lnot p(X, l))]$$
+
+\noindent From $S$ we can build the set $C$ of clauses st $C = \{\lnot p(b, Y); p(c,l); p(b, X) \lor \lnot p(X, l)\}$. The \textit{Herbrand Domain of $C$} is $\{b, c, l\}$ while the grounding is:
+
+\begin{align*}
+ground(C) &= \{\\
+	&\lnot p(b, b),\\
+	&p(b, b), \lor \lnot p(b, l),\\
+	&\lnot p(b, c),\\
+	&p(b, c) \lor \lnot p(c, l),\\
+	&\lnot p(b, l),\\
+	&p(b, l) \lor \lnot p(l, l),\\
+	&p(c, l)\\
+	\}&
+\end{align*}
+
+\paragraph{} In Example \ref{exmp:HerbrandTheorem}, $ground(C)$ is not satisfiable because of a contradicting subset of the ground clauses: $\{\lnot p(b, c), p(c, l), p(b, c) \lor\lnot p(c, l)\}$. Hence the set of clauses $C$ is unsatisfiable.
+
+
+\paragraph{Herbrand Interpretation} A Herbrand Intepretation (HI) of a set $Th$ of definite clauses is a set of ground atoms over the constant, function and predicate symbols occurring in $Th$. In essence, a HI is a subset of the Herbrand Base of $Th$, and the set of all Herbrand Interpretations of $Th$ is the power set of the Herbrand Base.
+
+\paragraph{Herbrand Model} A Herbrand Interpretation $I$ is a Herbrand Model (HM) of $Th$ iff for all clauses $\lnot b_1 \lor \lnot b_2 \lor ... \lor \lnot b_n \lor h_1 \lor h_2 \lor ... \lor h_m$ in $Th$ and ground substitutions $\theta$, $$\{b_1\theta, b_2\theta, ..., b_n\theta\} \in I \implies \{h_1\theta, h_2\theta, ..., h_m\theta\} \cap I \not= \emptyset$$
+
+\noindent The inequality with an empty set denotes that the HI $I$ must satisfy $\exists i \in [1, m]\ h_i\theta$. Hence a Herbrand Model is a Herbrand Interpretation is satisfable in a clausal theory.
+
+\begin{defn} Since there may be more than one HI that satisfies a clausal theory (i.e. more than one HM), some HM may be a subset of another HM. The \textit{Minimal Herbrand Model} is a HM of which none of its subsets is a HM. Any satisfiable clausal theory $Th$ of definite clauses has one unique minimal HM called the \textit{Least Herbrand Model}. \end{defn}
+
+\paragraph{Infinite Herbrand Domain} It is possible for a clausal theory to accept an infinite HM as they may have an infinite HD. Consider the following example which has an infinite HD:
+
+\begin{align*}
+Th &= \{\\
+	&\text{natural}(0),\\
+	&\text{natural}(X) \implies \text{natural}(succ(X))\\
+	\}&
+\end{align*}
+
+\subsection{SLD Derivation}
+\paragraph{} A pure Prolog program is a set of definite clauses and hence its semantics is given by its Least Herbrand Model\footnote{Defined by Luc De Raedt in his book.}. The inference procedure used by Prolog is a special version of resolution that exploits the fact that the given clausal theory is a set of definite clauses and not general clauses. 
+
+\paragraph{} Queries to a Prolog program are not any arbitrary clauses but denial clauses\footnote{We want to proof by refutation.}. Arbitrary clauses must be rewritten in a certain way to accomodate this syntactic restriction of Prolog. 
+
+\paragraph{} Given a set of definite clauses and a denial clause, there can be many resolution proofs that can be constructed. Prolog uses a special form of resolution - SLD resolution - to systematically explore all possible derivations. The SLD derivation is a linear sequence of application of an SLD inference rule that is applied between a denial clause and a definite clause in the original $Th$ clausal theory. SLD is a resolution proof method and as such is still refutation based. Hence the denial clause is the given query expressed in denial form. 
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.3\textwidth]{graphics/sld-inference-rule.png}
+\caption{$\theta$ in the inference rule is the Most General Unifier $mgu(\alpha_1, \alpha_1')$. $\alpha_i$ and $\beta_j$ are atoms.}
+\end{figure}
+
+\paragraph{} Given a denial (goal) $G_0$ and clausal theory $Th$ of definite clauses, an SLD-derivation of $G_0$ from $Th$ is a (possibly infinite) sequence of denials:
+
+$$G_0 \underset{C_0}{\implies} G_1 \underset{C_1}{\implies} ...  \underset{C_{n-2}}{\implies} G_{n - 1}\underset{C_{n - 1}}{\implies} G_n  $$
+
+\noindent ... where $G_{i + 1}$ is derived directly from $G_i$ and a clause $C_i$ with variables appropriate renamed. This means the composition $\theta = \theta_1 \theta_2 ... \theta_n$, where $\theta_i$ is defined at each step of the derivation, gives the entire substitution computed reaching the final derivation if computation is \textit{finite}.
+
+\subsubsection{SLD Trees}
+
+\paragraph{} When performing SLD derivation, there may be one or more choices of clause $C_i$ that can be used with $G_i$ to derive $G_{i+1}$. Consider the following knowledge base and the query $\exists Z\ \text{proud}(Z)$:
+
+\begin{itemize}
+\setlength\itemsep{0.1em}
+\item[] $\text{proud}(X) \Leftarrow \text{parent}(X, Y), \text{newborn}(Y)$
+\item[] $\text{parent}(X, Y) \Leftarrow \text{father}(X, Y)$
+\item[] $\text{parent}(X, Y) \Leftarrow \text{mother}(X, Y)$
+\item[] $\text{father}(\text{adam}, \text{mary})$
+\item[] $\text{newborn}(\text{mary})$
+\end{itemize}
+
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.45\textwidth]{graphics/sld-derivation-example.png}
+\caption{By SLD derivation, we can determine that $Z = \text{adam}$.}
+\end{figure}
+
+\paragraph{} However we can see that at $C_2$, another clause $\text{parent}(X, Y) \Leftarrow mother(X, Y)$ could have been picked instead for the reservation. When each sub-goal can unify with more clauses, more than one SLD derivations can be computed. Alternative choices can then be represented as a tree, with each leaf as a possible derivation.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.45\textwidth]{graphics/sld-tree.png}
+\caption{Each time there is a choice of clauses can be be used to resolve the subgoals, branches are created in the tree to represent the different possible derivations. In this case, picking $\Leftarrow \text{mother}(X, Y), \text{newborn}(Y)$ as $G_2$ would lead to a non-empty derivation. }
+\end{figure}
+
+\paragraph{} The SLD Tree represents the search space of all possible derivations. Each path from the original denial $G_0$ to the leaf node is the SLD computation / refutation. The tree is then traversed in a depth-first search to provide each refutation in order. For a finite SLD-tree, this strategy is complete. Whenever the traversal reaches a leaf node of an empty clause, the substitution of the completed refutation is returned. As mentioned before, it is also possible for SLD derivation to generate an infinite sequence of denials and hence an infinite SLD-tree, which explains why sometimes Prolog computations do not terminate.
+
+\subsection{Normal Clausal Logic}
+
+\paragraph{Normal Clausal Logic} extends Horn Clauses by permitting atoms in the body of a rule / denial to be prefixed with a special operator \textit{not} (read as "fail"). For example:
+
+\begin{itemize}
+\setlength\itemsep{0.1em}
+\item[] \textbf{Normal Clauses}:\\ $h \Leftarrow b_1, ... b_n, \text{not}\ b_{n+1}, ..., \text{not}\ b_m$
+\item[] \textbf{Normal Denials}:\\ $\Leftarrow b_1, ... b_n, \text{not}\ b_{n+1}, ..., \text{not}\ b_m$
+\end{itemize}
+
+\paragraph{} The \textit{not} operator in Prolog is known as $\backslash+$. The computational meaning of $\text{not}\ p$ is: i) $\text{not}\ p$ succeeds iff $p$ fails finitely and ii) $\text{not}\ p$ fails iff $p$ succeeds. When evaluating $\Leftarrow \text{not} p(X)$, the atom $p$ must be ground: otherwise the derivation is "floundered"\footnote{The answer is unknown.}. The variable $X$ should have already been grounded in previous steps of the derivation.
+
+\paragraph{} In Normal Clausal Logic, the fail operator never appears in the head of a rule. Putting the fail operator in the head of a rule would be asking to prove what should not be proved, whereas clausal theories define what should be provable.
+
+\end{multicols}
+\end{document}

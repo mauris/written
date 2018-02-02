@@ -4,7 +4,7 @@ GRAPHICS = $(patsubst %.dot,%.png,$(wildcard graphics/*.dot))
 
 main: lbl-reference.pdf
 	
-lbl-reference.pdf: $(GRAPHICS) lbl-reference.tex
+lbl-reference.pdf: $(GRAPHICS:.dot=.png) lbl-reference.tex
 	latexmk --pdf lbl-reference.tex
 	
 %.png: %.dot

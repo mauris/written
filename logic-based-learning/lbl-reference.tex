@@ -318,7 +318,7 @@ $$G_0 \underset{C_0}{\implies} G_1 \underset{C_1}{\implies} ...  \underset{C_{n-
 
 \subsection{Normal Clausal Logic}
 
-\paragraph{Normal Clausal Logic} extends Horn Clauses by permitting atoms in the body of a rule / denial to be prefixed with a special operator \textit{not} (read as "fail"). For example:
+\paragraph{Normal Clausal Logic} extends Horn Clauses by permitting atoms in the body of a rule / denial to be prefixed with a special operator \textit{not} (read as "fail"). This operator is also referred to as "negation by failure". For example:
 
 \begin{itemize}
 \setlength\itemsep{0.1em}
@@ -329,6 +329,110 @@ $$G_0 \underset{C_0}{\implies} G_1 \underset{C_1}{\implies} ...  \underset{C_{n-
 \paragraph{} The \textit{not} operator in Prolog is known as $\backslash+$. The computational meaning of $\text{not}\ p$ is: i) $\text{not}\ p$ succeeds iff $p$ fails finitely and ii) $\text{not}\ p$ fails iff $p$ succeeds. When evaluating $\Leftarrow \text{not} p(X)$, the atom $p$ must be ground: otherwise the derivation is "floundered"\footnote{The answer is unknown.}. The variable $X$ should have already been grounded in previous steps of the derivation.
 
 \paragraph{} In Normal Clausal Logic, the fail operator never appears in the head of a rule. Putting the fail operator in the head of a rule would be asking to prove what should not be proved, whereas clausal theories define what should be provable.
+
+\subsection{SLDNF Derivation}
+\paragraph{} SLDNF derivation is SLD derivation with Negation as Failure. A selected subgoal $\text{not}\ p)$,  succeeds if the subproof fails, and it fails if the subproof succeeds. Consider the following example knowledge base and query $connected$:
+
+\begin{itemize}
+\setlength\itemsep{0.0em}
+\item[] $connected \Leftarrow \text{not}\ unconnected$
+\item[] $unconnected \Leftarrow node(X), \text{not}\ succ(X)$
+\item[] $succ(X) \Leftarrow arc(X, Y)$
+\item[] $node(a)$
+\item[] $node(b)$
+\item[] $arc(a, b)$
+\item[] $arc(b, c)$
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.3\textwidth]{graphics/sldnf-example1.png}
+\caption{ In the example, we need to prove that $\Leftarrow unconnected$ fails in order to prove the second denial / sub-goal "$\Leftarrow \text{not}\ unconnected$". $\Leftarrow unconnected$ fails iff all all possible outcomes of $\Leftarrow unconnected$ comes to a failure / non-empty clause. The two possible outcomes, for $X = a \text{or} b$: $\Leftarrow \text{not}\ succ(X)$, are proven to to fail since each of $\Leftarrow succ(X)$ succeeds.}
+\end{figure}
+
+\paragraph{Floundering} If we make a slight modification to the knowledge base of the example by replacing $unconnected \Leftarrow node(X), \text{not}\ succ(X)$ with $unconnected \Leftarrow node(X), \text{not} arc(X, Y)$, the SLDNF would not be possible to evaluate even though the knowledge bases are equivalent. Figure \ref{fig:sldnf-example2} shows the resolution tree.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.3\textwidth]{graphics/sldnf-example2.png}
+\caption{With the slight modification, it becomes impossible to prove $\text{not}\ arc(X, Y)$ for $a$ and $b$ since $Y$ was not instantiated, as it would require a search through possibly infinite derivations to prove that there is exists no such value of $Y$. This is why the SLDNF strategy adopted is whenever a non-ground fail literal is encountered as a subgoal, the derivation consider it not possible to evaluate and a floundering condition is reported.}
+\label{fig:sldnf-example2}
+\end{figure}
+
+\subsection{Abduction}
+
+\paragraph{} So far reasoning has been primarily deductive. Sometimes our knowledge base can be incomplete and deductive inference would fail on certain queries due to lack of information. For example, given the following knowledge base and the query $soreElbow$:
+
+\begin{itemize}
+\setlength\itemsep{0.0em}
+\item[] $soreElbow \Leftarrow tennisElbow$
+\item[] $tennisPlayer \Leftarrow tennisElbow$
+\item[] $soreElbow \Leftarrow soreJoints$
+\item[] $soreJoint \Leftarrow arthritis, untreated$
+\end{itemize}
+
+\paragraph{} It is impossible to explain $soreElbow$ using deductive inference, as shown in Figure \ref{fig:abduction-example1} below.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.3\textwidth]{graphics/abduction-example1.png}
+\caption{}
+\label{fig:abduction-example1}
+\end{figure}
+
+\paragraph{} Abductive reasoning computes explanations that are consistent with the given knowledge base to explain (or satisfy) the given observations. The list of explanations can be generated and some may be subset of others. They should not be unnecessarily strong\footnote{i.e. including more ground literals than needed} or unnecessarily weak \footnote{too few to prove the observations in all circumstances}. Abductive algorithms for Normal clauses aim to generate a minimal set of explanations that, together with the given theory, proves the goal.
+
+\paragraph{Abducibles} When modelling a problem domain in an abductive term, we need to think about a vocabulary of what are considered to be plausible explanations for the given types of observations - and we refer this vocabulary as the set of \textit{abducibles}.
+
+\subsubsection{Abductive Model}
+
+\paragraph{} An abductive model of a problem domain is defined as a tuple $<KB, Ab, IC>$ where $KB$ is the knowledge base (set of normal clauses), $Ab$ is the vocabulary of plausible explanations (set of ground undefined literals), and $IC$ is the set of constraints (set of normal details).
+
+\paragraph{Abductive Solution} Given an abductive model, an \textit{abductive solution} (or explanation) of a given observation $O$ is a set $\Delta$ of ground literals st:
+
+\begin{itemize}
+\item $\Delta \subset Ab$ - $\Delta$ belongs to a predefined language of abducibles.
+\item $KB \cup \Delta \models O$ - $\Delta$ must provide missing information needed to prove observation $O$.
+\item $KB \cup \Delta \not\models \perp$ - $\Delta$ must be consistent with the knowledge base.
+\item $KB \cup \Delta \models IC$ - $\Delta$ when combined with the knowledge base must entail the constraints.
+\end{itemize}
+
+\paragraph{} When $KB$ is a set of definite clauses, the augmented theory $KB \cup \Delta$ will also be a set of definite clauses that accepts a unique minimal model, the Least Herbrand Model.
+
+\subsection{Abductive Proof Procedure}
+
+\paragraph{} Let $<KB, Ab, IC>$ be an abductive model expressed in Normal Clausal Logic and let $O$ be a ground observation:
+
+... TODO
+
+\section{ILP}
+
+\subsection{Learning from Entailment}
+
+Learning from entailment means $\forall e \in E, B \cup H_i \models e$
+
+\subsection{Inverse Entailment}
+
+$$Bot(B, e) = \{\lnot e_1, \lnot e_2, ..., \lnot e_n\}$$
+
+$$B \land \lnot e_i \models l_1, l_2, ... l_m$$
+
+We can look at the Least Herbrand Model of the set of $B \cup {\lnot e^+}$ for the list of literals that can be entailed from $B \cup {\lnot e^+}$. Alternatively to prove a that the set satisfy a $l_i$, you can also proof by resolution that $B \land \lnot e_i \land \lnot l_i \vdash_{res} [\ ]$.
+
+\subsection{Progol5}
+
+For a head literal $l_i$ to be proved
+
+\section{HAIL}
+
+\paragraph{} We have background knowledge $B$, positive examples $E^+$, negative examples $E^-$ and mocdel $M$. 
+\begin{enumerate}
+\item Abductive Step (replace STARTSET): What are the abducibles?
+\item Deductive Step
+\item Induction Step
+\end{enumerate}
+
+Kernel is the set of clauses . Generalisation shrinks the Kernel set. Head of clauses are from the abduction proof. In Induction Step can I find a $H$ that $\theta$-subsumes $K$ in the $\theta$-lattice. Generalization increases positive-example coverage but we must check that it does not cover any negative examples.
 
 \end{multicols}
 \end{document}

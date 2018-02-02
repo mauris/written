@@ -1,0 +1,61 @@
+graph {
+  nodesep=0.2; 
+  ranksep=0.1;
+  compound=true;
+  node [shape=none, height=0.1]
+  
+  0 [label=<&larr; connected>];
+  1 [label=<&larr; <I>not</I> unconnected>];
+  2 [label=<&#9633;>];
+  
+  0 -- 1;
+  1 -- 2;
+  
+  subgraph cluster_notUnconnected {
+    graph[style="solid" margin=2];
+    subgraph cluster_notUnconnected2 {
+      graph[style="solid"];
+    
+      3 [label=<&larr; unconnected>];
+      4 [label=<&larr; node(X), <I>not</I> succ(X)>];
+      
+      3 -- 4;
+      
+      5 [label=<{X/a}> fontcolor="blue"];
+      6 [label=<{X/b}> fontcolor="blue"];
+      
+      4 -- 5;
+      4 -- 6;
+      
+      7 [label=<&larr; <I>not</I> succ(a)>];
+      8 [label=<&larr; <I>not</I> succ(a)>];
+      
+      5 -- 7;
+      6 -- 8;
+      
+      subgraph cluster_notSuccA {
+        graph[style="solid"];
+        9 [label=<&larr; succ(a)>];
+        10 [label=<&larr; arc(a, Y)>];
+        11 [label=<&#9633;>];
+        
+        9 -- 10;
+        10 -- 11;
+      }
+      
+      7 -- 9[lhead=cluster_notSuccA];
+      
+      subgraph cluster_notSuccB {
+        graph[style="solid"];
+        12 [label=<&larr; succ(b)>];
+        13 [label=<&larr; arc(b, Y)>];
+        14 [label=<&#9633;>];
+        
+        12 -- 13 -- 14;
+      }
+      
+      8 -- 12[lhead=cluster_notSuccB];
+    }
+  }
+  2 -- 3[lhead=cluster_notUnconnected];
+}

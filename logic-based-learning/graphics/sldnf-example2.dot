@@ -1,0 +1,41 @@
+graph {
+  nodesep=0.2; 
+  ranksep=0.1;
+  compound=true;
+  node [shape=none, height=0.1]
+  
+  0 [label=<&larr; connected>];
+  1 [label=<&larr; <I>not</I> unconnected>];
+  2 [label=<floundered> fontcolor="red"];
+  
+  0 -- 1;
+  1 -- 2;
+  
+  subgraph cluster_notUnconnected {
+    graph[style="solid"];
+    
+    3 [label=<&larr; unconnected>];
+    4 [label=<&larr; node(X), <I>not</I> arc(X, Y)>];
+    
+    3 -- 4;
+    
+    5 [label=<{X/a}> fontcolor="blue"];
+    6 [label=<{X/b}> fontcolor="blue"];
+    
+    4 -- 5;
+    4 -- 6;
+    
+    7 [label=<&larr; <I>not</I> arc(a, Y)>];
+    8 [label=<&larr; <I>not</I> arc(a, Y)>];
+    
+    5 -- 7;
+    6 -- 8;
+    
+    9 [label=<floundered> fontcolor="red"];
+    10 [label=<floundered> fontcolor="red"];
+    
+    7 -- 9;
+    8 -- 10;
+  }
+  2 -- 3[lhead=cluster_notUnconnected];
+}

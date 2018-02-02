@@ -1,0 +1,22 @@
+graph {
+  nodesep=0.2; 
+  ranksep=0.1;
+  compound=true;
+  node [shape=none, height=0.1]
+  
+  0 [label=<&larr; soreElbow>];
+  1 [label=<&larr; tennisElbow>];
+  2 [label=<&larr; soreJoints>];
+  
+  0 -- 1;
+  0 -- 2;
+  
+  3 [label=<&larr; arithritis, untreated>];
+  2 -- 3;
+  
+  4 [label=<???> fontcolor="red"];
+  5 [label=<???> fontcolor="red"];
+  
+  1 -- 4;
+  3 -- 5;
+}

@@ -25,7 +25,7 @@ digraph {
   8 -> 9;
   
   10 [label=<C<SUB>3</SUB>: newborn(mary)>];
-  11 [label=<G<SUB>4</SUB>: [ ]> fontcolor="red"];
+  11 [label=<G<SUB>4</SUB>: &#9723;> fontcolor="red"];
   9 -> 11;
   10 -> 11;
 }

@@ -1,0 +1,10 @@
+digraph {
+  rankdir=LR;
+  node [shape=circle]
+  
+  0 [label=<w<SUB>1</SUB>> xlabel=<p, &not;q>];
+  1 [label=<w<SUB>2</SUB>> xlabel=<&not; p, &not;q>];
+  
+  0 -> 1
+  1 -> 1;
+}

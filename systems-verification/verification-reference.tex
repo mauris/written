@@ -13,6 +13,8 @@
 \usepackage{multicol}
 \usepackage{amsthm}
 \usepackage{comment}
+\usepackage[font=footnotesize,labelfont=bf]{caption}
+\usepackage{float}
 
 \theoremstyle{plain}
 \newtheorem{thm}{Theorem}[section]
@@ -52,11 +54,16 @@
 
 \paragraph{} This reference was made as an condensation from the lecture slides and notes provided by Prof. Alessio R. Lomuscio, Prof. Michael Huth and Prof. Mark D. Ryan in the Imperial College London, Department of Computing's 303: Systems Verification.
 
+\paragraph{} This reference also contain several contributions\footnote{List of contributors in no particular order.} by Michael Akintunde. Thank you!
+
 \paragraph{} The ordering of this reference may not correspond to the sequence introduced in the lectures, lecture slides and notes. This order is how I feel I would understand the topic better.
 
 \begin{footnotesize}
 \paragraph{License} This reference is made publicly available under the MIT License. You should not have paid anyone money in exchange for this document. If you have paid someone for it, well too bad. The source code for this document can be found public available on my Github repository\footnote{\href{https://github.com/mauris/written}{https://github.com/mauris/written}}. If you wish to help improve this document, feel free to open an issue on the Github repository.
 \end{footnotesize}
+
+\tableofcontents
+\newpage
 
 \section{Model Checking}
 
@@ -270,6 +277,28 @@ Given a formula $\phi$, a model $M$ and a state $s$ in $M$, $\phi$ is true at $s
 \item $\psi R \phi \equiv \phi W (\phi \land \psi)\\
  \equiv (\phi U (\phi \land \psi)) \lor G(\phi \land \psi)$
 \end{itemize}
+
+\subsection{Non-Equivalences}
+
+\paragraph{} Different forumlas may provide different semantic meanings. For example, we see that $Fp \implies Fq \not\equiv F(p \implies q)$:
+
+\begin{itemize}
+\item[] We assume that $Fp \implies Fq \equiv F(p \implies q)$. We use the definition of $\implies$ to derive:\\ $Fp \implies Fq \equiv \lnot Fp \lor Fq$ and\\ $F(p \implies q) \equiv F(\lnot p \lor q) \equiv F\lnot p \lor Fq$.
+\item[] To reach a contradiction, we need a model that satisfies one formula but not the other. Since we need $Fq$ to be false (otherwise $Fq$ would make both formulae true), we must never reach a point in the model where $q$ holds. We choose to eliminate $q$ from any counterexample we construct.
+\item[] We're left with $\lnot Fp$ and $F\lnot q$. One must be true and the other false.
+\item[] We can try to make $\lnot Fp$ true and $F\lnot p$ false, but in order to make $F\lnot p$ false, we need to $Gp$ in the model to be true, which is impossible when we're already making $\lnot Fp$ true.
+\item[] Alternatively, we make $\lnot Fp$ false and $F\lnot p$ true in the same model. We construct a model such that $p$ starts off as true, and at some other point $p$ becomes false. 
+\end{itemize}
+
+\noindent With the following model $\mathcal{M}$: for all models $Fp \implies Fq \not\equiv F(p \implies q)$.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.2\textwidth]{graphics/ltl-non-equiv-example1.png}
+\caption{The constructed model $\mathcal{M}$ st given the sequence $\rho = w_1 w_2^+$ we have $(\mathcal{M}, \rho) \not\models Fp \implies Fq$, but $(\mathcal{M}, \rho) \models F(p \implies q)$.}
+\end{figure}
+
+\paragraph{} By the counterexample, we proved that there exists a model $\mathcal{M}$ and a path $\rho$ st $(\mathcal{M}, \rho) \not\models (Fp \implies Fq) \land (\mathcal{M}, \rho) \models F(p \implies q)$. Hence $Fp \implies Fq \not\equiv F(p \implies q)$.
 
 \section{Computation Tree Logic}
 

@@ -1,11 +1,12 @@
 GRAPHICS = $(patsubst %.dot,%.png,$(wildcard graphics/*.dot))
+TEXFILE = lbl-reference.pdf
 
 .PHONY = main
 
-main: lbl-reference.pdf
+main: $(TEXFILE)
 	
-lbl-reference.pdf: $(GRAPHICS:.dot=.png) lbl-reference.tex
-	latexmk --pdf lbl-reference.tex
+$(TEXFILE): $(GRAPHICS:.dot=.png) $(TEXFILE:.pdf=.tex)
+	latexmk --pdf $(TEXFILE:.pdf=.tex)
 	
 %.png: %.dot
 	dot $< -Tpng:cairo -o $@

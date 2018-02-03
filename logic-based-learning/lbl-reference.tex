@@ -60,6 +60,9 @@
 \paragraph{License} This reference is made publicly available under the MIT License. You should not have paid anyone money in exchange for this document. If you have paid someone for it, well too bad. The source code for this document can be found public available on my Github repository\footnote{\href{https://github.com/mauris/written}{https://github.com/mauris/written}}. If you wish to help improve this document, feel free to open an issue on the Github repository.
 \end{footnotesize}
 
+\tableofcontents
+\newpage
+
 \section{Background}
 \subsection{Forms of Reasoning}
 
@@ -334,7 +337,7 @@ $$G_0 \underset{C_0}{\implies} G_1 \underset{C_1}{\implies} ...  \underset{C_{n-
 \paragraph{} SLDNF derivation is SLD derivation with Negation as Failure. A selected subgoal $\text{not}\ p)$,  succeeds if the subproof fails, and it fails if the subproof succeeds. Consider the following example knowledge base and query $connected$:
 
 \begin{itemize}
-\setlength\itemsep{0.0em}
+\setlength\itemsep{0.1em}
 \item[] $connected \Leftarrow \text{not}\ unconnected$
 \item[] $unconnected \Leftarrow node(X), \text{not}\ succ(X)$
 \item[] $succ(X) \Leftarrow arc(X, Y)$
@@ -364,7 +367,7 @@ $$G_0 \underset{C_0}{\implies} G_1 \underset{C_1}{\implies} ...  \underset{C_{n-
 \paragraph{} So far reasoning has been primarily deductive. Sometimes our knowledge base can be incomplete and deductive inference would fail on certain queries due to lack of information. For example, given the following knowledge base and the query $soreElbow$:
 
 \begin{itemize}
-\setlength\itemsep{0.0em}
+\setlength\itemsep{0.1em}
 \item[] $soreElbow \Leftarrow tennisElbow$
 \item[] $tennisPlayer \Leftarrow tennisElbow$
 \item[] $soreElbow \Leftarrow soreJoints$
@@ -391,7 +394,7 @@ $$G_0 \underset{C_0}{\implies} G_1 \underset{C_1}{\implies} ...  \underset{C_{n-
 \paragraph{Abductive Solution} Given an abductive model, an \textit{abductive solution} (or explanation) of a given observation $O$ is a set $\Delta$ of ground literals st:
 
 \begin{itemize}
-\item $\Delta \subset Ab$ - $\Delta$ belongs to a predefined language of abducibles.
+\item $\Delta \subseteq Ab$ - $\Delta$ belongs to a predefined language of abducibles.
 \item $KB \cup \Delta \models O$ - $\Delta$ must provide missing information needed to prove observation $O$.
 \item $KB \cup \Delta \not\models \perp$ - $\Delta$ must be consistent with the knowledge base.
 \item $KB \cup \Delta \models IC$ - $\Delta$ when combined with the knowledge base must entail the constraints.
@@ -401,15 +404,87 @@ $$G_0 \underset{C_0}{\implies} G_1 \underset{C_1}{\implies} ...  \underset{C_{n-
 
 \subsection{Abductive Proof Procedure}
 
-\paragraph{} Let $<KB, Ab, IC>$ be an abductive model expressed in Normal Clausal Logic and let $O$ be a ground observation:
+\subsubsection{Abductive Phase}\label{sec:AbductiveProofProcedureAbductivePhase}
 
-... TODO
+\paragraph{} Let $<KB, Ab, IC>$ be an abductive model expressed in Normal Clausal Logic and let $O$ be a ground observation. To start the procedure, we let $G_1 = O$ and $\Delta_0$ initially be $\emptyset$:
 
-\section{ILP}
+\paragraph{} Select a subgoal $L \in G_i$, then let $G_i' = G_i - \{L\}$:
+\begin{itemize}
+\item $L \not\in Ab$ and $L$ is a non-negative atom:\\ If $\exists [(H \Leftarrow B) \in KB]$ st $L = H\theta$,\\ then $G_{i+1} = B\theta \cup G_i$ and $\Delta_{k+1} = \Delta_k$
+\item $L \in \Delta_i$: $G_{i+1} = G_i$ and $\Delta_{k+1} = \Delta_k$
+\item $L \in Ab$ and $L \not\in \Delta_k$ and $(\text{not}\ L) \not\in \Delta_k$: $L$ can be assumed but needs to go through \textit{Consistency Phase} (Section \ref{sec:AbductiveProofProcedureConsistencyPhase}) to verify that assumption does not introduce inconsistency. If the consistency phase succeeds\footnote{Succeds with a failure in derivation.}, then $\Delta_{k+1} = \Delta_k \cup {L}$.
+\end{itemize}
+
+\subsubsection{Consistency Phase}\label{sec:AbductiveProofProcedureConsistencyPhase}
+
+\paragraph{} To prove that an assumption $A$ does not introduce inconsistency, the Consistency Phase requires the derivation to finish with a failure.
+
+\paragraph{} Let $F_1$ be the set of all denials in $IC$ that has been resolved with assumption $A$. Select a denial $\Leftarrow \phi$ in $F_1$ and a literal L from $\phi$.
+
+\begin{itemize}
+\item $L \not\in Ab$: Perform SLDNF failure with L as a subgoal.
+\item $L \in \Delta_k$: $\phi' = \phi - \{L\}$ and consider the new constraint $\Leftarrow \phi'$\
+\item $L \in Ab$ and $(\text{not}\ L) \in \Delta_k$, then continue consistency phase with the next denial in $F_1$ to check.
+\item $L \in Ab$ and $L \not\in \Delta_k$ and $(\text{not}\ L) \not\in \Delta_k$: As the literal has to fail, we perform an abductive derivation of its negation to check for its success (i.e. we go back to Abductive Phase, Section \ref{sec:AbductiveProofProcedureAbductivePhase}, with the subgoal $\text{not} L$). 
+\end{itemize}
+
+\section{Inductive Logic Programming}
+
+\paragraph{} ILP can be seen as a search problem. In \textit{concept learning} the task is to compute the definition of a concept, expressed in a given language (i.e. hypotheses space), that satisfies all examples labelled as \textbf{positive} and none of the examples labelled as \textbf{negative} in a given dataset.
+
+\paragraph{} However, the question is: how do we make the search for hypotheses that covers relation and quality criterion computationally feasible? A naive approach would be to perform a generate-and-test, which would become very inefficient when the version space gets large.
+
+\subsection{Learning as a Search}
+
+\paragraph{} Given 
+
+\begin{itemize}
+\setlength\itemsep{0.1em}
+\item $\mathcal{L}_e$: a set of observations where
+	\begin{itemize}
+	\item $E^+$ is the set of positive examples
+	\item $E^-$ is the set of negative examples
+	\end{itemize}
+\item $B$: Background knowledge / clausal theory
+\item $\mathcal{L}_h$: hypothesis language
+\item $c(B, \mathcal{L}_h, e)$: coverage of $\mathcal{L}_h$ over the example $e$
+\end{itemize}
+
+\noindent We want to find a theory $H \in \mathcal{L}_h$ st
+
+\begin{itemize}
+\setlength\itemsep{0.1em}
+\item $\forall e \in E^+: B \cup H \models e$: H is complete
+\item $\forall e \in E^-: B \cup H \not\models e$: H is consistent
+\end{itemize}
+
+\paragraph{} Using the same concept as concept learning, we need to define a notion of \textit{generality relation} between first-order theories and be able to put clauses in general-to-specific order.
+
+\subsection{Generality of Theories}
+
+\paragraph{} Let $C$ and $D$ be two definite clauses. 
+
+\begin{defn} $C$ is more general than $D$ (denoted $C \geq_g D$) iff $C \models D$. If $C \not\models e$, then $D \not\models e$. \end{defn}
+
+\begin{defn} $C$ subsumes $D$ iff $\exists \theta$ st $C\theta \subseteq D$. If $C$ subsumes $D$, $C \models D$. \end{defn}
+
+\subsection{Lattice of Clauses}
+
+\paragraph{} ILP for definite clauses can be described by i) Structure of the hypothesis space based on generality relation and ii) Search strategy (or prune strategy) by $\theta$-subsumption. The subsumption relation over definite clauses defines a lattice structure. There are two types of traversal over the lattice of hypotheses: specialization (going down the lattice to find a more specific hypothesis) and generalization (going up the lattice to find a more general hypothesis). Hence, ILP learning programs for definite clauses have been classified into either \textit{top-down} or \textit{bottom-up} learners.
+
+\subsection{General-to-Specific Traversal}
+
+\paragraph{Shapiro Operator} is a refinement / specialisation operator. The basic idea is to start from a set of positive and negative examples of a new concept and compute a set of Horn clauses that correctly represent this concept by traversing a lattice (i.e. a special version space) of possible hypothesis by means of the Shapiro ($\rho$) operator. The key idea is to add a litteral in the body of the current clause or apply a substitution $\theta$.
+
+\paragraph{} TODO: Here I miss out Specific to General Traversal: Plotkin's least general generalisation of two clauses and Muggleton's inverse resolution.
+
+\subsection{Learning from Interpretation}
+
+\paragraph{} In \textit{Learning from Interpretation}, the set of examples contain a full description nad all the information that belongs to the example is represented in the example, not in the background knowledge. The Background only contains general information concerning the domain, not concerning specific examples. Hence a definite clause theory $H$ is a solution iff $e \in E^+$ is a model of $H$ (i.e. $e \models H$).
 
 \subsection{Learning from Entailment}
 
-Learning from entailment means $\forall e \in E, B \cup H_i \models e$
+\paragraph{} Learning from entailment is a different paradigm. Given the examples $E = <E^+, E^->$, each $e \in E$ is a ground fact and $B$ is the background definite clause theory. We want to find hypothesis $H$ st means $\forall e \in E^+\ B \cup H_i \models e$ and $\forall e \in E^-\ B \cup H_i \not\models e$
 
 \subsection{Inverse Entailment}
 

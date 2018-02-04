@@ -468,6 +468,10 @@ $$G_0 \underset{C_0}{\implies} G_1 \underset{C_1}{\implies} ...  \underset{C_{n-
 
 \begin{defn} $C$ subsumes $D$ iff $\exists \theta$ st $C\theta \subseteq D$. If $C$ subsumes $D$, $C \models D$. \end{defn}
 
+\paragraph{Theory $\theta$-subsumption} Given two sets of clauses where $H_1 = \{C_1,... , C_n\}$ and $H_2 = \{D_0,... , D_m\}$, to show that $H_1$ $\theta$-subumes $H_2$, we need to show that $\forall D_i$ clause $\in H_2$, $\exists C_i$ clause $\in H_1$ that subsumes $D_i$.
+
+\paragraph{} A clause $C$ can $\theta$-subsume itself as the $\theta$-substitution would be $\theta = \{\}$.
+
 \subsection{Lattice of Clauses}
 
 \paragraph{} ILP for definite clauses can be described by i) Structure of the hypothesis space based on generality relation and ii) Search strategy (or prune strategy) by $\theta$-subsumption. The subsumption relation over definite clauses defines a lattice structure. There are two types of traversal over the lattice of hypotheses: specialization (going down the lattice to find a more specific hypothesis) and generalization (going up the lattice to find a more general hypothesis). Hence, ILP learning programs for definite clauses have been classified into either \textit{top-down} or \textit{bottom-up} learners.

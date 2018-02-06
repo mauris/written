@@ -306,14 +306,14 @@ $$G_0 \underset{C_0}{\implies} G_1 \underset{C_1}{\implies} ...  \underset{C_{n-
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.45\textwidth]{graphics/sld-derivation-example.png}
-\caption{By SLD derivation, we can determine that $Z = \text{adam}$.}
+\caption{By SLD derivation, we determine that $Z = \text{adam}$.}
 \end{figure}
 
 \paragraph{} However we can see that at $C_2$, another clause $\text{parent}(X, Y) \Leftarrow mother(X, Y)$ could have been picked instead for the reservation. When each sub-goal can unify with more clauses, more than one SLD derivations can be computed. Alternative choices can then be represented as a tree, with each leaf as a possible derivation.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.45\textwidth]{graphics/sld-tree.png}
+\includegraphics[width=0.4\textwidth]{graphics/sld-tree.png}
 \caption{Each time there is a choice of clauses can be be used to resolve the subgoals, branches are created in the tree to represent the different possible derivations. In this case, picking $\Leftarrow \text{mother}(X, Y), \text{newborn}(Y)$ as $G_2$ would lead to a non-empty derivation. }
 \end{figure}
 

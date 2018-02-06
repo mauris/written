@@ -294,7 +294,7 @@ $$G_0 \underset{C_0}{\implies} G_1 \underset{C_1}{\implies} ...  \underset{C_{n-
 \paragraph{} When performing SLD derivation, there may be one or more choices of clause $C_i$ that can be used with $G_i$ to derive $G_{i+1}$. Consider the following knowledge base and the query $\exists Z\ \text{proud}(Z)$:
 
 \begin{itemize}
-\setlength\itemsep{0.1em}
+\setlength\itemsep{0.0em}
 \item[] $\text{proud}(X) \Leftarrow \text{parent}(X, Y), \text{newborn}(Y)$
 \item[] $\text{parent}(X, Y) \Leftarrow \text{father}(X, Y)$
 \item[] $\text{parent}(X, Y) \Leftarrow \text{mother}(X, Y)$
@@ -394,10 +394,10 @@ $$G_0 \underset{C_0}{\implies} G_1 \underset{C_1}{\implies} ...  \underset{C_{n-
 \paragraph{Abductive Solution} Given an abductive model, an \textit{abductive solution} (or explanation) of a given observation $O$ is a set $\Delta$ of ground literals st:
 
 \begin{itemize}
-\item $\Delta \subseteq Ab$ - $\Delta$ belongs to a predefined language of abducibles.
-\item $KB \cup \Delta \models O$ - $\Delta$ must provide missing information needed to prove observation $O$.
-\item $KB \cup \Delta \not\models \perp$ - $\Delta$ must be consistent with the knowledge base.
-\item $KB \cup \Delta \models IC$ - $\Delta$ when combined with the knowledge base must entail the constraints.
+\item $\Delta \subseteq Ab$: $\Delta$ belongs to a predefined language of abducibles.
+\item $KB \cup \Delta \models O$: $\Delta$ must provide missing information needed to prove observation $O$.
+\item $KB \cup \Delta \not\models \perp$: $\Delta$ must be consistent with the knowledge base.
+\item $KB \cup \Delta \models IC$: $\Delta$ when combined with the knowledge base must entail the constraints.
 \end{itemize}
 
 \paragraph{} When $KB$ is a set of definite clauses, the augmented theory $KB \cup \Delta$ will also be a set of definite clauses that accepts a unique minimal model, the Least Herbrand Model.
@@ -454,8 +454,8 @@ $$G_0 \underset{C_0}{\implies} G_1 \underset{C_1}{\implies} ...  \underset{C_{n-
 
 \begin{itemize}
 \setlength\itemsep{0.1em}
-\item $\forall e \in E^+: B \cup H \models e$: H is complete
-\item $\forall e \in E^-: B \cup H \not\models e$: H is consistent
+\item $\forall e \in E^+: B \cup H \models e$: H is \textbf{complete}
+\item $\forall e \in E^-: B \cup H \not\models e$: H is \textbf{consistent}
 \end{itemize}
 
 \paragraph{} Using the same concept as concept learning, we need to define a notion of \textit{generality relation} between first-order theories and be able to put clauses in general-to-specific order.
@@ -468,9 +468,9 @@ $$G_0 \underset{C_0}{\implies} G_1 \underset{C_1}{\implies} ...  \underset{C_{n-
 
 \begin{defn} $C$ subsumes $D$ iff $\exists \theta$ st $C\theta \subseteq D$. If $C$ subsumes $D$, $C \models D$. \end{defn}
 
-\paragraph{Theory $\theta$-subsumption} Given two sets of clauses where $H_1 = \{C_1,... , C_n\}$ and $H_2 = \{D_0,... , D_m\}$, to show that $H_1$ $\theta$-subumes $H_2$, we need to show that $\forall D_i$ clause $\in H_2$, $\exists C_i$ clause $\in H_1$ that subsumes $D_i$.
+\paragraph{$\theta$-subsumption} Given two sets of clauses where $H_1 = \{C_1,... , C_n\}$ and $H_2 = \{D_0,... , D_m\}$, to show that $H_1$ $\theta$-subumes $H_2$, we need to show that $\forall D_i$ clause $\in H_2$, $\exists C_i$ clause $\in H_1$ that subsumes $D_i$.
 
-\paragraph{} A clause $C$ can $\theta$-subsume itself as the $\theta$-substitution would be $\theta = \{\}$.
+\paragraph{} A clause $C$ can $\theta$-subsume itself as the $\theta$-substitution would be $\theta = \{\}$. If an hypothesis is consistent (i.e. does not cover any negative example) then any specialisation of this hypothesis will also be consistent. Similarly if an hypothesis is complete (i.e. covers every positive example), then every generalisation of this hypothesis will also be complete. Recall we aim to find hypotheses that are complete and consistent.
 
 \subsection{Lattice of Clauses}
 
@@ -490,19 +490,98 @@ $$G_0 \underset{C_0}{\implies} G_1 \underset{C_1}{\implies} ...  \underset{C_{n-
 
 \paragraph{} Learning from entailment is a different paradigm. Given the examples $E = <E^+, E^->$, each $e \in E$ is a ground fact and $B$ is the background definite clause theory. We want to find hypothesis $H$ st means $\forall e \in E^+\ B \cup H_i \models e$ and $\forall e \in E^-\ B \cup H_i \not\models e$
 
+\section{HAIL}
+
 \subsection{Inverse Entailment}
 
-$$Bot(B, e) = \{\lnot e_1, \lnot e_2, ..., \lnot e_n\}$$
+\paragraph{} Consider the notion of Inverse Entailment\footnote{Introduced by Prof. Muggleton and first implemented in PROGOL}. It combines the advantages of both bottom-up\footnote{narrowing the search by starting from what is known already} and top-down\footnote{refining a general hypothesis to form a new one} searches. We observe that
 
-$$B \land \lnot e_i \models l_1, l_2, ... l_m$$
+\[ B \cup H \models E \equiv B \cup \lnot E \models \lnot H \]
 
-We can look at the Least Herbrand Model of the set of $B \cup {\lnot e^+}$ for the list of literals that can be entailed from $B \cup {\lnot e^+}$. Alternatively to prove a that the set satisfy a $l_i$, you can also proof by resolution that $B \land \lnot e_i \land \lnot l_i \vdash_{res} [\ ]$.
+\paragraph{} Note that since $H$ and $E$ are set of clauses, their variables are universally quantified. When negating clauses in these sets, the variables becomes existentially quantified - skolemised. 
+
+\subsection{Bottom Set}
+
+\paragraph{} Considering a positive example $e^+ \in E^+$, we can compute the (possibly infinite) set of ground literals that are derivable from (or entailed by) $B \land \lnot e^+$. These set of ground literals are considered as the negation of the Bottom Set, denoted $\lnot Bot(B, e^+)$. Let $h$ and $h$ to be single Horn clauses where
+
+\begin{itemize}
+\item $h \equiv l_1 \lor \lnot l_2 \lor ... \lor \lnot l_n$: Note that $l_1$ is the head of the clause.
+\item $e^+ \equiv a_1 \lor \lnot a_2 \lor ... \lor \lnot a_m$: Note that $a_1$ is the head of the clause.
+\end{itemize}
+
+\paragraph{} We then have their negation with skolemisation:
+
+\begin{itemize}
+\item $\lnot h \equiv \lnot l_1 \land l_2\theta \land ... \land l_n\theta$: $\theta$ is a grounding by existential quantifier for $h$.
+\item $\lnot e^+ \equiv \lnot a_1\delta \land a_2\delta \land ... \land a_m\delta$: $\delta$ is a grounding by existential quantifier for $h$.
+\end{itemize}
+
+\paragraph{} The Bottom set is then defined as:
+
+$$Bot(B, e^+) = \{\lnot l_1\theta, \lnot l_2\theta, ..., \lnot l_n\theta\}$$
+
+\paragraph{} The Bottom Set is the \textbf{most specific ground set of clauses} that is at the bottom of an hypothesis search space that explains the example $e^+$. Let $g(\lnot h_{\perp}) \subseteq \lnot Bot(B, e^+)$ and consequently $\lnot Bot(B, e^+) \models g(\lnot h_{\perp})$. Remember that all variables in the sets $g(\lnot h_{\perp})$ and $\lnot Bot(B, e^+)$ are existentially quantified. By contrapositive, we have $g(h_{\perp}) \models Bot(B, e^+)$. If we replace every constant in $g(h_{\perp})$ with a unique variable, we obtain a universally quantified clause $h_{\perp}$. This clause $h_{\perp}$ $\theta$-subsumes the Bottom Set (and hence $h_{\perp} \models Bot(B, e^+)$).
+
+\paragraph{} $h_{\perp}$ corresponds to the \textbf{most specific unground hypothesis} at the bottom of the hypothesis search space (or lattice) that $\theta$-subsumes $Bot(B, e^+)$. 
+
+\paragraph{} Computing the Bottom Set first allows for a more efficient search for hypotheses, as the search space can be limited to the sub-lattice space delimited by the $Bot(B, e^+)$ as the bottom-most element and the empty clause as the top element. Solutions will be clauses that $\theta$-subsume the Bottom Set $Bot(B, e^+)$.
+
+\paragraph{} We can look at the Least Herbrand Model of the set of $B \cup {\lnot e^+}$ for the list of literals that can be entailed from $B \cup \{\lnot e^+\}$. Alternatively to prove that the set satisfy a clause $h$, we can also use proof by resolution to show that $B \land \lnot e^+ \land \lnot h \vdash_{res} [\ ]$.
+
+\paragraph{Learning by Bottom Generalisation} Using the computed Bottom Set to generate the bottom clause $h_{\perp}$, the next step would be to compute a more generate clause that subsume these bottom set through top-down refinement. We say that an hypothesis $H$ is derivable from the bottom generalisation from $B$ and $e^+$ iff $H \geq_g Bot(B, e^+)$. 
+
+\subsection{Language Bias}
+
+\paragraph{} Sometimes we would like to define the language of the hypothesis by using a language bias. It is composed of a set of \textbf{mode declarations}.
+
+\[
+\text{Mode declarations: }
+\begin{cases}
+	modeh(r, s)\\
+	modeb(r, s)
+\end{cases}
+\]
+
+\paragraph{modeh} indicates the predicate may appear as head predicate of the rules to learn.
+\paragraph{modeb} indicates the predicate may appear as body predicate of the rules to learn.
+\paragraph{r} represents a recall, an integer that indicates how many times the predicate may appear in a rule. '*' indicates that the predicate may appear any number of times in a rule.
+\paragraph{s} is the scheme, which is a ground atom with the predicate's name, placemarkers $+t$ (input variable), $-t$ (output variable) and $\#t$ (constants) for unary type $t$. 
+
+\paragraph{Example} For example consider the following mode declarations:
+
+\begin{align*}
+	&\text{modeh}(1, \text{grandfather}(+\text{person}, +\text{person}))\\
+	&\text{modeb}(1, \text{father}(+\text{person}, -\text{person}))\\
+	&\text{modeb}(1, \text{parent}(+\text{person}, +\text{person}))
+\end{align*}
+
+We can build a rule $grandfather(X, Y) \leftarrow father(X, Z), parent(Z, Y)$.
+
+\subsection{Kernel Set}
+
+\paragraph{} The notion of the BottomSet $Bot(B, e)$ can be generalised into a new notion called \textbf{Kernel Set}. The creation of Kernel Set uses a full abductive reasoning procedure that replaces the StartSet procedure used to derive $Bot(B, e)$. 
+
+{\footnotesize
+\begin{align*}
+& Kernel(B, E) \\
+&= \{a | a \in \Delta \land B \cup \Delta \models e\} \cup \{\lnot b_i | B \cup \{\lnot e\} \models b_i\} \\
+&= \bigwedge \{b_i | B \cup \{\lnot e\} \models b_i\} \rightarrow \bigvee \{a | a \in \Delta \land B \cup \Delta \models e\} \models b_i\}
+\end{align*}}
+
+\paragraph{} Note from above that the body literals are still generated the same way as it did by Progol5, i.e. $B \cup \{\lnot e\} \models b$. From the Kernel Set (that is ground), we then construct the Kernel Set hypothesis (that is ungrounded) given by
+
+\[ 
+K = \begin{cases}
+a_1 \leftarrow b_{11}, b_{21}, ..., b_{n1}\\
+a_2 \leftarrow b_{12}, b_{22}, ..., b_{m2}\\
+...\\
+a_k \leftarrow b_{1k}, b_{2k}, ..., b_{hk}
+\end{cases}
+\]
 
 \subsection{Progol5}
 
 For a head literal $l_i$ to be proved
-
-\section{HAIL}
 
 \paragraph{} We have background knowledge $B$, positive examples $E^+$, negative examples $E^-$ and mocdel $M$. 
 \begin{enumerate}
@@ -512,6 +591,21 @@ For a head literal $l_i$ to be proved
 \end{enumerate}
 
 Kernel is the set of clauses . Generalisation shrinks the Kernel set. Head of clauses are from the abduction proof. In Induction Step can I find a $H$ that $\theta$-subsumes $K$ in the $\theta$-lattice. Generalization increases positive-example coverage but we must check that it does not cover any negative examples.
+
+\section{Top-directed Abductive Learning}
+
+\section{Stable Model Semantics}
+
+\paragraph{} Consider the following program:
+
+\begin{lstlisting}
+p :- not q.
+q :- not p.
+\end{lstlisting}
+
+\paragraph{} What should Prolog return if queried "$p$"? While Prolog will loop infinitely, there are in fact multiple answers to the query. The value of p depends on q and the value of q depends on p. The stable model semantics\footnote{Gelfond and Lifschitz 1988} is a different approach to solving normal logic programs. Instead of providing solutions to specific queries, the stable model semantics defines the set of "stable" models of the program. we will see that the example program above has the stable models $\{p\}$ and $\{q\}$.
+
+\section{Answer Set Programming}
 
 \end{multicols}
 \end{document}

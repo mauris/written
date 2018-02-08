@@ -321,7 +321,7 @@ $$G_0 \underset{C_0}{\implies} G_1 \underset{C_1}{\implies} ...  \underset{C_{n-
 
 \paragraph{} The SLD Tree represents the search space of all possible derivations. Each path from the original denial $G_0$ to the leaf node is the SLD computation / refutation. The tree is then traversed in a depth-first search to provide each refutation in order. For a finite SLD-tree, this strategy is complete. Whenever the traversal reaches a leaf node of an empty clause, the substitution of the completed refutation is returned. As mentioned before, it is also possible for SLD derivation to generate an infinite sequence of denials and hence an infinite SLD-tree, which explains why sometimes Prolog computations do not terminate.
 
-\subsection{Normal Clausal Logic}
+\subsection{Normal Clausal Logic}\label{sec:NormalClausalLogic}
 
 \paragraph{Normal Clausal Logic} extends Horn Clauses by permitting atoms in the body of a rule / denial to be prefixed with a special operator \textit{not} (read as "fail"). This operator is also referred to as "negation by failure". For example:
 
@@ -660,6 +660,22 @@ Kernel is the set of clauses . Generalisation shrinks the Kernel set. Head of cl
 
 \section{Stable Model Semantics}
 
+\subsection{Definitions}
+
+\paragraph{} A Normal Logic Program is set of rules, where each rule $R$ is in the form
+
+\begin{lstlisting}
+h :- b1, ..., bn, not c1, ..., not cm.
+\end{lstlisting}
+
+\noindent ... where $h$, $b_i$ and $c_i$ are all atoms. We define 
+
+\begin{itemize}
+\item $head(R) = h$
+\item $body^+(R) = \{ b_1, ..., b_n \}$
+\item $body^-(R) = \{ c_1, ..., c_m \}$
+\end{itemize}
+
 \subsection{Prolog and Negation}
 
 \paragraph{} Consider the following program:
@@ -677,7 +693,47 @@ q :- not p.
 
 \paragraph{} Most of these grounding instances of each rule may be redundant instances whose bodies could never be satisfied. ASP solvers do not generate these redundant rules.
 
-\section{Answer Set Programming}
+\subsection{Safety}
+
+\paragraph{} In Prolog, floundering (see section \ref{sec:NormalClausalLogic}) is a problem because negative literals may contain a variable which is only ground by a positive literal occurring later in the body of the rule. Recall that in Prolog, rule evaluation is ordered top to bottom and left to right. For example, the following logic program flounders in Prolog as $X$ and $Y$ only gets instantiated in $r(X, Y)$, which happens after $not\ q(X, Y)$:
+
+\begin{lstlisting}
+p(X) :- not q(X, Y), r(X, Y).
+r(a, b).
+\end{lstlisting}
+
+\paragraph{} ASP does not consider the ordering of the literals in a rule and hence safety is less of a problem in ASP.  However, ASP needs to ground the entire program and another form of safety is needed. ASP Solvers are restricted to working with "safe" rules only.
+
+\begin{defn}\label{defn:SafeRule}
+A rule $R$ is safe, if every variable in $R$ occurs in at least one atom in $body^+(R)$. 
+\end{defn}
+
+\paragraph{} Considering Definition \ref{defn:SafeRule}, take a look at the following examples:
+
+\begin{itemize}
+\item \lstinline{p(Z) :- not q(X, Y), r(X, Y).} - This rule is unsafe because the variable $Z$ does not occur in any of the atoms in $body^+(R)$.
+\item \lstinline{p(X) :- not q(X, Y), r(X, Y).} - This rule is safe.
+\item \lstinline{p(Y) :- not q(X, Y), r(Y, Y).} - This rule is unsafe because the variable $X$ does not occur in any of the atoms in $body^+(R)$.
+\end{itemize}
+
+\paragraph{} Nonetheless, in ASP even when we restrict to safe rules, for some logic program $P$, $ground(P)$ can still be infinite. For example:
+
+\begin{lstlisting}
+p(f(X)) :- p(X).
+p(1).
+\end{lstlisting}
+
+\subsection{Herbrand Theory}
+
+\paragraph{} For a definite logic program $P$, a Herbrand Interpretation $I$ of $P$ is an Herbrand Model if for all rule $R$ st
+
+\begin{itemize}
+\item each atom in $body^+(R)$ is true in $I$
+\item each atom in $body^-(R)$ is false in $I$
+\item $head(R)$ is true in $I$
+\end{itemize}
+
+\paragraph{} We can construct the least Herbrand model for a logic program $P$, denoted $M(P)$ by starting with the empty set $M = {}$. We then repeatedly add any atom $h$ to $M$M st $h$ is the head of a rule $R$ whose body is a subset of $M$, i.e. we add $head(R)$ to $M$ if $(body^+(R) \cup body^-(R)) \subseteq M$. For definite programs with no loops, this is the same as what is provable using Prolog.
 
 \bibliographystyle{plain}
 \bibliography{references}

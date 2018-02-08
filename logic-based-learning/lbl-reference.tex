@@ -50,7 +50,7 @@
 
 \begin{multicols}{2}
 
-\paragraph{} NOTICE: This set of reference is currently incomplete and will be updated as the semester progress. By Mar 2018 it should be complete.
+\paragraph{} NOTICE: This set of reference is currently incomplete with respect to the syllabus of the course and will be updated as the semester progress. By end Mar 2018 it should be complete.
 
 \section*{Foreword}  
 
@@ -647,6 +647,8 @@ a_k \leftarrow b_{1k}, b_{2k}, ..., b_{hk}
 
 \subsection{Hybrid Abductive Inductive Learning}
 
+TODO: complete HAIL algorithm
+
 \paragraph{} We have background knowledge $B$, positive examples $E^+$, negative examples $E^-$ and mocdel $M$. 
 \begin{enumerate}
 \item Abductive Step (replace STARTSET): What are the abducibles?
@@ -658,11 +660,13 @@ Kernel is the set of clauses . Generalisation shrinks the Kernel set. Head of cl
 
 \section{Top-directed Abductive Learning}
 
+TODO: write TAL section
+
 \section{Stable Model Semantics}
 
 \subsection{Definitions}
 
-\paragraph{} A Normal Logic Program is set of rules, where each rule $R$ is in the form
+\paragraph{} A Normal Logic Program is set of rules / clauses, where each rule $R$ is in the form
 
 \begin{lstlisting}
 h :- b1, ..., bn, not c1, ..., not cm.
@@ -675,6 +679,8 @@ h :- b1, ..., bn, not c1, ..., not cm.
 \item $body^+(R) = \{ b_1, ..., b_n \}$
 \item $body^-(R) = \{ c_1, ..., c_m \}$
 \end{itemize}
+
+\paragraph{} For convenience, I define $body(R) = body^+(R) \cup body^-(R)$ to be the set of all atoms in the body of the clause.
 
 \subsection{Prolog and Negation}
 
@@ -725,7 +731,9 @@ p(1).
 
 \subsection{Herbrand Theory}
 
-\paragraph{} For a definite logic program $P$, a Herbrand Interpretation $I$ of $P$ is an Herbrand Model if for all rule $R$ st
+\subsubsection{Definite Logic Programs}
+
+\paragraph{} For a \textbf{definite logic program} $P$, a Herbrand Interpretation $I$ of $P$ is an Herbrand Model if for all rule $R$ st
 
 \begin{itemize}
 \item each atom in $body^+(R)$ is true in $I$
@@ -733,7 +741,42 @@ p(1).
 \item $head(R)$ is true in $I$
 \end{itemize}
 
-\paragraph{} We can construct the least Herbrand model for a logic program $P$, denoted $M(P)$ by starting with the empty set $M = {}$. We then repeatedly add any atom $h$ to $M$M st $h$ is the head of a rule $R$ whose body is a subset of $M$, i.e. we add $head(R)$ to $M$ if $(body^+(R) \cup body^-(R)) \subseteq M$. For definite programs with no loops, this is the same as what is provable using Prolog.
+\paragraph{} We can construct the Least Herbrand Model for a definite logic program $P$, denoted $M(P)$ by starting with the empty set $M = {}$. We then repeatedly add any atom $h$ to $M$M st $h$ is the head of a rule $R$ whose body is a subset of $M$, i.e. we add $head(R)$ to $M$ if $body(R) \subseteq M$. \textit{For definite programs with no loops, this is the same as what is provable using Prolog.}
+
+\subsubsection{Normal Logic Programs}
+
+\paragraph{} However when it comes to \textbf{normal logic programs}, generally there is no Least Herbrand Model. Consider the following example:
+
+\begin{lstlisting}
+p :- not q.
+q :- not p.
+\end{lstlisting}
+
+\paragraph{} The set of Herbrand Interpretations is $\{\emptyset, \{p\}, \{q\}, \{p ,q\}\}$.
+
+\begin{itemize}
+\item In the case of $HI = \emptyset$, it does not satisfy the program since both $not\ p$ and $not\ q$ are satisfied but their heads $q$ and $p$ respectively are not satisfied. 
+\item In the case of $HI = \{p\}$, it satisfies the the program and is a Herbrand model of the program.
+\item In the case of $HI = \{q\}$, it satisfies the the program and is a Herbrand model of the program.
+\item In the case of $HI = \{p, q\}$, it satisfies the the program and is a Herbrand model of the program. However because the earlier two HIs are subsets of this HI, this is not a minimal Herbrand Model.
+\end{itemize}
+
+\paragraph{} Hence, instead of having just one Least Herbrand Model, the program has both $\{p\}$ and $\{q\}$ as two Minimal Herbrand Models of the program.
+
+\subsubsection{Supportability}
+
+\paragraph{} Consider this program:
+
+\begin{lstlisting}
+p :- not p.
+\end{lstlisting}
+
+\paragraph{} The program has the set of Herbrand Interpretations: $\{\emptyset, \{p\}\}$. The $\emptyset$ HI does not satisfy the program while $\{p\}$ does, which makes it the Least Herbrand Model. However, the LHM $\{p\}$ is unsupported because $p$ has no support: it is not a head of any clauses in the program whose body is true in the Herbrand Model. In fact, there are no stable models of this program.
+
+\begin{defn}A Herbrand Model $M(P)$ for a normal logic program $P$ is supported iff every atom $a \in M(P)$ is the head of a clause in $P$ those body $body(R)$ is also true in $M(P)$, i.e. $body(R) \subseteq M(P)$. \end{defn}
+
+\subsection{Reduct}
+
 
 \bibliographystyle{plain}
 \bibliography{references}

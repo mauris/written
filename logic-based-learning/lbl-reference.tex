@@ -777,6 +777,12 @@ p :- not p.
 
 \subsection{Reduct}
 
+\begin{defn}The \textbf{reduct} of any ground normal logic program $P$, i.e. $ground(P)$, with respect to any set of atoms $X$ is constructed in two steps:\end{defn}
+
+\begin{enumerate}
+\item Remove any rule from $P$ whose body contains negation as failure of an atom in $X$. i.e. we remove rule $R$ from $P$ where $a \in X: not\ a \in body(R)$.
+\item Remove any negation as failure atoms from the remaining rules in $P$P.
+\end{enumerate}
 
 \bibliographystyle{plain}
 \bibliography{references}

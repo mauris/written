@@ -781,8 +781,118 @@ p :- not p.
 
 \begin{enumerate}
 \item Remove any rule from $P$ whose body contains negation as failure of an atom in $X$. i.e. we remove rule $R$ from $P$ where $a \in X: not\ a \in body(R)$.
-\item Remove any negation as failure atoms from the remaining rules in $P$P.
+\item Remove any negation as failure atoms from the remaining rules in $P$.
 \end{enumerate}
+
+\paragraph{} The remaining logic program is the reduct of $P$ with respect to $X$, written $P^X$. Suppose $X = \{p\}$ and $P$ is the logic program:
+
+\begin{lstlisting}
+p :- not q.
+q :- not p.
+\end{lstlisting}
+
+\paragraph{} The result $P^X$ would be $\{p\}$. This process can be thought as making a guess to see if an interpretation $X$ may be an Answer Set, then assuming the Answer Set to be true while interpreting negation as failure in the program. If a logic program contains variables, the program needs to be grounded first before we can find the reduct. We represent the reduct of the ground of program $P$ with respect to $X$ as $ground(P)^X$.
+
+\subsection{Stable Model}
+
+\begin{defn}An interpretation $X$ is a \textbf{stable model} of a normal logic program $P$ iff $X$ is the Least Herbrand Model of $ground(P)^X$, i.e. $X \equiv M(ground(P)^X)$.\end{defn}
+
+\paragraph{} Consider the following logic program and an interpretation $X = \{p\}$:
+
+\begin{lstlisting}
+p :- not q.
+q :- not p.
+\end{lstlisting}
+
+\paragraph{} Since $P^X = M(P^X) = \{p\} = X$, $X$ is a stable model of $P$. Likewise if we take the interpretation $X = \{q\}$, we will find that $\{q\}$ is also a stable model of $P$. This means that different interpretations may result in different reducts for the same logic program.
+
+\begin{defn}An \textit{Answer Set} is a stable model of normal logic program.\end{defn}
+
+\subsection{Answer Set Programming}
+
+\paragraph{} The Answer Set Programming paradigm is to translate the problem we want to solve into an Answer Set program st when we solve the program for Answer Sets, these Answer Sets can be translated back as solutions to the original problem. For example, we translate the rules of the Sudoku game into an ASP representation of the game. We then are able to find the Answer Sets, which can be then mapped back as solutions of the game itself.
+
+\section{Extended Constructs in ASP}
+
+\subsection{Constraints}
+
+\paragraph{} Constraints are a way of filtering any unwanted Answer Sets. They are written as normal clauses with an empty head, e.g. \lstinline{:- b1, ..., bn, not c1, ..., not cm}. The empty head represents falsity $\perp$. When we compute the reduct of such program, rules with empty head will have their heads are replaced with $\perp$. 
+
+\paragraph{} $\perp$ can never be in an Answer Set. Hence any interpretations that satisfy the body of a constraint would end up having $\perp$ in the result, which eliminates the interpretation as an Answer Set. For example:
+
+\begin{lstlisting}
+p :- not q.
+q :- not p.
+:- p, not q.
+\end{lstlisting}
+
+\paragraph{} The constraint in the above program eliminates the interpretation $X = \{p\}$ as an answer set. In other words, an Answer Set does not satisfy the body of all constraints in a logic program.
+
+\subsection{Choice Rules}
+
+\begin{defn}A \textbf{choice rule} is a rule in an ASP program where a \textit{counting aggregate} is allowed to appear in the head of a rule.\end{defn}
+
+\paragraph{} A counting aggregate $a\ \{ h_1, h_2, ..., h_n \}\ b$ is satisfied by an interpretation $X$ if $$a \leq |\{h_1, h_2, ..., h_n \} \cap X| \leq b$$
+
+\paragraph{} For example, the rule 
+
+\begin{lstlisting}
+1 {value(C, h), value(C, t)} 1 :- coin(C).
+\end{lstlisting}
+
+expresses that every coin $C$ must either take the value "h" or "t" (but not both, since $b = 1$).
+
+\paragraph{Semantics} We compute the Answer Sets of a logic program $P$ containing choice rules by inserting an additional step into the computation process of reduct $P^X$. For each rule $R$ that is a choice rule:
+
+\begin{enumerate}
+\item If the aggregate is not satisfied by $X$, we convert $R$ into a constraint by replacing the head with $\perp$.
+\item If the aggregate is satisifed by $X$, we generate one rule for each atom $A$ in the aggregate which is also in $X$, with $A$ at the head.
+\end{enumerate}
+
+\paragraph{} For example, consider the following program $P$ with the interpretation $X = \{p, q, r\}$:
+
+\begin{lstlisting}
+1 {p, q} 1 :- r.
+r.
+\end{lstlisting}
+
+\paragraph{} Since $| \{ p, q \} \cup X | \geq 1$, we compute the reduct $P^X$ of the program by replacing the head with $\perp$:
+
+\begin{lstlisting}[mathescape=true]
+$\perp$ :- r.
+r.
+\end{lstlisting}
+
+\paragraph{} Alternatively, we consider the slightly modified program $P'$ below with the same interpretation $X = \{p, q, r\}$:
+
+\begin{lstlisting}
+1 {p, q} 2 :- r.
+r.
+\end{lstlisting}
+
+\paragraph{} Now that $| \{ p, q \} \cup X | = 2$, we can compute the reduct $P^X$ of the program to be as such:
+
+\begin{lstlisting}
+p :- r.
+q :- r.
+r.
+\end{lstlisting}
+
+\subsection{Optimisation Statements}
+
+\paragraph{} It is possible set up an ASP program to give an ordering over Answer Sets to specify which Answer Sets are preferred over others. Finding optimal Answer Sets of a ASP program can be done by adding optimisation statements like this:
+
+\begin{lstlisting}[mathescape=true]
+#minimize [ $a_1$ = $w_1$, ..., $a_n$ = $w_n$ ].
+\end{lstlisting}
+
+\paragraph{} The above statement assigns weights $w_i$ to its corresponding literal $a_i$. The weight of each Answer Set is summed from the weights assigned to each atom in the Answer Set. In the statement above, the optimal Answer Set has the lowest weight. It is also possible to find Answer Sets that has the greatest weight by using \#maximize instead:
+
+\begin{lstlisting}[mathescape=true]
+#maximize [ $a_1$ = $w_1$, ..., $a_n$ = $w_n$ ].
+\end{lstlisting}
+
+
 
 \bibliographystyle{plain}
 \bibliography{references}

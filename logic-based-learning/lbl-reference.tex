@@ -812,7 +812,7 @@ q :- not p.
 
 \paragraph{} The Answer Set Programming paradigm is to translate the problem we want to solve into an Answer Set program st when we solve the program for Answer Sets, these Answer Sets can be translated back as solutions to the original problem. For example, we translate the rules of the Sudoku game into an ASP representation of the game. We then are able to find the Answer Sets, which can be then mapped back as solutions of the game itself.
 
-\section{Extended Constructs in ASP}
+\section{Extended Constructs in ASP}\label{sec:ASPExtendedConstructs}
 
 \subsection{Constraints}
 
@@ -828,7 +828,7 @@ q :- not p.
 
 \paragraph{} The constraint in the above program eliminates the interpretation $X = \{p\}$ as an answer set. In other words, an Answer Set does not satisfy the body of all constraints in a logic program.
 
-\subsection{Choice Rules}
+\subsection{Choice Rules}\label{sec:ASPChoiceRules}
 
 \begin{defn}A \textbf{choice rule} is a rule in an ASP program where a \textit{counting aggregate} is allowed to appear in the head of a rule.\end{defn}
 
@@ -886,13 +886,166 @@ r.
 #minimize [ $a_1$ = $w_1$, ..., $a_n$ = $w_n$ ].
 \end{lstlisting}
 
-\paragraph{} The above statement assigns weights $w_i$ to its corresponding literal $a_i$. The weight of each Answer Set is summed from the weights assigned to each atom in the Answer Set. In the statement above, the optimal Answer Set has the lowest weight. It is also possible to find Answer Sets that has the greatest weight by using \#maximize instead:
+\paragraph{} The above statement\footnote{Note the Non-British spelling of minimise.} assigns weights $w_i$ to its corresponding literal $a_i$. The weight of each Answer Set is summed from the weights assigned to each atom in the Answer Set. In the statement above, the optimal Answer Set has the lowest weight. It is also possible to find Answer Sets that has the greatest weight by using \#maximize instead:
 
 \begin{lstlisting}[mathescape=true]
 #maximize [ $a_1$ = $w_1$, ..., $a_n$ = $w_n$ ].
 \end{lstlisting}
 
+\section{Brave and Cautious Entailment}
 
+\subsection{Induction for Definite Programs}
+
+\paragraph{} For a definite program $P$, since there is always a unique LHM (written $M(P)$), entailment is defined in terms of this LHM. The task of ILP is therefore to find a hypothesis $H$ st $M(B \cup H)$ contains all of a set of positive examples and none of a set of negative examples. There are two different kind of entailments: \textit{brave} and \textit{cautious}. 
+
+\subsection{Brave Induction}
+\paragraph{} An atom $A$ is bravely entailed by a program $P$ if it is true in \textbf{at least one stable model} of $P$ (written $P \models_b A$).
+
+\paragraph{} Based on the semantics of brave entailment, we can construct the concept of Brave Induction  \cite{sakama08}. Given a Brave ILP (denoted $\text{ILP}_\text{B}$) task as the tuple $<B, E^+, E^->$, we want to search for a hypothesis $H$ st $B \cup H$ has \textbf{at least one Answer Set} which contains all of the positive examples and none of the negative examples i.e. $\exists A$ of $B \cup H$ st $\forall e^+ \in E^+: e^+ \in A$ and $\forall e^- \in E^-: e^- \not\in A$. We can also write it as:
+
+$$B \cup H \models_b (e_1^+ \land ... \land e_n^+ \land \text{not}\ e_1^- \land ...  \land \text{not}\ e_m^-)$$
+
+\subsection{Limitations of Brave Induction}
+
+\paragraph{} Some hypotheses cannot be learned from using Brave Induction alone. For example, brave induction cannot be used to learn any hypothesis which only rules out Answer Sets and does not generate anything new.
+
+\paragraph{} In particular, a brave ILP task will never have, as an optimal solution, a hypothesis containing a constraint. If the hypothesis is a solution for the brave ILP task, it must have at least one Answer Set that contains all of the positive examples and none of the negative examples. As constraints only rule out Answer Sets, this Answer Sets will still be an Answer Set of the program without the constraint.
+
+\subsection{Cautious Induction}
+\paragraph{} An atom $A$ is cautiously entailed by a program $P$ if it is true in \textbf{all stable models} of $P$ (written $P \models_c A$).
+
+\paragraph{} Based on the semantics of cautious entailment, we can construct the concept of Cautious Induction  \cite{sakama08}. Given a Cautious ILP (denoted $\text{ILP}_\text{C}$) task as the tuple $<B, E^+, E^->$, we want to search for a hypothesis $H$ st $B \cup H$ has at least one Answer Set and \textbf{all of its Answer Sets} contain all of the positive examples and none of the negative examples i.e. $\forall A$ of $B \cup H$ st $\forall e^+ \in E^+: e^+ \in A$ and $\forall e^- \in E^-: e^- \not\in A$. We can also write it as:
+
+$$B \cup H \models_c (e_1^+ \land ... \land e_n^+ \land \text{not}\ e_1^- \land ...  \land \text{not}\ e_m^-)$$
+
+\subsection{Limitations of Cautious Induction}
+
+\paragraph{} Consider an empty background knowledge $B$, we cannot construct a set of examples st any of the shortest hypotheses are:
+
+\begin{lstlisting}
+1 {value(C, h), value(C, t)} 1 :- coin(C).
+coin(c1).
+\end{lstlisting}
+
+\paragraph{} The only atom that is true in all Answer Sets of the program that we are trying to learn would be $coin(c1)$. Neither atoms $value(c1, heads)$ nor $value(c1, tails)$ is false in all Answer Sets. Hence this would cause us to learn only $coin(c1)$. This is not what we are aiing for as we want to learn a program with two distinct Answer Sets, which corresponds to the coin $c1$ being $heads$ or $tails$. Cautious entailment of all examples in such a case may be a requirement that is too strong. Hence, in such situation, a Brave ILP learning task would be able to give what is true in some Answer Sets but not all Answer Sets of the learned program.
+
+\section{ASP Abductive Learning}
+
+\paragraph{} Using ASP, we can perform abductive learning (hence ASPAL) by using the extended constructs in ASP as described in Section \ref{sec:ASPExtendedConstructs}. 
+
+\subsection{Skeleton Rules}
+
+\paragraph{} A skeleton rule for the mode declaration $<M_h, M_b>$ is a compatible rule where all constant placemarkers are replaced with different variables instead of constants. For example, consider the following mode declarations:
+
+\begin{lstlisting}
+modeh(1, penguin(+bird)).
+modeb(2, not can(+bird, #ability)).
+
+bird(a).
+bird(b).
+ability(fly).
+ability(swim).
+can(a, fly).
+can(b, swim).
+\end{lstlisting}
+
+\paragraph{} For every variable, ASPAL will add the type of the variable to the body of the rule. In he case of $penguin(+bird)$, $bird(V1)$ is added to the body of the rule. This enforces that the rules only apply to terms of these types and will also mean that ASPAP would not need to worry about the safety of the rules. All variables will certainly appear in at least one positive literal in the body of the rule. The rule  \lstinline{penguin(V1) :- bird(V1), not can(V1, C1).} represents:
+
+\begin{lstlisting}
+penguin(V1) :- bird(V1), not can(V1, fly).
+penguin(V1) :- bird(V1), not can(V1, swim).
+\end{lstlisting}
+
+\paragraph{} By using skeleton rules where the constant symbols are not yet ground, ASPAL leaves the task of finding the grounding to the ASP solver. Each skeleton rule represents a set of rules where the constant-representative variables have been replaced with constants of the correct type.
+
+\subsection{Limits}
+
+To limit the the hypothesis search space, we introduce two constraints in addition to the given mode declarations: $L_\text{max}$ specifies the number of literals allowed to appear in the body of the rule and $V_\text{max}$ specifies the number of unique variables allowed in the rule.
+
+\paragraph{} ASPAL constructs a set of skeleton rules $S_M$ - we call this set the hypothesis space. $S_M$ is maximal given language constraints $<M_h, M_b>, L_\text{max}, V_\text{max}$ if any rule which can be constructed respecting the constraints is equivalent to a rule already in $S_M$.
+
+\subsection{Hypothesis Space}\label{sec:ASPALHypothesisSpace}
+
+\paragraph{} Given the following background knowledge $B$:
+
+\begin{lstlisting}
+bird(a).
+bird(b).
+ability(fly).
+ability(swim).
+can(a, fly).
+can(b, swim).
+\end{lstlisting}
+
+\paragraph{} and given the following set of skeleton rules $S_M$:
+
+\begin{lstlisting}
+penguin(V1) :- bird(V1).
+penguin(V1) :- bird(V1), not can(V1, C1).
+penguin(V1) :- bird(V1), not can(V1, C1), not can (V2, C2).
+\end{lstlisting}
+
+\paragraph{} The following is the list of all possible rules that are represented by $S_M$:
+
+\begin{lstlisting}
+penguin(V1) :- bird(V1).
+penguin(V1) :- bird(V1), not can(V1, fly).
+penguin(V1) :- bird(V1), not can(V1, swim).
+penguin(V1) :- bird(V1), not can(V1, fly), not can(V1, swim).
+\end{lstlisting}
+
+\subsection{ASP Encoding}
+
+\subsubsection{Rule Encoding}
+
+\paragraph{} ASPAL encodes an ILP task as a meta level ASP program. The Answer Sets would contain atoms that represent each of the rules in the hypothesis. To help us map the Answer Set of the meta level program back to an inductive solution of the ILP task, we assign a unique rule identifier $R_\text{ID}$ to each skeleton rule in $S_M$. The atom $rule(R_\text{ID}, c_1, ..., c_n)$ represents the skeleton rule $R$ with each constant variables replaced with constants $c_1, ..., c_n$.
+
+\paragraph{} We can then use the choice rule (See Section \ref{sec:ASPChoiceRules}) on the set of rules and the combination of constants to let the ASP solver help us find the solutions to the ILP task.
+
+\paragraph{} Considering the penguin example in Section \ref{sec:ASPALHypothesisSpace}, we can add the rule atom to each of the rules in $S_M$:
+
+\begin{lstlisting}
+penguin(V1) :- bird(V1), rule(1).
+penguin(V1) :- bird(V1), not can(V1, C1), rule(2, C1).
+penguin(V1) :- bird(V1), not can(V1, C1), not can (V2, C2), rule(3, C1, C2).
+\end{lstlisting}
+
+\paragraph{} The choice rule below causes one Answer Set to be generated for each set of rules (i.e. each hypothesis):
+
+\begin{lstlisting}
+{ rule(1), rule(2, fly), rule(2, swim), rule(3, fly, swim) }.
+\end{lstlisting}
+
+\paragraph{} The rule atoms that appear in the Answer Sets represent the hypothesis. 
+
+\subsubsection{Example Encoding}
+
+\paragraph{} To rule out any Answer Set of the meta program which corresponds to an Answer Set of $B \cup H$ which either 1) does not contain all of the positive examples or 2) contains one or more negative examples, we add the goal rule and its constraint to the program:
+
+\begin{lstlisting}
+goal :- e1+, ..., en+, e1-, ..., em-.
+:- not goal.
+\end{lstlisting}
+
+\paragraph{} The result of this is that Answer Sets of the meta program will correspond exactly to the inductive solutions of the ILP task. 
+
+\subsection{Optimization}
+
+\paragraph{} ASLAP uses an optimisation statement st the optimal Answer Sets of the meta level program will correspond exactly to the optimally inductive solutions of the task. We can do this using the \lstinline{#minimize} statement in ASP (See Section \ref{sec:ASPExtendedConstructs}) and by weighing each of the rules by its length:
+
+\begin{lstlisting}
+#minimize[rule(1, c1, ..., cn) = Rlen, ...].
+\end{lstlisting}
+
+\paragraph{} We define the length of the rule to be the number of literals in the rule (including the head) excluding type enforcement literals.
+
+\section{Learning from Answer Sets}
+
+\subsection{Partial Interpretation}
+
+\paragraph{} A partial interpretation $e$ is a pair of sets of atoms $<e^\text{inc}, e^\text{exc}>$. $e^\text{inc}$ is the set of \textit{inclusions} and $e^\text{exc}$ is the set of \textit{exclusions}.
+
+\paragraph{} A Herbrand Interpretation $I$ extends a partial interpretation $e$ iff $e^\text{inc} \subseteq I$ and $e^\text{exc} \cap I = \emptyset$. For example: sets $\{p, q\}$ and $\{p, q, s\}$ extend $<\{p, q\}, \{r\}>$ but not neither $\{p\}$ nor $\{p, q, r\}$ do. In Learning from Answer Sets (LAS), examples are covered if there exists an Answer Set of $B \cup H$ which extends the example (as a partial interpretation). 
 
 \bibliographystyle{plain}
 \bibliography{references}

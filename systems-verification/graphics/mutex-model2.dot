@@ -1,0 +1,36 @@
+digraph {
+  forcelabels=true;
+  node [shape=circle, height=0.5];
+  
+  s7 -> s1 [constraint=false, weight=1];
+  s4 -> s5 [constraint=false, weight=1];
+  s2:n -> s0:w [constraint=false, weight=1];
+  s6:n -> s0:e [constraint=false, weight=1];
+  
+  {rank=same; s1; s5;}
+  {rank=same; s2; s3_1; s3_2; s6;}
+  {rank=same; s4; s7;}
+  
+  s0 -> s1 -> {s2, s3_1:nw} -> s4 [weight=5];
+  s0 -> s5 -> {s6, s3_2:ne} -> s7 [weight=5];
+  
+  si [style=invisible];
+  
+  s0 [label=<n<SUB>1</SUB>,n<SUB>2</SUB>>, xlabel="s0"];
+  s1 [label=<t<SUB>1</SUB>,n<SUB>2</SUB>>, xlabel="s1", group=g2];
+  s2 [label=<c<SUB>1</SUB>,n<SUB>2</SUB>>, xlabel="s2"];
+  s3_1 [label=<t<SUB>1</SUB>,t<SUB>2</SUB>>, xlabel="s3"];
+  s4 [label=<c<SUB>1</SUB>,t<SUB>2</SUB>>, xlabel="s4", group=g2];
+  
+  s5 [label=<n<SUB>1</SUB>,t<SUB>2</SUB>>, xlabel="s5", group=g3];
+  s6 [label=<n<SUB>1</SUB>,c<SUB>2</SUB>>, xlabel="s6"];
+  s3_2 [label=<t<SUB>1</SUB>,t<SUB>2</SUB>>, xlabel="s8"];
+  s7 [label=<t<SUB>1</SUB>,c<SUB>2</SUB>>, xlabel="s7", group=g3];
+  
+  si -> s0;
+  
+  edge[style=invis, weight=5];
+  s1 -> s4; 
+  s5 -> s7;
+  s3_1 -> s3_2;
+}

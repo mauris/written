@@ -433,11 +433,11 @@ $$M_S \models \phi_P$$
 
 \subsection{Case Study: Mutual Exclusion}
 
-\subsubsection{LTL Specification}
+\subsubsection{Introduction}
 
-\paragraph{} We consider a key implementation of distributed systems - mutual exclusion - as an example of LTL specifications. There are three main property of a mutual exclusion system:
+\paragraph{} We consider a key implementation of distributed systems - mutual exclusion. There are three main property of a mutual exclusion system:
 
-\begin{itemize}
+\begin{itemize}\label{list:MutexProperties}
 \item \textbf{Safety}: Only one process may have access to the same resource at any time.
 \item \textbf{Liveness}: Whenever a process requests for the access to the resource, it will \textit{eventually} be granted the access.
 \item \textbf{Non-blocking}: A process can always make a request to the use the resource.
@@ -449,7 +449,237 @@ $$M_S \models \phi_P$$
 
 \paragraph{} We add another specification - \textbf{No strict sequencing}: No ordering exists in resource access.
 
+\paragraph{} To model these properties of the system in temporal logic, we assign some propositions:
+
+\begin{itemize}
+\item Process $i$ is in critical section ($c_i$) when it is using the resource.
+\item Process $i$ is in the trying state ($t_i$) when it is making the request to use the resource.
+\item Process $i$ is in outside of critical section ($n_i$) when it is not using the resource nor requesting for access to it.
+\end{itemize}
+
+\paragraph{} In this example, we assume that there are two processes in the world and each process can only be in one of the three states written above.
+
+\subsubsection{LTL Specification}
+
+\paragraph{} We attempt to model in LTL:
+
+\begin{itemize}
+\item \textbf{Safety}: $G\lnot(c_1 \land c_2)$
+\item \textbf{Liveness}: $G(t_1 \implies Fc_1) \land G(t_2 \implies Fc_2)$
+\item \textbf{Non-blocking}: We cannot express this in LTL.
+\item \textbf{No strict sequencing}: We cannot express this directly, but we can express a formula that implies the negation of no strict sequencing: $G(c_1 \implies (c_1\ W\ (\lnot c_1 \land \lnot c_1\ W\ c_2)))$.\footnote{It says that everytime we get to a $c_1$ state, either we remain in $c_1$ forever or we need to go through a $c_2$ state before getting to $c_1$ again.}
+\end{itemize}
+
 \subsubsection{CTL Specification}
+
+\paragraph{} We attempt to model in CTL:
+
+\begin{itemize}
+\item \textbf{Safety}: $AG\lnot(c_1 \land c_2)$
+\item \textbf{Liveness}:\\ $AG(t_1 \implies AFc_1) \land AG(t_2 \implies AFc_2)$
+\item \textbf{Non-blocking}: 
+\item \textbf{No strict sequencing}: 
+\end{itemize}
+
+\subsection{Model Building}
+
+\paragraph{} Now that we have a set of formal specifications, we can try to build its model and check whether the model satisfies the specifications given above. 
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.36]{graphics/mutex-model1.png}
+\caption{A model of the mutual exclusion system for process 1 and 2. This model is a possible implementation for a system that satisfies mutual exclusion. The initial state is $s_0$.}\label{fig:MutexModel1}
+\end{figure}
+
+\paragraph{} We now check if our \textit{LTL specifications} are satisfied at the initial state $s_0$, i.e. $(M, s_0) \models \phi$, where $\phi$ expresses our four specifications in Section \ref{list:MutexProperties}. We find that:
+
+\begin{itemize}
+\item Safety is satisfied: There is no state in the model such that $c_1, c_2$ hold in the same state.
+\item Liveness is not satisfied: check the path $s_0s_1s_3s_7s_1...$
+\item Non-blocking is not expressible in LTL.
+\item The negation of no-strict sequencing is not satisfied, hence the property of no-strict sequencing is satisfied: check the path $s_0s_5s_3s_4s_5s_3s_4$
+\end{itemize}
+
+\paragraph{} There are also a few assumptions we are making in this diagram:
+
+\begin{enumerate}
+\item Is the amount of time spent in each state unit time or variable time? If it is fixed time, how can we allow process 1 to stay in the critical section as long as it needs while process 2 doesn't try? i.e. do we need to add a loop from $s_2$ to itself and a loop from $s_6$ to itself?
+\item A process $i$ is either in $n_i$, $t_i$ or $c_i$ state. We take the assumption that two or more states for a single process cannot happen in the same state of the model.
+\end{enumerate}
+
+\paragraph{} The way we represented non-determinism may result in one process always getting preference over the other: i.e. at $s_3$, how do we choose which state to advance to: $s_4$ or $s_7$? We need to revise the model.
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.36]{graphics/mutex-model2.png}
+\caption{The revised model (from Fig. \ref{fig:MutexModel1}) of the mutual exclusion system for process 1 and 2. We split $s_3$ into two so that we can fix the non-determinism and hence satisfying liveness.}\label{fig:MutexModel2}
+\end{figure}
+
+\paragraph{} We find that the model in Figure \ref{fig:MutexModel2} satisfies the three properties:
+
+\begin{itemize}
+\item Safety is remains satisfied.
+\item Liveness is now satisfied.
+\item The negation of no-strict sequencing is not satisfied, hence the property of no-strict sequencing remains satisfied.
+\end{itemize}
+
+\subsection{Fairness}
+
+\paragraph{} In Figure \ref{fig:MutexModel1}, we see that we had paths in which some requests (states with $t_i$) that would never be served (reaching a state with $c_i$) by some "unfair" executions. To avoid this situation, we need to forbid these paths to happen in the model.
+
+\paragraph{} As shown in Figure \ref{fig:MutexModel2}, we split $s_3$ into $s_3$ and $s_8$ in the model to hardwire order of requests by using appropriate transitions. In some sense we can think of considering the previous path in addition to the current state to determine the appropriate transitions. 
+
+\paragraph{} To solve such a problem, we introduce what we call "fairness constraints". These limits the paths considered to the ones in which some formulas are true indefinitely often. The argument of a fairness constraint can be any formula.
+
+\paragraph{} In the Mutual Exclusion example, we could introduce the fairness constraint $(c_1 \lor c_2)$ representing the fact that along any path, we need to serve either process infinitely often. This can be represented by adding fairness constraint statements in automatic model checkers such as NuSMV.
+
+\paragraph{} There are two classes of fairness constraints that are usually considered:
+
+\begin{itemize}
+\item Justice Constraints: "Formula $\phi$ is true infinitely often over any path."
+\item Compassion Constraints: "If formula $\phi$ is true infinitely often over any path, then $\psi$ is also true infinitely often."
+\end{itemize}
+
+\paragraph{} Note that compassion constraints impose the formula $GF\phi \implies GF\phi$ in all states considered (as it needs to be satisfied in all paths considered). We can express both justice and compassion constraints in NuSMV.
+
+\section{Explicit Model Checking}
+
+\paragraph{} We need an algorithmic way of computing $(M, s_0) \models \phi$ and we need it to be efficient. Turns out it is convenient to compute the whole set of states $[\phi]_M$ on which $\phi$ is true. By definition,
+
+$$s_0 \in [\phi]_M \equiv (M, s_0) \models \phi$$
+
+\subsection{Labelling Algorithm}
+
+\paragraph{} We label the states where the subformulas of $\phi$ are satisfied starting from the smallest subformulas and working outwards towards $\phi$. 
+
+\begin{itemize}
+\item Input: A model $M$ and a CTL formula $\phi$.
+\item Output: The set of states in $M$ which satisfies $\phi$ (i.e. $[\phi]_M$).
+\end{itemize}
+
+\subsubsection{Labelling Propositional Variables}
+
+\paragraph{} First, we consider all propositional variables in $\phi$ and label the states in which they hold. 
+
+\paragraph{} For example, if $\phi = a \land b$, we label all the states where $a$ hold and also all the states where $b$ hold.
+
+\subsubsection{Labelling Subformulas}
+
+\paragraph{} Next, $\forall s$ state and $\forall\psi$ subformulas of $\phi$ (including $\phi$), we perform the following labelling:
+
+\begin{itemize}
+\item $\lnot\psi$: label state $s$ with $\lnot\psi$ where the state $s$ is not labelled with $\psi$.
+\item $\psi_1 \land \psi_2$: label state $s$ with $\psi_1 \land \psi_2$ if state $s$ has been labelled with both $\psi_1$ and $\psi_2$.
+\end{itemize}
+
+\paragraph{} With the two definitions, we can also easily label any OR operators using double negation and De Morgan's laws.
+
+\paragraph{} In the remaining parts of the labelling algorithm, we also consider the minimal implementation by taking advantage of equivalences and duality. Hence we will only discuss the implementation of $EX\psi$, $AF\psi$ and $E(\psi_1\ U\ \psi_2)$ as an adequate set of connectives for CTL. All others can be written in terms of these connectives.
+
+\subsubsection{Labelling $EX\psi$}
+
+\paragraph{} We label any state with $EX\psi$ if \textit{one of its successors} is labelled with $\psi$.
+
+\subsubsection{Labelling $AF\psi$}
+
+\paragraph{} If any state $s$ is labelled with $\psi$, we label it with $AF\psi$. Then we repeatedly label any state with $AF\psi$ if \textit{all of its successors} are labelled with $AF\psi$ until there is no more new labelling.
+
+\subsubsection{Labelling $E(\psi_1\ U\ \psi_2)$}
+
+\paragraph{} If any state $s$ is labelled with $\psi_2$, label it with $E(\psi_1\ U\ \psi_2)$. Then we repeatedly label any state with $E(\psi_1\ U\ \psi_2)$ if it is labelled with $\psi_1$ and \textit{at least one of it successor} is labelled with $E(\psi_1\ U\ \psi_2)$ until there is no more new labelling.
+
+\subsubsection{Algorithm Output}
+
+\paragraph{} When all the labellings are complete, we output the states which are labelled $\phi$ as the answer. 
+
+\subsubsection{Variants: $EG\psi$}
+
+\paragraph{} Instead of adding labels, we could also start from adding labels to all then removing them. For example, we could label states by using the following algorithm for $EG\psi$:
+
+\begin{enumerate}
+\item Label \textit{all} states with $EG\psi$.
+\item If any state $s$ is not labelled with $\psi$, we delete the label $EG\psi$ from $s$. 
+\item Repeatedly delete label $EG\psi$ from states that has no successors labelled $EG\psi$ until there is no more changes.
+\end{enumerate}
+
+\subsection{General Algorithm}
+
+\paragraph{} We attempt to build a more formal and general algorithm that takes a CTL formula $\phi$ and a model $M$ as input and return the set of states $[\phi]_M$ as output. The algorithm will rely on basic set operations and three additional functions to calculate set of states that satisfy subformulas with EX, EU and AF.
+
+\paragraph{} Again, we choose the functions to be implemented for EX, EU and AF because they form an adequate set of connectives for CTL. Alternative implementations are possible. We will see that our function will perform the appropriate rewriting for the other CTL connectives.
+
+\subsubsection{Implementation of $SAT(\phi, M)$}
+
+\begin{lstlisting}[mathescape=true]
+function SAT($\phi$, M)
+switch $\phi$:
+  case $\top$: return S(M) 
+    /* S(M) -> all states in model M */
+  case $\perp$: return $\emptyset$
+  case is atomic: return $\{s \in S(M) | \phi \in L(s)\}$
+  case $\lnot\psi$: return S \ SAT($\psi$, M)
+  case $\psi_1 \land \psi_2$: return SAT($\psi_1$,M) $\cap$ SAT($\psi_2$,M)
+  case $\psi_1 \lor \psi_2$: return SAT($\psi_1$,M) $\cup$ SAT($\psi_2$,M)
+  case $\psi_1 \rightarrow \psi_2$: return SAT($\lnot\psi_1\lor\psi_2$, M)
+  case $AX\psi$: return SAT($\lnot EX\lnot\psi$, M)
+  case $A(\psi_1\ U\ \psi_2)$: return
+    SAT($\lnot(E[\lnot\psi_2\ U\ (\lnot\psi_1\land\lnot\psi_2)]\lor EG\lnot\psi_2)$, M)
+  case $EF\psi$: return SAT($E(\top\ U\ \psi)$, M)
+  case $EG\psi$: return SAT($\lnot AF\lnot\psi$, M)
+  case $AG\psi$: return SAT($\lnot EF\lnot\psi$, M)
+  case $EX\psi$: return SATex($\psi$, M)
+  case $AF\psi$: return SATaf($\psi$, M)
+  case $E(\psi_1\ U\ \psi_2)$: return SATeu($\psi_1$, $\psi_2$, M)
+end switch
+end function
+\end{lstlisting}
+
+\paragraph{} In the implementation of $SAT(\phi, M)$ above, we can see that rewritings are done using recursive calls to itself with a rewritten version of the formula.
+
+\subsubsection{Auxiliary Function $SATex(\phi, M)$}
+
+\begin{lstlisting}[mathescape=true]
+function SATex($\phi$, M)
+  local var X, Y
+  X := SAT($\phi$, M)
+  Y := $\{s_0 \in S(M)\ |\ \exists s_1 \in X: s_0 \rightarrow s_1\}$
+  return Y
+end function
+\end{lstlisting}
+
+\paragraph{} Notice the statement $X := SAT(\phi, M)$ handles complex formula in $\phi$ recursively. 
+
+\subsubsection{Auxiliary Function $SATaf(\phi, M)$}
+
+\begin{lstlisting}[mathescape=true]
+function SATaf($\phi$, M)
+  local var X, Y
+  X := S(M)
+  Y := SAT($\phi$, M)
+  repeat until X = Y:
+    X := Y
+    Y := $Y \cup \{s\ |\ \forall s'\text{ successors of } s: s' \in Y\}$
+  end repeat
+  return Y
+end function
+\end{lstlisting}
+
+\subsubsection{Auxiliary Function $SATeu(\phi, \psi, M)$}
+
+\begin{lstlisting}[mathescape=true]
+function SATeu($\phi$, $\psi$, M)
+  local var W, X, Y
+  W := SAT($\phi$, M)
+  X := S(M)
+  Y := SAT($\psi$, M)
+  repeat until X = Y:
+    X := Y
+    Y := $Y \cup (W \cap \{s\ |\ \exists s'\text{ successor of }s: s' \in Y\})$
+  end repeat
+  return Y
+end function
+\end{lstlisting}
+
 
 \end{multicols}
 \end{document}

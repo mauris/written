@@ -766,11 +766,7 @@ q :- not p.
 
 \subsubsection{Supportability}
 
-\paragraph{} Consider this program:
-
-\begin{lstlisting}
-p :- not p.
-\end{lstlisting}
+\paragraph{} Consider the program: \lstinline{p :- not p.}
 
 \paragraph{} The program has the set of Herbrand Interpretations: $\{\emptyset, \{p\}\}$. The $\emptyset$ HI does not satisfy the program while $\{p\}$ does, which makes it the Least Herbrand Model. However, the LHM $\{p\}$ is unsupported because $p$ has no support: it is not a head of any clauses in the program whose body is true in the Herbrand Model. In fact, there are no stable models of this program.
 
@@ -1048,13 +1044,20 @@ goal :- e1+, ..., en+, e1-, ..., em-.
 
 \paragraph{} A partial interpretation $e$ is a pair of sets of atoms $<e^\text{inc}, e^\text{exc}>$. $e^\text{inc}$ is the set of \textit{inclusions} and $e^\text{exc}$ is the set of \textit{exclusions}.
 
-\paragraph{} A Herbrand Interpretation $I$ extends a partial interpretation $e$ iff $e^\text{inc} \subseteq I$ and $e^\text{exc} \cap I = \emptyset$. For example: sets $\{p, q\}$ and $\{p, q, s\}$ extend $<\{p, q\}, \{r\}>$ but not neither $\{p\}$ nor $\{p, q, r\}$ do. In LAS, examples are covered if there exists an Answer Set of $B \cup H$ which extends the example (as a partial interpretation).
+\paragraph{} A Herbrand Interpretation $I$ extends a partial interpretation $e$ iff $e^\text{inc} \subseteq I$ and $e^\text{exc} \cap I = \emptyset$.
+
+\paragraph{} For example: sets $\{p, q\}$ and $\{p, q, s\}$ extend $<\{p, q\}, \{r\}>$ but not neither $\{p\}$ nor $\{p, q, r\}$ do. In LAS, examples are covered if there exists an Answer Set of $B \cup H$ which extends the example (as a partial interpretation).
 
 \subsection{Learning}
 
 \paragraph{} A LAS task is a tuple $<B, S_M, E^+, E^->$. Unlike ASPAL and similar systems, as LAS is aimed at learning ASP rather than Prolog, LAS has no concept of input and output variables. The only restriction is that the rules in $S_M$ are safe. 
 
-\paragraph{} A hypothesis $H$ is an inductive solution (written $H \in \text{ILP}_\text{LAS}<B, S_M, B^+, B^->$) iff it is constructed from the rules in $S_M$ (i.e. $H \subseteq S_M$) and each positive example is extended by at least one Answer Set of $B \cup H$ (this can be different Answer Set for each positive example) and none of the negative examples are extended by any Answer Set of $B \cup H$. 
+\paragraph{} A hypothesis $H$ is an inductive solution (written $H \in \text{ILP}_\text{LAS}<B, S_M, B^+, B^->$) iff it is constructed from the rules in $S_M$ (i.e. $H \subseteq S_M$) and each positive example is extended by at least one Answer Set of $B \cup H$ (this can be different Answer Set for each positive example) and none of the negative examples are extended by any Answer Set of $B \cup H$. Formally,
+
+\begin{itemize}
+\item $\forall e \in E^+: \exists A \in AS(B \cup H)\ \text{st}\ A\ \text{extends}\ e$
+\item $\forall e \in E^-: \forall A \in AS(B \cup H)\ \text{st}\ \lnot(A\ \text{extends}\ e)$
+\end{itemize}
 
 \paragraph{} Consider the following $\text{ILP}_\text{LAS}$ task. Given the background knowledge $B$:
 

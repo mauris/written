@@ -63,6 +63,7 @@
 \begin{footnotesize}
 \paragraph{License} This reference is made publicly available under the MIT License. You should not have paid anyone money in exchange for this document. If you have paid someone for it, well too bad. The source code for this document can be found public available on my Github repository\footnote{\href{https://github.com/mauris/written}{https://github.com/mauris/written}}. If you wish to help improve this document, feel free to open an issue on the Github repository.
 \end{footnotesize}
+\newpage
 
 \tableofcontents
 \newpage
@@ -680,6 +681,164 @@ function SATeu($\phi$, $\psi$, M)
 end function
 \end{lstlisting}
 
+\subsubsection{LTL Implementation}
+
+\paragraph{} Note that we do not specify the implementation for LTL here because the algorithm will need to check for all paths from a given state. This will give you a hint about the time complexity of such computation if we were to perform explicit model checking on LTL. We will discuss the time complexity of LTL explicit model checking later in Section \ref{sec:ExplicitModelCheckingComplexityAnalysis}.
+
+\subsection{Handling Fairness}
+\paragraph{} We use fairness conditions not to consider paths that are not meaningful for our purposes. The way model checkers handle this depends on what logic (CTL, LTL, CTL* ...) they are checking specifications for.
+
+\paragraph{} For the case of LTL, it is trivial. Suppose we need to check a condition $\phi$ where fair paths satisfy $p$. We can simply check for the condition $GFp \implies \phi$. For CTL, we cannot sub-select path in a similar way so we need to redefine satisfaction for certain operators\footnote{Not covered in syllabus}.
+
+\subsection{Complexity Analysis}\label{sec:ExplicitModelCheckingComplexityAnalysis}
+
+\paragraph{} Suppose we can input the whole model explicitly. Let $V$ be the set of vertices in the model (i.e. states in the model), $E$ be the set of edges (i.e. transitions) and $|\phi|$ be the length of formula $\phi$. We see the complexities are as follows:
+
+\begin{itemize}
+\item For CTL model checking: $O(|\phi| \times (|V| + |E|))$
+\item For LTL model checking: $O(2^{|\phi|} \times |V|)$
+\end{itemize}
+
+\paragraph{} The key factors that affect the time complexities are the length of the formula $\phi$ and the size of the model. In CTL, the time complexity grows linearly with $|\phi|$ and $(|V| + |E|)$. However in LTL, the time complexity grows exponentially with $|\phi|$ and linearly with $|V|$. 
+
+\paragraph{} Despite being linear wrt the model size and formula, model checking for CTL on compact descritpions is actually a PSPACE-Complete problem: it turns out that this problem is intrinsically more difficult. 
+
+\subsubsection{State Explosion Problem}
+
+\paragraph{} The linearity in the size of the model does not always translate into something practically viable. The model still grows exponentially in the number of variables used in the program describing it. For example, by introducing just one Boolean variable in a NuSMV program, we are effectively doubling the size of the model. The apparent attractiveness of the linearity of the problem is still hindered by the difficulty of generating compact models. This difficulty is known as the state explosion problem.
+
+\subsubsection{Beyond Explicit Model Checkers}
+
+\paragraph{} We need to look for techniques that can handle large state-spaces in models resulting in descriptions of actual scenarios, irrespective of the theoretical complexity of the decision problem. While there is a variety of techniques available, we will study Ordered Binary Decision Diagrams (OBDDs) and Bounded Model Checking (BMC). 
+
+\section{Ordered Binary Decision Diagrams}
+
+\paragraph{} Ordered Binary Decision Diagrams (OBDDs) are efficient symbolic structures to represent Boolean formulas. This will enable us to perform symbolic model checking later.
+
+\subsection{Binary Decision Trees}
+
+\paragraph{} Binary Decision Trees (BDTs) are binary trees that represent propositional formulas just like truth tables. By convention, we use dashed lines (-\ -\ -) to assign a false decision to a variable and solid lines (---) to assign a true decision to a variable.
+
+\paragraph{} For example, we consider the formula $\lnot(x \lor y)$. The truth table would be:
+
+\begin{table}[H]
+\centering
+\begin{tabular}{| c | c | c |}
+\hline
+$x$ & $y$ & $f(x, y)$ \\
+\hline
+\hline
+0 & 0 & 1 \\
+\hline
+0 & 1 & 0 \\
+\hline
+1 & 0 & 0 \\
+\hline
+1 & 1 & 0 \\
+\hline
+\end{tabular}
+\caption{The truth table for the formula $\lnot(x \lor y)$.}
+\end{table}
+
+\paragraph{} We can draw its corresponding BDT to be:
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.3]{graphics/bdt-d1.png}
+\caption{The BDT of the formula $\lnot(x \lor y)$.}\label{fig:BDTD1}
+\end{figure}
+
+\subsubsection{Truth Tables vs BDTs}\label{sec:TruthTablesvsBDTs}
+
+\paragraph{} Considering a propositional formula $\phi$ with $n$ propositional variables. 
+
+\begin{itemize}
+\item It would take $O(n^2)$ to look through the truth table for the satisfiability of a given assignment, while it only takes $O(n)$ in a BDT.
+\item Checking for validity of a formula via truth tables can be done going through at most $2^n$ values, which is the same on BDTs (leaf nodes).
+\end{itemize}
+
+\paragraph{} If we perform Boolean operations on a formula, using a truth table would require a recalculation of the truth table, while we will see later that on BDT it can be done quickly. 
+
+\paragraph{} Checking for equivalences between formulas is expensive on both truth tables and BDTs. However this can become easy with some advanced representations generated from BDTs.
+
+\subsection{Reduction Algorithm}
+
+\subsubsection{Optimisations to BDTs -- BDDs}
+
+\paragraph{} We can develop algorithms to reduce the size of a BDT which produces a Binary Decision Diagram (BDD). A BDD is a directed graph that serves the same purpose as BDT. For example:
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.3]{graphics/bdd-d1.png}
+\caption{Two versions of BDDs reduced from the BDT in Figure \ref{fig:BDTD1} of the formula $\lnot(x \lor y)$. The left BDD shows the collapse of the three "0" leaf node into one (i.e. sharing common results) while the right BDD shows the removal of a redundant decision point "$y$".}
+\end{figure}
+
+\subsubsection{Algorithm Steps}
+
+\paragraph{} We formally define a reduction algorithm that reduces a BDT to a reduced Binary Decision Diagram by iteratively applying these steps:
+
+\paragraph{C1. Removal of duplicate terminals} If a BDD contains more than one $0$-node, we redirect all edges which point to such a $0$-node to just one of them and remove the others. We proceed with the same way for terminal nodes labelled with $1$.
+
+\paragraph{C2. Removal of redundant tests} If both outgoing edges of a node $n$ in the BDD point to the same node $m$, then we send all incoming edges of $n$ to $m$ and eliminate the node $n$.
+
+\paragraph{C3. Removal of duplicate non-terminals} If two distinct nodes $n$ and $m$ in the BDD are the roots of structurally identical sub-BDDs, we eliminate one of them. Say for example we eliminate $m$, and we direct all of $m$'s incoming edges to $n$.
+
+\subsubsection{Definition}
+
+\paragraph{} A BDD is said to be reduced if none of the optimisations C1, C2, C3 can be applied (i.e. no more possible reductions). 
+
+\begin{defn}
+(Huth and Ryan Def 6.5)\\ A binary decision diagram (BDD) is a finite DAG with a unique initial node, where all terminal nodes are labelled with $0$ or $1$, and all non-terminal nodes are labelled with a Boolean variable. Each non-terminal node has exactly two edges from that node to others: one labelled $0$ and one labelled $1$ (we represent them as a dashed line and a solid line respectively; alternatively we write $0$ and $1$ on the edges respectively.)
+\end{defn}
+
+\subsubsection{Important BDDs}
+
+\paragraph{} There are some important BDDs, which we call $B_0, B_1, B_x$:
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.36]{graphics/bdd-impt.png}
+\caption{The three important BDDs (left to right): $B_0, B_1, B_x$}
+\end{figure}
+
+\subsection{Comparing BDDs}
+
+\paragraph{} Comparing two formulas is computationally expensive as discussed in Section \ref{sec:TruthTablesvsBDTs}. Depending on the order of the variables in the ranks of the BDT, we may have different reduced BDDs of the same formula with different sizes. We need a canonical method to compare these formula.
+
+\subsection{Variable Ordering}
+
+\paragraph{} Different variable orderings would create different reduced BDDs. Certain variable orderings may give smaller reduced BDDs than others. An ordered BDD (OBDD) is a BDD which has an ordering for its variables.
+
+\begin{defn}
+(Huth and Ryan Def 6.6)\\
+Let $[x_1,...,x_n]$ be an ordered list of variables without duplications and let $B$ be a BDD all of whose variables occur somewhere in the list. We say that $B$ has the ordering $[x_1, ..., x_n]$ if all variable labels of $B$ occur in that list and for every occurrence of $x_i$ followed by $x_j$ along any path in $B$, we have $i < j$
+\end{defn}
+
+\subsection{Reduced OBDDs}
+
+\paragraph{} One important property of OBDDs is that their reduced structure is unique for a given Boolean formula. We call these reduced structures as ROBDDs.
+
+\begin{thm}
+The reduced OBDD representing a given Boolean function $f$ is unique, once a variable ordering has been fixed.
+\end{thm}
+
+\paragraph{} When performing operations on two OBDDs, we require them to have compatible variable orderings. The orderings of $B_f$ and $B_y$ are said to be compatible iff there are no variables $x$ and $y$ st $x$ precedes $y$ in the ordering of variables in $B_f$ and $y$ precedes $x$ in the ordering of variables in $B_y$.
+
+\begin{thm}
+Assume $B_f$ and $B_y$ to be two ROBDDs with compatible variable orderings. If $B_f$ and $B_y$ represent the same Boolean function, then they have identical structure.
+\end{thm}
+
+\paragraph{} If we apply the reductions C1, C2, C4 to an OBDD until there are no further reductions possible, then we are guaranteed that the result is always the same ROBDD. We therefore say that the OBDDs have a \textit{canonical form}, which is their reduced form.
+
+\subsection{Importance of Canonical Form}
+
+\paragraph{} The canonical representation for BDDs become crucial when we would like to perform certain useful tests on its corresponding Boolean formula. Consider the formulas $f$ and $g$ and their ROBDD representations $B_f$ and $B_g$. We can:
+
+\begin{itemize}
+\item \textbf{Test for validity}: $f$ is valid iff $B_f \equiv B_1$.
+\item \textbf{Test for satisfiability}: $f$ is satisfiable iff $B_f \not\equiv B_0$.
+\item \textbf{Test for semantic equivalence}: $f$ and $g$ are semantically equivalent iff $B_f \equiv B_y$.
+\end{itemize}
 
 \end{multicols}
 \end{document}

@@ -1,0 +1,20 @@
+graph {
+  nodesep=0.8;
+  ranksep=0.5;
+  
+  node[shape=square];
+  
+  n0 [label="0"]
+  n1 [label="1"]
+  
+  
+  node[shape=circle];
+  nx [label="x"];
+  node[shape=square];
+  
+  nx0 [label="0"]
+  nx1 [label="1"]
+  nx -- nx0 [style="dashed"];
+  nx -- nx1 [style="solid"];
+  
+}

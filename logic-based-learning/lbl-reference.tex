@@ -1042,17 +1042,17 @@ goal :- e1+, ..., en+, e1-, ..., em-.
 
 \subsection{Partial Interpretation}
 
-\paragraph{} A partial interpretation $e$ is a pair of sets of atoms $<e^\text{inc}, e^\text{exc}>$. $e^\text{inc}$ is the set of \textit{inclusions} and $e^\text{exc}$ is the set of \textit{exclusions}.
+\paragraph{} A partial interpretation $e$ is a pair of sets of atoms $\langle e^\text{inc}, e^\text{exc}\rangle $. $e^\text{inc}$ is the set of \textit{inclusions} and $e^\text{exc}$ is the set of \textit{exclusions}.
 
 \paragraph{} A Herbrand Interpretation $I$ extends a partial interpretation $e$ iff $e^\text{inc} \subseteq I$ and $e^\text{exc} \cap I = \emptyset$.
 
-\paragraph{} For example: sets $\{p, q\}$ and $\{p, q, s\}$ extend $<\{p, q\}, \{r\}>$ but not neither $\{p\}$ nor $\{p, q, r\}$ do. In LAS, examples are covered if there exists an Answer Set of $B \cup H$ which extends the example (as a partial interpretation).
+\paragraph{} For example: sets $\{p, q\}$ and $\{p, q, s\}$ extend $\langle \{p, q\}, \{r\} \rangle$ but not neither $\{p\}$ nor $\{p, q, r\}$ do. In LAS, examples are covered if there exists an Answer Set of $B \cup H$ which extends the example (as a partial interpretation).
 
 \subsection{Learning}
 
-\paragraph{} A LAS task is a tuple $<B, S_M, E^+, E^->$. Unlike ASPAL and similar systems, as LAS is aimed at learning ASP rather than Prolog, LAS has no concept of input and output variables. The only restriction is that the rules in $S_M$ are safe. 
+\paragraph{} A LAS task is a tuple $\langle B, S_M, E^+, E^- \rangle$. Unlike ASPAL and similar systems, as LAS is aimed at learning ASP rather than Prolog, LAS has no concept of input and output variables. The only restriction is that the rules in $S_M$ are safe. 
 
-\paragraph{} A hypothesis $H$ is an inductive solution (written $H \in \text{ILP}_\text{LAS}<B, S_M, B^+, B^->$) iff it is constructed from the rules in $S_M$ (i.e. $H \subseteq S_M$) and each positive example is extended by at least one Answer Set of $B \cup H$ (this can be different Answer Set for each positive example) and none of the negative examples are extended by any Answer Set of $B \cup H$. Formally,
+\paragraph{} A hypothesis $H$ is an inductive solution, written $H \in \text{ILP}_\text{LAS}\langle B, S_M, B^+, B^- \rangle$, iff it is constructed from the rules in $S_M$ (i.e. $H \subseteq S_M$) and each positive example is extended by at least one Answer Set of $B \cup H$ (this can be different Answer Set for each positive example) and none of the negative examples are extended by any Answer Set of $B \cup H$. Formally,
 
 \begin{itemize}
 \item $\forall e \in E^+: \exists A \in AS(B \cup H)\ \text{st}\ A\ \text{extends}\ e$

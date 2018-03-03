@@ -1117,6 +1117,173 @@ coin(c2).
 
 $$\text{ILP}_\text{LAS} \langle B, \{\langle \emptyset, \emptyset \rangle\}, \{\langle \emptyset, e^+_1\rangle, ..., \langle \emptyset, e^+_n\rangle, \langle e^-_1, \emptyset\rangle, ..., \langle e^-_m, \emptyset\rangle\}\rangle$$
 
+\section{Meta-Interpretive Learning of Grammars}
+
+\paragraph{} State-of-art ILP systems cannot learn grammar because they are fail to learn recursions and invent new predicates as needed. We now look at the Meta-Interpretive Learning (MIL) framework\cite{muggleton13} that enables this.
+
+\subsection{Parity Example}
+
+\paragraph{} We look at the rules for a even parity example on accepting or rejecting an input. The following shows the Finite State Maching (FSM) diagram of the finite acceptor:
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.6]{graphics/mil-parity-fsm.png}
+\caption{The finite acceptor of the parity example with two states, $q_0$ and $q_1$. The system starts at the $q_0$ and the double circle means that the system must end at the state $q_0$ for it to be valid.}
+\end{figure}
+
+The Definite Clause Grammar of the even parity example can be written down as:
+
+\begin{align*}
+q_0([], []) &\leftarrow\\
+q_0([0|A], B) &\leftarrow q_0(A, B)\\
+q_0([1|A], B) &\leftarrow q_1(A, B)\\
+q_1([0|A], B) &\leftarrow q_1(A, B)\\
+q_1([1|A], B) &\leftarrow q_0(A, B)\\
+\end{align*}
+
+\paragraph{} Some positive examples can include: $\lambda, 0, 11, 00, 101$, where $\lambda$ represents the empty string. We notice that we can build a general form of DCG as such:
+
+\begin{align*}
+Q([], []) &\leftarrow\\
+Q([C|x],y) &\leftarrow P(X, Y)
+\end{align*}
+
+\paragraph{} We can perform predicate invention using a higher-order abduction. Suppose we build a meta-interpreter for the regular grammar of parity bit as follows:
+
+\begin{align*}
+parse(S) \leftarrow\ &parse(q0, S, []).\\
+parse(Q, [], []) \leftarrow\ &acceptor(Q).\\
+parse(Q, [C|X], Y) \leftarrow\ &delta1(Q, C, P),\\ &parse(P, X, Y).
+\end{align*}
+
+\paragraph{} This is also a Meta-Interpreter for Regular Languages.
+
+\subsection{MIL Setting}
+
+\paragraph{} The input of learning task is a tuple $\langle B, E\rangle$ where $B = \langle B_M, B_A \rangle$ where $B_M$ is the Meta-Interpreter and $B_A$ is the Atomic background knowledge. $E = \langle E^+, E^- \rangle$ are the sets of positive and negative examples respectively. A hypothesis $H \in \mathcal{H}_{B,E}$ is a set of higher-order $\exists$-quantified Datalog atoms st $B, H \models E^+$ and $B, E^-$ consistent.
+
+\paragraph{} We apply inverse entailment $B, \lnot E^+ \models \lnot H$, where $\lnot E^+$ and $\lnot H$ are $\forall$-quantified denials.
+
+\paragraph{} For the parity example, we construct the following examples:
+
+\begin{table}[H]
+\centering\footnotesize
+\begin{tabular}{ | l | l | l | }
+
+\hline
+$E^+$ & $\lnot E^+$ & $E^-$ \\
+\hline
+
+$parse([]) \leftarrow$ & $\leftarrow parse([]),$ & $\leftarrow parse([1])$ \\
+$parse([1, 1]) \leftarrow$ & $parse([1, 1]),$ & $\leftarrow parse([0, 1])$ \\
+$parse([0, 1, 1]) \leftarrow$ & $parse([0, 1, 1]),$ & $\leftarrow parse([1, 0])$ \\
+$parse([1, 0, 1]) \leftarrow$ & $parse([1, 0, 1]),$ & $\leftarrow parse([0, 0, 1])$ \\
+$parse([1, 1, 0]) \leftarrow$ & $parse([1, 1, 0]).$ & $\leftarrow parse([1, 1, 1])$ \\
+
+\hline
+\end{tabular}
+\caption{The table of MIL examples for the Parity example. The negation of $E^+$ can be seen in the second column.}
+\end{table}
+
+\subsection{Hypothesis Ordering in MIL}
+
+\begin{defn}Within the MIL setting, we say that $H \succeq_{B,E} H'$ in the case that $H, H' \in \mathcal{H}_{B,E}$ and $\lnot H' \succeq_\theta \lnot H$.\end{defn}
+
+\paragraph{Proposition (Lattice)} Given $\mathcal{H}_{B,E}$ and the relation $\succeq_{B,E}$, the pair $\langle \mathcal{H}_{B,E}, \succeq_{B,E} \rangle$ forms a lattice.
+
+\paragraph{Proposition (Unique $\top$)} There exists $\top \in \mathcal{H}_{B,E}$ st $\forall H \in \mathcal{H}_{B.E}: \top \succeq_{B,E} H$ and $\top$ is unique up to renaming of Skolem constants.
+
+\paragraph{Proposition (Unique $\perp$)} There exists $\perp \in \mathcal{H}_{B,E}$ st $\forall H \in \mathcal{H}_{B.E}: H \succeq_{B,E} \perp$ and $\perp$ is unique up to renaming of Skolem constants.
+
+\subsection{Meta-Interpreter for Context-Free Grammars}
+
+\paragraph{} Using the MIL setting and definitions, we build a meta-interpreter for Context-Free Grammars (CFGs) using five statements:
+
+\begin{align*}
+parse(S) \leftarrow start(Q), parse(Q, S, []).
+\end{align*}
+
+\paragraph{} The statement above begins parsing $S$ by finding a start state $Q$ and parse $S$ beginning at state $Q$. In the last argument of $parse$, we also indicate that parsing terminates at an empty list.
+
+\begin{align*}
+parse(Q, X, X) \leftarrow acceptor(Q).
+\end{align*}
+
+\paragraph{} Here we define the parsing recursive base case where $Q$ is an acceptor in the FSM and the last two arguments of $parse$ are equal.
+
+\begin{align*}
+parse(Q, [C|X], Y) \leftarrow\ &delta1(Q, C, P),\\ &parse(P, X, Y).
+\end{align*}
+
+\paragraph{} The third statement states that if $delta1(Q, C, P)$, and $C$ is at the front of list $X$, we perform $parse(P, X, Y)$. $delta1$ checks if a transition from state $Q$ to state $P$, given that $C$ is currently observed, is allowed. The last literal $parse(P, X, Y)$ simply continues to parse the rest of the list recursively from state $P$.
+
+\begin{align*}
+parse(Q, X, Y) \leftarrow\ &delta2(Q, P, C),\\ &parse(P, X, [C|Y]).
+\end{align*}
+
+\paragraph{} The fourth statement performs an accumulation of $C$ into the third parameter of $parse$ and performs the transition from state Q to P if $delta2(Q, P, C)$ holds. The accumulation is later checked at the base case to see if the ending list and accumulated list matches at the acceptor.
+
+\begin{align*}
+parse(Q, X, Y) \leftarrow\ &delta3(Q, P, R),\\ &parse(P, X, Z), parse(R, Z, Y).
+\end{align*}
+
+% TODO: discuss delta3
+
+\subsection{Metagol${}_R$ Prolog Implementation}
+
+\paragraph{} The following is the Metagol${}_R$ implementation in Prolog. The $R$ stands for Regular Languages.
+
+\begin{lstlisting}
+parse(S, G1, G2) :- parse(s(0), S, [], G1, G2).
+
+parse(Q, X, X, G1, G2) :- abduce(acceptor(Q), G1, G2).
+parse(Q, [C|X], Y, G1, G2) :- skolem(P), abduce(delta1(Q, C, P), G1, G3), parse(P, X, Y, G3, G2).
+
+abduce(X, G, G) :- member(X, G).
+abduce(X, G, [X|G]) :- not member(X, G).
+
+skolem(s(0)).
+skolem(s(1)).
+...
+\end{lstlisting}
+
+\paragraph{} Abducible terms are simply accumulated in variables $G1$, $G2$ and $G3$. A finite set of Skolem constants is provided by the monadic predicate \lstinline{skolem/1}.
+
+\paragraph{} To build the learn the correct state transitions, we provide a set of positive and negative examples in our query. For example in the case the Parity example:
+
+\begin{lstlisting}
+:- parse([], [], G1), parse([0], G1, G2), parse([0, 0], G2, G3), parse([1, 1], G3, G4), parse([0, 0, 0], G4, G5), parse([0, 1, 1], G5, G6), parse([1, 0, 1], G6, G), not parse([1], G, G), not parse([0, 1], G, G).
+\end{lstlisting}
+
+\paragraph{} The set of abducibles is built iteratively through each positive examples in G1, G2, ... until G, where the final set of abduciles are created. The negative examples are prefixed with $not$ to ensure that the abducibles in $G$ do not cause our answer to entail negative examples. An answer to the query would be:
+
+\begin{lstlisting}
+G = [
+  delta1(s(1), 0, s(1)),
+  delta1(s(1), 1, s(0)),
+  delta1(s(0), 1, s(1)),
+  delta1(s(0), 0, s(0)),
+  acceptor(s(0))
+]
+\end{lstlisting}
+
+\section{MIL of Higher-Order Dyadic Datalog}
+
+\paragraph{Dyadic} Binary functions; functions of arity 2.
+
+\paragraph{} In early sections of MIL, we saw how programs can learn regular languages and context free grammars. However, the program has yet to learn how to perform \textbf{predicate invention} or learn any recursion. We consider the example of family relations with the following target theory:
+
+\begin{align*}
+father(ted, bob) \leftarrow&\\
+father(ted, jane) \leftarrow&\\
+parent(X, Y) \leftarrow\ &mother(X, Y).\\
+parent(X, Y) \leftarrow\ &father(X, Y).\\
+ancestor(X, Y) \leftarrow\ &parent(X, Y).\\
+ancestor(X, Y) \leftarrow\ &parent(X, Z),\\ &ancestor(Z, Y).\\
+\end{align*}
+
+\paragraph{} In the family relations theory above, we see that given the predicates $father/2$ and $mother/2$, we want to learn $parent/2$ through predicate invention and $ancestor/2$ through both predicate invention and recursion.
+
 \end{multicols}
 
 \bibliographystyle{plain}

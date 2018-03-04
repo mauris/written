@@ -1284,6 +1284,257 @@ ancestor(X, Y) \leftarrow\ &parent(X, Z),\\ &ancestor(Z, Y).\\
 
 \paragraph{} In the family relations theory above, we see that given the predicates $father/2$ and $mother/2$, we want to learn $parent/2$ through predicate invention and $ancestor/2$ through both predicate invention and recursion.
 
+\subsection{Generalised Meta-Interpreter}
+
+\paragraph{} We perform some meta-logical substitutions to have us achieve such a learning task. For example:
+
+\begin{align*}
+father(ted, bob) \leftarrow
+\end{align*}
+
+would be substituted as:
+
+\begin{align*}
+metasub(instance, [father, ted, bob]).
+\end{align*}
+
+and
+
+\begin{align*}
+p1(X, Y) \leftarrow father(X, Y).
+\end{align*}
+
+would be substituted as:
+
+\begin{align*}
+metasub(base, [p1, father]).
+\end{align*}
+
+The tail recursive substitution would then be:
+
+\begin{align*}
+ancestor(X, Y) \leftarrow\ &parent(X, Z),\\ &ancestor(Z, Y).
+\end{align*}
+
+would be substituted as:
+
+\begin{align*}
+metasub(tailrec, [ancestor, p1, ancestor]).
+\end{align*}
+
+\paragraph{} Finally, we build a generalised Meta-Interpreter as such:
+
+\begin{lstlisting}
+prove([], Prog, Prog).
+prove([Atom | As], Prog1, Prog2) :-
+	metarule(Name, MetaSub, (Atom :- Body), Order),
+	Order,
+	save_subst(metasub(Name, MetaSub), Prog1, Prog3),
+	prove(Body, Prog3, Prog4),
+	prove(As, Prog4, Prog2).
+\end{lstlisting}
+
+\paragraph{} The interpreter takes a base case \lstinline{prove([], Prog, Prog)} that returns the program in the third argument if there is nothing to prove.
+
+\paragraph{} For the recursive proving rule, it performs an abduction then proves the body recursively. This allows recursive learning to happen. The substitution abducibles are saved in propagating manner through \lstinline{Prog3}, \lstinline{Prog4} and finally \lstinline{Prog2}.
+
+\subsection{Table of Metarules}
+
+The metarules used in the meta-interpreter are as follows:
+
+\begin{table}[H]
+\centering\footnotesize
+\begin{tabular}{ | l | l | l | }
+\hline
+\textbf{Name} & \textbf{Meta-Rule} & \textbf{Order} \\
+\hline
+\hline
+
+Instance & $P(X, Y) \leftarrow$ & \textit{True}\\
+\hline
+
+Base & $P(x, y) \leftarrow Q(x, y)$ & $P \succ Q$\\
+\hline
+
+Chain & $P(x, y) \leftarrow Q(x, z), R(z, y)$ & $P \succ Q, P \succ R$\\
+\hline
+
+TailRec & $P(x, y) \leftarrow Q(x, z), P(z, y)$ & $P \succ Q, x \succ z \succ q$\\
+\hline
+\end{tabular}
+\caption{The table of Metarules used by the Meta-Interpreter.}\label{table:MILMetarules}
+\end{table}
+
+\paragraph{} The total ordering on P, Q, R and x, y, z helps interval shrinking so that the program eventually leads to a terminating state. The tail recursion introduces the danger of not terminating if ordering is not in use. From the general form of each metarule in Table \ref{table:MILMetarules}, we can define the metarule general form with quantification:
+
+\begin{table}[H]
+\centering\footnotesize
+\begin{tabular}{ | l | l | l | }
+\hline
+\textbf{Name} & \textbf{Meta-Rule} & \textbf{Quantification} \\
+\hline
+\hline
+
+Instance & $P(X, Y) \leftarrow$ & $\exists P, X, Y$\\
+\hline
+
+Base & $P(x, y) \leftarrow Q(x, y)$ & $\exists P\ \forall x, y$\\
+\hline
+
+Chain & $P(x, y) \leftarrow Q(x, z), R(z, y)$ & $\exists P, Q, R\ \forall x, y, z$\\
+\hline
+
+TailRec & $P(x, y) \leftarrow Q(x, z), P(z, y)$ & $\exists P, Q, R\ \forall x, y, z$\\
+\hline
+\end{tabular}
+\caption{The table of quantification of each metarule.}\label{table:MILMetarulesQuantification}
+\end{table}
+
+\subsection{Expressivity of $H^2_2$}
+
+\paragraph{} In the Family relations example, we consider datalog logic programs in $H^2_2$, which contain predicates of at most \textbf{2} arity and has at most \textbf{2} atoms in the body.
+
+\paragraph{} Given an infinite signature, $H^2_2$ has Universal Turning Machine expressivity.\cite{tarnlund77}
+
+\begin{align*}
+utm(S, S) \leftarrow\ &halt(S).\\
+utm(S, T) \leftarrow\ &execute(S, S1),\\ &utm(S1, T).\\
+execute(S, T) \leftarrow\ &instruction(S, F),\\ &F(S, T).\\
+\end{align*}
+
+\paragraph{} But the question is, how can we limit $H^2_2$ to avoid the halting problem?
+
+\subsection{Bias Reformulation}
+
+\paragraph{} Consider the following computation problem:
+
+\begin{table}[H]
+\centering\footnotesize
+\begin{tabular}{ | l | l | }
+\hline
+bob & BOB \\
+alice & ?\\
+\hline
+\end{tabular}
+\caption{Text transformation problem}\label{table:MILTextTransformation}
+\end{table}
+
+\paragraph{} Given "bob" and the correct label "BOB", how would we expect a program to learn how to give the correct answer for "alice"? One possible answer would be
+
+\begin{table}[H]
+\centering\footnotesize
+\begin{tabular}{ | l | l | }
+\hline
+bob & BOB \\
+alice & BOICE\\
+\hline
+\end{tabular}
+\caption{Solution 1 to the text transformation problem}\label{table:MILTextTransformation2}
+\end{table}
+
+\paragraph{} Perhaps the system should write "BO" followed by the remaining characters "ICE"? Another possible answer would be:
+
+\begin{table}[H]
+\centering\footnotesize
+\begin{tabular}{ | l | l | }
+\hline
+bob & BOB \\
+alice & ALILA\\
+\hline
+\end{tabular}
+\caption{Solution 2 to the text transformation problem}\label{table:MILTextTransformation3}
+\end{table}
+
+
+\paragraph{} or perhaps the system should should consider the answer "BOB" as a capitalised reversal of "bob" and does the same for "alice", creating "ALILA" and ignoring "ce"? Intuitively to us humans, the following solution would have been what was expected:
+
+\begin{table}[H]
+\centering\footnotesize
+\begin{tabular}{ | l | l | }
+\hline
+bob & BOB \\
+alice & ALICE\\
+\hline
+\end{tabular}
+\caption{Solution 3 to the text transformation problem}\label{table:MILTextTransformation3}
+\end{table}
+
+\paragraph{} It's obvious there are bias and intuition we picked up over the years that we cannot expect a machine to have immediately without learning them. Other harder tasks could involve:
+
+\begin{table}[H]
+\centering\footnotesize
+\begin{tabular}{ | l | p{3.2cm} | l | }
+\hline
+Task 1 & miKe dwIGHT & Mike Dwight \\
+\hline
+Task 2 & European Conference on Artificial Intelligence & ECAI \\
+\hline
+Task 3 & My name is John. & John \\
+\hline
+\end{tabular}
+\caption{Harder tasks of text transformation learning.}\label{table:MILTextTransformation3}
+\end{table}
+
+\paragraph{} How can this human text transformation bias be learned by a computer? Ideally we want machines to look at one positive example and would be able to start getting correct predictions.
+
+\paragraph{Option 1} Flash Fill in Microsoft Excel 2013 (Gulwani, 2011, 2012) with a hardcoded bias as domain-specific language could learn how to extract all the names from email addresses given one example. However, there are still other non-intuitive error in Flash Fill:
+
+\begin{table}[H]
+\centering\footnotesize
+\begin{tabular}{ | l | l | }
+\hline
+IaN RoDny & Ian Rodny \\
+StaNleY TRAVis & Itanley Rley travis\\
+\hline
+\end{tabular}
+\caption{Non-intuitive error in Flash Fill}\label{table:Flashfill}
+\end{table}
+
+\paragraph{Option 2} We learn the bias by using a variant of Meta-Interpretive Learning (presented at IJCAI 2013):
+
+\begin{lstlisting}[mathescape=true]
+ep04(A, B) $\leftarrow$ ep04_1(A, C), ep04_2(C, B).
+ep04_1(A, B) $\leftarrow$ ep04_3(A, C), ep04_4(C, B).
+ep04_2(A, B) $\leftarrow$ ep04_3(A, C),
+	skiprest(C, B).
+ep04_3(A, B) $\leftarrow$ make_uppercase(A, C),
+	copyword(C, B).
+ep04_4(A, B) $\leftarrow$ skip1(A, C),
+	write_space(C, B).
+\end{lstlisting}
+
+\paragraph{} However, the performance of learning by MIL is not desirable. It took 9.3 seconds to learn the bias above. Those five clauses are sufficient to work on an example such as:
+
+\begin{table}[H]
+\centering\footnotesize
+\begin{tabular}{ | l | l | }
+\hline
+brent.harold@hotmail.com & Brent Harold\\
+\hline
+\end{tabular}
+\caption{Example of name extraction from email address.}\label{table:Flashfill}
+\end{table}
+
+\paragraph{} However there may be previously learned theory that can be re-used to speed up learning:
+
+\begin{lstlisting}[mathescape=true]
+ep02(A, B) $\leftarrow$ ep02_1(A, C), write_dot(C, B).
+ep02_1(A, B) $\leftarrow$ make_upper(A, C), copyword(C, B)
+
+ep04(A, B) $\leftarrow$ ep04_1(A, C), ep04_2(C, B).
+ep04_1(A, B) $\leftarrow$ ep02_1(A, C), ep04_4(C, B).
+ep04_2(A, B) $\leftarrow$ ep02_1(A, C),
+	skiprest(C, B).
+ep04_4(A, B) $\leftarrow$ skip1(A, C),
+	write_space(C, B).
+\end{lstlisting}
+
+\paragraph{} Note in the results above, ep04\_1 and ep04\_2 could now re-use ep02\_1 instead of learning one more clauses. Episode 4 now has one less clause to learn, which brought the learning time down to 3.1 seconds.
+
+\subsection{Language Class \& Complexity}
+
+\paragraph{} The cardinality of hypothesis space $O(m^n p^{3n})$, given $m$ metarules, $n$ clauses, and $p$ predicate symbols. The complexity is on the exponent which is the number of clauses. By reducing the number of clauses we could greatly reduce the hypothesis space.
+
 \end{multicols}
 
 \bibliographystyle{plain}

@@ -52,8 +52,6 @@
 
 \begin{multicols}{2}
 
-\paragraph{} NOTICE: This set of reference is currently incomplete with respect to the syllabus of the course and will be updated as the semester progress. By end Mar 2018 it should be complete.
-
 \section*{Foreword}  
 
 \paragraph{} This reference was made as an condensation from the lecture slides and notes provided by Prof. Alessio R. Lomuscio, Prof. Michael Huth and Prof. Mark D. Ryan in the Imperial College London, Department of Computing's 303: Systems Verification.
@@ -197,11 +195,11 @@ Necessitation & It is necessary that $\phi$ holds & It is possible that $\phi$ h
 \item $(M, w) \models p \impliedby w \in \pi(p)$
 \item $(M, w) \models \lnot\phi \impliedby \lnot((M, w)\models \phi)$
 \item $(M, w) \models \phi \land \psi \impliedby ((M,w) \models \phi) \land ((M, w) \models \psi)$
-\item $(M, w) \models \Box\psi \impliedby\\ (\forall w' \in W (w R w' \implies (M, w') \models \psi)$
-\item $(M, w) \models \Diamond\psi \impliedby\\ (\exists w' \in W (w R w' \land (M, w') \models \psi)$
+\item $(M, w) \models \Box\psi \impliedby\\ (\forall w' \in W: w R w' \implies (M, w') \models \psi)$
+\item $(M, w) \models \Diamond\psi \impliedby\\ (\exists w' \in W: w R w' \land (M, w') \models \psi)$
 \end{itemize}
 
-\noindent We read $(M, w) \models \phi$ as "$\phi$ is true at $w$ in model $M$".
+\noindent We read $(M, w) \models \phi$ as "$\phi$ is true at $w$ in model $M$". In the case of $(M, w) \models \Box\psi$, if $w$ does not have any successor defined by the relation $R$ then $(M, w) \models \Box\psi$ holds for any $\psi$.
 
 \section{Linear Temporal Logic}
 

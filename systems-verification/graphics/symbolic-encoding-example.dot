@@ -1,0 +1,13 @@
+digraph {
+  nodesep=0.5;
+  node[shape=circle];
+  s0 [label="x1", xlabel="s0"];
+  s1 [label="x2", xlabel="s1"];
+  s2 [label="", xlabel="s2"];
+  
+  {rank=same; s0; s1;}
+  
+  s0 -> s1;
+  s1 -> s2;
+  s2 -> {s2, s0};
+}

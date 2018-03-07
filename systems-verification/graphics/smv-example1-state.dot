@@ -1,0 +1,15 @@
+digraph {
+  rankdir=LR;
+  nodesep=0.8;
+  ranksep=0.5;
+  
+  node[shape=circle];
+  0 [label=<!b0> xlabel=0]
+  1 [label=<b0> xlabel=1]
+  
+  0 -> 1;
+  1 -> 0;
+  
+  node[style=invisible];
+  start -> 0;
+}

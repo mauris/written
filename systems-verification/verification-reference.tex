@@ -1,5 +1,6 @@
 \documentclass{article}
 \usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
 \usepackage{geometry}
 \usepackage{amsmath}
 \usepackage{dirtytalk}
@@ -11,6 +12,7 @@
 \longdate
 \usepackage{amsfonts}
 \usepackage{multicol}
+\usepackage{multirow}
 \usepackage{amsthm}
 \usepackage{comment}
 \usepackage[font=footnotesize,labelfont=bf]{caption}
@@ -129,10 +131,10 @@ We refer $\phi, \psi,...$ to arbitrary formulas in $\mathcal{L}$ and $p, q, ...$
 
 \medskip 
 \noindent
-{\small
+\begin{table}[H]
 \bgroup
-\def\arraystretch{1.5}
-\begin{tabular}{ | p{1.8cm} || p{2.4cm} | p{2.4cm} | }
+\def\arraystretch{1.5}\footnotesize
+\begin{tabular}{ | p{2cm} || p{2.4cm} | p{2.4cm} | }
 \hline
 \bf Meaning of $\Box$ & \bf Reading of $\Box\phi$ & \bf Reading of $\Diamond\phi$ \\
 \hline
@@ -158,7 +160,8 @@ Necessitation & It is necessary that $\phi$ holds & It is possible that $\phi$ h
 
 \end{tabular}
 \egroup
-}
+\caption{Table of Modality Readings}
+\end{table}
 
 \begin{exmp}In the \textit{Epistemic} meaning, $\Box\Box\phi$ is read as "$\phi$ is known to be known".\end{exmp}
 \begin{exmp}In the \textit{Epistemic} meaning, $\Box\Diamond\phi$ is read as "$\phi$ is known to be regarded as possible".\end{exmp}
@@ -549,7 +552,7 @@ $$M_S \models \phi_P$$
 
 $$s_0 \in [\phi]_M \equiv (M, s_0) \models \phi$$
 
-\subsection{Labelling Algorithm}
+\subsection{Labelling Algorithm}\label{sec:LabellingAlgorithm}
 
 \paragraph{} We label the states where the subformulas of $\phi$ are satisfied starting from the smallest subformulas and working outwards towards $\phi$. 
 
@@ -685,7 +688,7 @@ end function
 
 \paragraph{} Note that we do not specify the implementation for LTL here because the algorithm will need to check for all paths from a given state. This will give you a hint about the time complexity of such computation if we were to perform explicit model checking on LTL. We will discuss the time complexity of LTL explicit model checking later in Section \ref{sec:ExplicitModelCheckingComplexityAnalysis}.
 
-\subsection{Handling Fairness}
+\subsection{Handling Fairness}\label{sec:HandlingFairness}
 \paragraph{} We use fairness conditions not to consider paths that are not meaningful for our purposes. The way model checkers handle this depends on what logic (CTL, LTL, CTL* ...) they are checking specifications for.
 
 \paragraph{} For the case of LTL, it is trivial. Suppose we need to check a condition $\phi$ where fair paths satisfy $p$. We can simply check for the condition $GFp \implies \phi$. For CTL, we cannot sub-select path in a similar way so we need to redefine satisfaction for certain operators\footnote{Not covered in syllabus}.
@@ -723,19 +726,13 @@ end function
 
 \begin{table}[H]
 \centering
-\begin{tabular}{| c | c | c |}
-\hline
+\begin{tabular}{c | c | c}
 $x$ & $y$ & $f(x, y)$ \\
 \hline
-\hline
 0 & 0 & 1 \\
-\hline
 0 & 1 & 0 \\
-\hline
 1 & 0 & 0 \\
-\hline
 1 & 1 & 0 \\
-\hline
 \end{tabular}
 \caption{The truth table for the formula $\lnot(x \lor y)$.}
 \end{table}
@@ -839,6 +836,625 @@ Assume $B_f$ and $B_y$ to be two ROBDDs with compatible variable orderings. If $
 \item \textbf{Test for satisfiability}: $f$ is satisfiable iff $B_f \not\equiv B_0$.
 \item \textbf{Test for semantic equivalence}: $f$ and $g$ are semantically equivalent iff $B_f \equiv B_y$.
 \end{itemize}
+
+\section{Symbolic Model Checking with OBDDs}
+
+\paragraph{} OBDDs can be used to perform symbolic model checking. This is the technique implemented in NuSMV, MCMAS and many other model checkers as symbolic model checking technique can be much more efficient than explicit model checking techniques. 
+
+\paragraph{} The key observation is that we can represent sets and functions between sets as Boolean formulas. Once we have a Boolean formula, we can construct the corresponding OBDD and build the corresponding ROBDD. Operations on sets and functions can then be executed on the ROBDD. 
+
+\subsection{Representing sets of states}
+
+\paragraph{} Boolean functions can be used to encode states. Considering the set of states $S = \{a, b, c, d, e, f\}$, to represent any element in $S$ we need a number of $n = 3$ bits. This means that we can build a correspondence between a vector of Boolean values to elements in a set. 
+
+\paragraph{} In general, to represent any element of a set $S$, we need at least $n$ bits where $2^n > |S| > 2^{n-1}$. Usually, $S$ does not have a cardinality power of 2 and hence some vectors will not code up any element.
+
+\subsection{Representing Subsets}
+
+\paragraph{} The subsets of $S$ can now be thought of as functions $\{0, 1\} \times \{0, 1\} \times \{0, 1\} \rightarrow \{0, 1\}$. The domain / pre-image of the function codes up all possible vectors representing the state and the range / image of the function is 0 or 1 depending on whether the element in in the subset or not.
+
+\paragraph{} In the example $S = \{a, b, c, d, e, f\}$, since $n = 3$, there are $2^{2^3} = 256$ such functions / propositions, even though in reality there are only $2^6 = 64$ subsets of $S$\footnote{We had to pad representation of $S$ to 8 elements.}. 
+
+\paragraph{} Equivalently, we can represent a subset using a Boolean formula over the atoms $\{x_1, x_2, x_3\}$. Consider the subset $S_1 = \{a, c, e\} \subseteq S$: $S_1$ can be encoded as $\{000, 010, 100\}$ and represented by the following propositional formula:
+
+\begin{align*}
+f_{S_1} =\ &(\lnot x_1 \land \lnot x_2 \land \lnot x_3)\\
+ &\lor (\lnot x_1 \land x_2 \land \lnot x_3)\\
+ &\lor (x_1 \land \lnot x_2 \land \lnot x_3)
+\end{align*}
+
+\paragraph{} The simplification of $f_{S_1}$ results in:
+
+\begin{align*}
+f_{S_1} = (\lnot x_1 \lor \lnot x_2) \land \lnot x_3
+\end{align*}
+
+\paragraph{} $f_{S_1}$ can now be encoded as ROBDD after picking a variable ordering.
+
+\subsection{Operation on Sets}
+
+\paragraph{} Set operations can be encoded as Boolean operations on their corresponding Boolean formulas. In particular:
+
+\begin{align*}
+f_{S_1 \cap S_2} &= f_{S_1} \land f_{S_2} \\
+f_{S_1 \cup S_2} &= f_{S_1} \lor f_{S_2} \\
+f_{-S_1} &= \lnot f_{S_1} \\
+\end{align*}
+
+\paragraph{} The set operations - namely intersection, union and complement - mentioned in explicit model checking can now be encoded as boolean operations directly. 
+
+\paragraph{} There are two other functions $pre_\exists$ and $pre_\forall$ used in explicit model checking where
+
+\begin{itemize}
+\item $pre_\exists(X) = \{ s\ |\ \exists s': s \rightarrow s' \land s \in X \}$
+\item $pre_\forall(X) = \{ s\ |\ \forall s': s \rightarrow s' \implies s \in X \}$
+\end{itemize}
+
+\paragraph{} To see how these functions can be implemented in symbolic model checking, we need to first see how the transition relation $\rightarrow$ is represented.
+
+\subsection{Symbolic Encoding}\label{sec:SymbolicEncoding}
+
+\paragraph{} Models denoted by model checkers have the property that where $S$ is the set of all states, $\forall s_1, s_2 \in S: \pi(s_1) = \pi(s_2) \implies s_1 = s_2$. This means that a state is determined entirely by the atomic formulas that are true in it. This is because the variables used in the code are then used as propositional variables for the specifications.
+
+\paragraph{} Consider the following model:
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.7]{graphics/symbolic-encoding-example}
+\caption{Example model}\label{fig:SymbolicModelExample}
+\end{figure}
+
+\paragraph{} The set of states from the model may be represented by Boolean values and by Boolean formulas as follows:
+
+\begin{table}[H]
+\centering\footnotesize
+\bgroup
+\def\arraystretch{1.5}
+\begin{tabular}{ p{0.8cm} | p{2.4cm} p{3.2cm} }
+Set of States & Representation by Boolean values & Representation by Boolean function\\
+\hline
+\hline
+
+$\emptyset$ & & 0\\
+\hline
+$\{s_0\}$ & $\{(1, 0)\}$ & $x_1 \land \lnot x_2$\\
+$\{s_1\}$ & $\{(0, 1)\}$ & $\lnot x_1 \land x_2$\\
+$\{s_2\}$ & $\{(0, 0)\}$ & $\lnot x_1 \land \lnot x_2$\\
+\hline
+$\{s_0, s_1\}$ & $\{(1, 0), (0, 1)\}$ & $(x_1 \land \lnot x_2) \lor (\lnot x_1 \land x_2)$\\
+$\{s_1, s_2\}$ & $\{(0, 1), (0, 0)\}$ & $(\lnot x_1 \land x_2) \lor (\lnot x_1 \land \lnot x_2)$\\
+$\{s_2, s_0\}$ & $\{(0, 0), (1, 0)\}$ & $(\lnot x_1 \land \lnot x_2) \lor (\lnot x_1 \land x_2)$\\
+\hline
+$S$ & $\{(1, 0), (0, 1), (0, 0)\}$ & $(x_1 \land \lor x_2) \lor (\lnot x_1 \land x_2) \lor (\lnot x_1 \land \lnot x_2)$\\
+
+\end{tabular}
+\egroup
+\caption{Symbolic encoding for the model in Figure \ref{fig:SymbolicModelExample}.}
+\end{table}
+
+\paragraph{} Noticed that the vector $(1, 1)$ and its corresponding formula $x_1 \land x_2$ are unused by the model in Figure \ref{fig:SymbolicModelExample}. It is up to us to decide whether to include it in the representation of a subset of $S$ or not. We may include it if this optimises the size of the resulting ROBDD.
+
+\paragraph{} For example, the subset $\{s_0, s_1\}$ is more efficiently represented by the equivalent Boolean function $x_1 \lor x_2$ (that means $(1, 1)$) since its ROBDD is smaller than that for $(x_1 \land \lnot x_2) \lor (\lnot x_1 \land x_2)$ as we can see below:
+
+\begin{multicols}{2}
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.6]{graphics/symbolic-encoding-obdd1}
+\caption{The ROBDD of $x_1 \lor x_2$ using order $(x_1, x_2)$.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.6]{graphics/symbolic-encoding-obdd2}
+\caption{The ROBDD of $(x_1 \land \lnot x_2) \lor (\lnot x_1 \land x_2)$ using the same order $(x_1, x_2)$.}
+\end{figure}
+\end{multicols}
+
+\paragraph{} To compute the OBDD for the transition relation $\rightarrow$ of the model given in Figure \ref{fig:SymbolicModelExample}, we first need to encode the truth table of $\rightarrow$. Each $1$ in the relation column represents a transition between two states and $0$ represents absence of such transition. We write $-$ to denote transitions we don't care. The table below shows this:
+
+\begin{table}[H]
+\centering
+\begin{tabular}{ c c | c c | c }
+\multicolumn{2}{ c |} {$s_1$} & \multicolumn{2}{ c |} {$s_2$} & \\
+$x_1$ & $x_2$ & $x'_1$ & $x'_2$ & $\rightarrow$ \\
+\hline
+
+0 & 0 & 0 & 0 & 1\\
+0 & 0 & 0 & 1 & 0\\
+0 & 0 & 1 & 0 & 1\\
+0 & 0 & 1 & 1 & -\\
+\hline
+
+0 & 1 & 0 & 0 & 1\\
+0 & 1 & 0 & 1 & 0\\
+0 & 1 & 1 & 0 & 0\\
+0 & 1 & 1 & 1 & -\\
+\hline
+
+1 & 0 & 0 & 0 & 0\\
+1 & 0 & 0 & 1 & 1\\
+1 & 0 & 1 & 0 & 0\\
+1 & 0 & 1 & 1 & -\\
+\hline
+
+1 & 1 & 0 & 0 & -\\
+1 & 1 & 0 & 1 & -\\
+1 & 1 & 1 & 0 & -\\
+1 & 1 & 1 & 1 & -\\
+
+\end{tabular}
+\caption{The truth table of state transition relation for the example model given in Figure \ref{fig:SymbolicModelExample}.}
+\end{table}
+
+\paragraph{} Now we can represent the transition relation $\rightarrow$ as a Boolean function by taking the disjunction of the rows having $1$ in the last column. We would obtain the following expression:
+
+\begin{align*}
+f_\rightarrow = &(\lnot x_1 \land \lnot x_2 \land \lnot x'_1 \land \lnot x'_2)\\
+&\lor (\lnot x_1 \land \lnot x_2 \land x'_1 \land \lnot x'_2)\\
+&\lor (x_1 \land \lnot x_2 \land \lnot x'_1 \land x'_2)\\
+&\lor (\lnot x_1 \land x_2 \land \lnot x'_1 \land \lnot x'_2)
+\end{align*}
+
+\paragraph{Variable Ordering} It is usually more efficient to interleave unprimed and primed variables in the OBDD variable ordering for $\rightarrow$. Variable ordering is important in getting compact OBDD representations. Consider using the ordering $(x_1, x'_1, x_2, x'_2)$ instead:
+
+\begin{table}[H]
+\centering
+\begin{tabular}{ c c | c c | c }
+$x_1$ & $x'_1$ & $x_2$ & $x'_2$ & $\rightarrow$ \\
+\hline
+
+0 & 0 & 0 & 0 & 1\\
+0 & 0 & 0 & 1 & 0\\
+0 & 0 & 1 & 0 & 1\\
+0 & 0 & 1 & 1 & 0\\
+\hline
+
+0 & 1 & 0 & 0 & 1\\
+0 & 1 & 0 & 1 & -\\
+0 & 1 & 1 & 0 & 0\\
+0 & 1 & 1 & 1 & -\\
+\hline
+
+1 & 0 & 0 & 0 & 0\\
+1 & 0 & 0 & 1 & 1\\
+1 & 0 & 1 & 0 & -\\
+1 & 0 & 1 & 1 & -\\
+\hline
+
+1 & 1 & 0 & 0 & 0\\
+1 & 1 & 0 & 1 & -\\
+1 & 1 & 1 & 0 & -\\
+1 & 1 & 1 & 1 & -\\
+
+\end{tabular}
+\caption{The truth table of state transition relation for the example model given in Figure \ref{fig:SymbolicModelExample} using the ordering $(x_1, x'_1, x_2, x'_2)$.}
+\end{table}
+
+\paragraph{BDD Reduction} For the don't care expressions, we can choose to assign them with $0$ or $1$ reduce the BDD. Ideally, we want to group them with their neighbours to form blocks of $0$s and $1$s. For example, consider the following substitutions:
+
+
+\begin{table}[H]
+\centering
+\begin{tabular}{ c c | c c | c | c | p{1,4cm} }
+$x_1$ & $x'_1$ & $x_2$ & $x'_2$ & $\rightarrow$ & $\rightarrow_\theta$ &  \\
+\hline
+
+0 & 0 & 0 & 0 & 1 & 1 & \\
+0 & 0 & 0 & 1 & 0 & 0 & \\
+0 & 0 & 1 & 0 & 1 & 1 & \\
+0 & 0 & 1 & 1 & 0 & 0 & \\
+\hline
+
+0 & 1 & 0 & 0 & 1 & 1 & \multirow{2}{2cm}{\footnotesize '$1$' groups these rows} \\
+0 & 1 & 0 & 1 & - & 1 & \\
+\cline{7-7}
+0 & 1 & 1 & 0 & 0 & 0 & \multirow{2}{2cm}{\footnotesize '$0$' groups these rows} \\
+0 & 1 & 1 & 1 & - & 0 & \\
+\hline
+
+1 & 0 & 0 & 0 & 0 & 0 & \\
+1 & 0 & 0 & 1 & 1 & 1 & \\
+\cline{7-7}
+1 & 0 & 1 & 0 & - & 0 & \multirow{2}{2cm}{\footnotesize '$0$' groups these rows} \\
+1 & 0 & 1 & 1 & - & 0 & \\
+\hline
+
+1 & 1 & 0 & 0 & 0 & 0 & \multirow{4}{2cm}{\footnotesize '$0$' groups these rows} \\
+1 & 1 & 0 & 1 & - & 0 & \\
+1 & 1 & 1 & 0 & - & 0 & \\
+1 & 1 & 1 & 1 & - & 0 & \\
+
+\end{tabular}
+\caption{The truth table of state transition relation for the example model given in Figure \ref{fig:SymbolicModelExample}  with the appropriate don't-care $\theta$ substitutions.}
+\end{table}
+
+\subsection{Implementing $pre_\exists$ and $pre_\forall$}
+
+\paragraph{} Now we consider how an OBDD for $pre_\exists$ and $pre_\forall$ can be constructed, given OBDDs $B_X$ for $X$ and $B_\rightarrow$ for the transition relation $\rightarrow$. Recall that this is required for computing the pre-images of sets for the explicit labelling algorithm in Section \ref{sec:LabellingAlgorithm}. Observe that because
+
+$$pre_\forall(X) = S \backslash pre_\exists(S \backslash X)$$
+
+\noindent we only need to compute the OBDD for $pre_\exists(X)$. 
+
+\subsection{$pre_\exists(X)$ BDD Computation}
+
+\paragraph{} The following is the algorithm for the BDD computation of $pre_\exists(X)$:
+
+\begin{enumerate}
+\item We rename variables in $B_X$ to their primed versions and call this resulting OBDD $B_{X'}$.
+\item We compute the OBDD for\\ $exists(\hat{x}, apply(\land, B_\rightarrow, B_{X'}))$ using the apply and exists algorithms\footnote{The $apply$ and $exists$ algorithms are not covered in this course. For more details, see Huth and Ryan pp. 372-380.}. 
+\end{enumerate}
+
+\paragraph{} The $apply$ algorithm implements a number of set operations on the corresponding OBDDs, but in this case we are only using the $\land$ operation. The $exists$ algorithm\footnote{The algorithm is NP-complete.} exploits the reduction $\exists x f = f[0/x] \lor f[1/x]$\footnote{Quantified Boolean formula (QBF) problem.}. Hence in OBDD terms: $exists(x, B_f) = apply(+, restrict(0, x, B_f), restrict(1, x, B_f))$.
+
+\subsection{Direct BDD construction}
+
+\paragraph{} In Section \ref{sec:SymbolicEncoding} we constructed $B_\rightarrow$ by defining its Boolean function first. This is not scalable for real systems and it is not how model checkers would build $B_\rightarrow$. We will see how NuSMV and other model checkers enable us to define how the values of variables change over states given the current state. Essentially, this defines a function $f_i$ for each variable $x_i$ in the system. 
+
+\paragraph{} It follows that the transition relation $\rightarrow$ can be encoded as the Boolean function
+
+$$\prod_{i = 1,...,n} x'_i \leftrightarrow f_i(x_1, ..., x_n)$$
+
+\paragraph{} This enables us to compute the BDD $B_\rightarrow$ directly from the program describing the next state of functions.
+
+\section{NuSMV Model Checking}
+
+\paragraph{} We want to describe the model $M_S$ of a system $S$ by means of writing a program and use a specialised tool to determine if $M_S \models \phi_P$. A \textit{model checker} is a tool supporting both requirements. It provides a programming language to describe the model succinctly and performs the specification checks automatically. The $phi_P$ checked by the model checker usually corresponds with the specification $P$ that needs checking.
+
+\subsection{Model Checkers}
+
+\paragraph{} There is a variety of model checkers available: some are released under the GNU GPL for free to download. Here are a few:
+
+\begin{itemize}
+\item NuSMV: an extremely popular model checker supporting both LTL and CTL. Supports both BDDs and SAT-based checking (bounded model checking). 
+\item PRISM: a popular probabilistic model checker supporting discrete and continuous time Markov chains and Markov decision processes (MDPs). Language incorporates PCTL and Continuous Stochastic Logic (CSL).
+\item SPIN: a popular on-the-fly verifier for LTL specifications. It can be unsed in combination with with partial order reduction and BDD. Its programming language, PROMELA\footnote{Process or Protocol Meta Language}, is very well-known. Released in the 1990s.
+\item MCMAS: an experimental model checker for CTL and logics for multi-agent systems using BDDs. The input language directly implements \textit{Interpreted Systems}, a semantics for multi-agent system logics.
+\item VerICS: a well-developed SAT-based model checker for CTL, LTL and real-time logics, as well as some logics for multi-agent systems. It also supports BDD-based model checking for various extensions of LTL and CTL. It uses bounded and unbounded model checking techniques. Supports a variety of input languages (e.g. KRONOS and UML).
+\end{itemize}
+
+\subsection{Intro to NuSMV}
+
+\paragraph{} NuSMV\footnote{A re-implementation of the original PhD work by McMillan.} is an open-source automatic model checker uses OBDDs for both LTL and CTL model checking and Boolean satisfiability for bounded model checking. SMV stands for Symbolic Model Verifier.
+
+\paragraph{} The input language of NuSMV is simply called SMV and the $\phi_P$ in SMV are formulae in LTL or CTL that are appropriately formalised. Given the input model and formulae to be checked, NuSMV will return either $true$ or $false$, and in some cases with counterexamples when returning $false$.
+
+\paragraph{} It takes time to compute the answer and the amount of time depends on the size of the model and formulae under checking:
+
+\begin{itemize}
+\item Models up to $10^{10}$ states should be generally fast to verify.
+\item Anything beyond $10^{15}$ states may require a lot more time.
+\end{itemize}
+
+\subsection{SMV Language}
+
+\paragraph{} A full description of the SMV language can be found on their website\footnote{\url{http://nusmv.irst.itc.it/NuSMV/userman/index-v2.html}}. This section will only cover some basic features of the SMV language.
+
+\subsubsection{First SMV Program}
+
+\paragraph{} Consider the following simple example of a SMV program:
+
+\begin{lstlisting}
+MODULE main
+VAR
+	b0: boolean;
+ASSIGN
+	init(b0) := 0;
+	next(b0) := !b0;
+\end{lstlisting}
+
+This is equivalent of building the following model:
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.5]{graphics/smv-example1-state}
+\caption{The visual state diagram of the simple SMV program.}
+\end{figure}
+
+\begin{itemize}
+\item \lstinline{b0: boolean;} declares a variable $b0$ of boolean type.
+\item \lstinline{init(b0) := 0;} defines the initial state(s) that a variable can have.
+\item \lstinline{next(b0) := !b0;} defines the transition relation.
+\end{itemize}
+
+\subsubsection{State Variable Data Types}
+
+\paragraph{} In SMV, you can declare various data types:
+
+\begin{itemize}
+\item Boolean: \begin{lstlisting}
+VAR
+  v: boolean;
+\end{lstlisting}
+\item Enumerate: \begin{lstlisting}
+VAR
+  v: { running, stopped, idle };
+\end{lstlisting}
+\item Bounded Integers: \begin{lstlisting}
+VAR
+  v: 1 .. 10;
+\end{lstlisting}
+\end{itemize}
+
+\paragraph{} Bounded Integers are used instead of unbounded integers or floating point precision numbers because we want to limit the amount of state space that the program has to check.
+
+\subsubsection{Assignments}
+
+\paragraph{} Assignments are ways we can update the state variables and set their initial state.
+
+\paragraph{Initialisation} To initialise a variable, we write:
+
+\begin{lstlisting}
+init(x) := expr;
+\end{lstlisting}
+
+\paragraph{} If a variable contains no init statements, it is initialised non-deterministically (i.e. random) and the number of initial states will reflect this. This depends on the data type of the variable.
+
+\paragraph{Updating} To update a variable, we write:
+
+\begin{lstlisting}
+next(x) := expr;
+\end{lstlisting}
+
+\paragraph{} If a variable does not contain any next statements, it will be updated non-deterministically. If you want a variable to be initialised non-deterministically but use the same value throughout the program, you need to omit the init statement and use the following next statement:
+
+\begin{lstlisting}
+next(x) := x;
+\end{lstlisting}
+
+\paragraph{} You can think of adding init and next statements to constraint the possible transition of a variable from one state to another.
+
+\subsubsection{Boolean Operators}
+
+\paragraph{} The following are some boolean operators expressed in SMV:
+
+\begin{itemize}
+\item ! represents negation (i.e. $\lnot$)
+\item \& represents and (i.e. $\land$)
+\item | represents or (i.e. $\lor$)
+\item -> represents implication (i.e. $\implies$)
+\end{itemize}
+
+\subsubsection{Using Cases}
+
+\paragraph{} To encode some if-else/switch logic into the next statements, you can write for example:
+
+\begin{lstlisting}
+next(status) := case
+	req: busy; -- return busy if req
+	1: {ready, busy}; -- non-det choice
+esac; -- esac is just flipping case
+\end{lstlisting}
+
+\subsubsection{Writing CTL/LTL Specifications}
+
+\paragraph{} To write a LTL statement, we use the \lstinline{LTLSPEC} keyword. For example to foramlise the LTL formula $G(request \rightarrow F(status = busy))$:
+
+\begin{lstlisting}
+LTLSPEC
+	G(request -> F status = busy);
+\end{lstlisting}
+
+\paragraph{} For CTL specifications, we specify similarly using the \lstinline{SPEC} keyword: 
+
+\begin{lstlisting}
+SPEC
+	AG(request -> AF status = busy);
+\end{lstlisting}
+
+\subsubsection{Modules}
+
+\paragraph{} To break a model into smaller modules, we can write additional modules using the \lstinline{MODULE} keyword:
+
+\begin{lstlisting}
+MODULE my_mod
+VAR
+	out: 0..9;
+ASSIGN
+	next(out) := (out + 1) mod 10;
+
+MODULE main
+VAR
+	m1: my_mod; -- my_mod gets used here
+	m2: my_mod;
+	sum: 0..18;
+ASSIGN
+	sum := m1.out + m2.out;
+\end{lstlisting}
+
+\paragraph{} Note that in this example, the module is placed as data types to variables in the main module. Also, the sum assignment is not bounded to any state. Module declarations can also take parameters, which makes it useful for communicating between modules:
+
+\begin{lstlisting}
+MODULE my_mod(in)
+VAR
+	out: 0..9;
+	my_sum: 0 .. 18;
+ASSIGN
+	next(out) := (out + 1) mod 10;
+	my_sum = out + in;
+
+MODULE main
+VAR
+	m1: my_mod(m2.out);
+	m2: my_mod(m1.out);
+ASSIGN
+	...
+\end{lstlisting}
+
+\subsubsection{Fairness}
+
+\paragraph{} In Section \ref{sec:HandlingFairness}, we talked about the incorrect behaviour that can arise sometimes because it corresponds to circumstances of no interest (e.g. bit transmission with a constantly faulty channel). In these circumstances, we often mentioned the possibility of assuming "fairness". This is supported by NuSMV by the statement:
+
+\begin{lstlisting}
+FAIRNESS X;
+\end{lstlisting}
+
+where $X$ is a valid statement or variable. For example:
+
+\begin{lstlisting}
+FAIRNESS !(channel.status = faulty);
+\end{lstlisting}
+
+\paragraph{} NuSMV will only consider runs in which the variable X becomes true infinitely often.
+
+\subsubsection{Synchronous/Asynchronous}
+
+\paragraph{} So far we assume synchronous execution / transition of the model, i.e. all processes move from state to state together in a locked transition. Often it is helpful though to assume that processes may make moves independently as threads on a single-core machine would.
+
+\paragraph{} To take advantage of the possibilities offered by asynchronous modelling in NuSMV\footnote{Since NUSMV version 2.5.0 processes are deprecated. In future versions of NUSMV processes
+may be no longer supported, and only synchronous FSM will be supported by the input language.
+Modeling of asynchronous processes will have to be resolved at higher level.}, we use the construct of \textit{processes}. Processes enable NuSMV to select non-deterministically which process gets selected to compute a next state (i.e. interleaving concurrency). It is only the state of the selected process that will have a changed state and all other processes will remain unchanged. To say that a variable represents a process, we write "process" before the variable type:
+
+\begin{lstlisting}
+VAR
+	pr1: process prc(other.val);
+\end{lstlisting}
+
+\section{Epistemic Specifications}
+
+\subsection{Donald Rumsfeld (2002)}
+
+\paragraph{} Assuming that $E_{we}$ is a pseudo-common knowledge operator, we can formalise the words from Donald Rumsfeld in 2002\footnote{Donald Rumsfeld was United States of America Secretary of Defense. The full transcript can be found at \url{http://archive.defense.gov/Transcripts/Transcript.aspx?TranscriptID=2636}} into the following:
+
+\paragraph{} "As we know, there are known knowns, i.e. there are things we know that we know"
+
+$$\exists x E_{we} E_{we} p(x)$$
+
+\paragraph{} "We also know that there are known unknowns, i.e. we know there are some things we know that we do not know"
+
+$$E_{we} \exists x \lnot E_{we} p(x)$$
+
+\paragraph{} "But there are unknown unknowns - the ones we don't know we don't know."
+
+$$\exists x \lnot E_{we} \lnot E_{we} p(x)$$
+
+\paragraph{} There are some specifications - in particular epistemic specifications\footnote{specification of relation to knowledge that one or a group of agents have.} - that cannot be expressed in CTL or LTL. We can express the concept of knowledge over time (i.e. CTL or LTL) and eventually express high level concepts such as wants and beliefs\footnote{Doxastic logic}. These concepts can help us describe complex behaviour, especially when autonomous. 
+
+\subsection{Autonomous Multi-Agent Systems (MAS)}
+
+\paragraph{} Agents are computer systems that are:
+
+\begin{itemize}
+\item \textit{situated} in some environment;
+\item capable of \textit{autonomous actions};
+\item capable of \textit{social interaction} with peers; and
+\item acting \textit{to meet} their design objectives.
+\end{itemize}
+
+\paragraph{} In some sense, MAS are distributed systems but with:
+
+\begin{itemize}
+\item Emphasis on intentional properties of the processes.
+\item Programmed and specified in terms of high-level concepts such as their knowledge, beliefs, desires, intentions, goals, commitments,...
+\end{itemize}
+
+\paragraph{} Compare these requirements with simpler specifications given in terms of temporal ones only.
+
+\paragraph{} There are three levels of work on MAS systems with different levels of abstraction:
+
+\begin{enumerate}
+\item \textbf{Agent Technology}: Communication languages and coordination platforms.
+\item \textbf{Models of Interaction}: negotiation, auctions, cooperation, etc.
+\item \textbf{Formalisms}: on specification and verification - logical models of knowledge, strategic abilities, beliefs, etc.
+\end{enumerate}
+
+\subsection{MAS Specification vs Epistemic Logic}
+
+\paragraph{} It is important to verify knowledge of agents because agents' behaviour depends on what they know. We use the notation $K_i p$ for represent that agent $i$ knows $p$. Some examples include:
+
+\begin{itemize}
+\item Agent $a$ does not know whether "key" is the secret key or not\footnote{This fact is represented either timeless (i.e. forever) or at the current point in time.}: $$\lnot K_a\ key \lor \lnot K_a \lnot key$$
+\item ... but Agent $b$ knows: $$K_b\ key \lor K_b \lnot key$$
+\item Agent $a$ knows that agent $b$ knows: $$K_a(K_b\ key \lor K_b \lnot key)$$
+\item Agent $b$ knows that agent $a$ at some point in time will know as well: $$K_b\ AF(K_a\ key \lor K_a \lnot key)$$
+\end{itemize}
+
+\paragraph{} As shown in the last example, we can combine temporal logics with epistemic logics to model the specifications accurately.
+
+\subsection{Interpreted Systems}
+
+\paragraph{} We take the basic assumption that a MAS can be represented in terms of local \textbf{states}, \textbf{actions}, \textbf{protocols} and \textbf{transitions} for the agents $A = \{1, ..., n\}$ and for the environment $e$. Then,
+
+\begin{itemize}
+\item $L_i$ is the set of local states for agent $i \in A$.
+\item $L_e$ is the set of local states of the environment.
+\item $Act_i$ is the set of local actions for agent $i \in A$.
+\item $Act_e$ is the set of local actions of the environment
+\item $Act = Act_1 \times ... \times Act_n \times Act_e$ is the \textit{set of joint actions} for all agents and the environment.
+\item A protocol $P_i: L_i \rightarrow \mathcal{P}(Act_i), i \in A$ expresses the selection mechanism of agent $i$. \footnote{$\mathcal{P}(A)$ is the powerset of the set $A$.}
+\item $P_e: L_e \rightarrow \mathcal{P}(Act_e)$ expresses the functioning conditions for the environment.
+\item $S = L_1 \times ... \times L_n \times L_e$ is the set of all possible global states.
+\end{itemize}
+
+\paragraph{} The system evolves synchronously with agents and the environment, selecting and performing an action at each tick of the clock. All actions need to be enabled by the respective protocols ($P_i$ or $P_e$) to be performed. 
+
+\paragraph{} An \textit{interpreted system}\footnote{Introduced in [Fagin et al., 1995]} is then a tuple $IS = \langle {L_i, Act_i, P_i, \tau_i}_{i \in A\cup\{e\}}, I, h \rangle$.
+
+\paragraph{Initial Global States} $I \subseteq S$ is the set of initial global states for the system. There exists initial local states for agent $i$ and the environment $e$.
+
+\paragraph{System Transition Function} $\tau: S \times Act \rightarrow S$ is a deterministic transition function for the system. If $\tau(g, act) = g'$ with $act = (act_1, ..., act_n, act_e)$ then $\forall i \in A: act_i \in P_i(g_i) \land act_e \in P_i(g_e)$. $g_i$ represents the local state of agent $i$ when in state $g$ and $g_e$ represents the local state of the environment when in state $g$.
+
+\paragraph{Reachable Global States} We refer to $G \subseteq S$ as the set of global states reachable from the set of initial global states $I$ via transition function $\tau$.
+
+\subsection{LTLK Syntax}
+
+\paragraph{} We use the LTLK (i.e. LTL with knowledge) language to build our specifications formally:
+
+$$\phi ::== p | \lnot \phi | \phi \land \phi | X\phi | G\phi | \phi U \phi | K_i\phi | E_\Gamma \phi | D_\Gamma \phi | C_\Gamma \phi$$
+
+\paragraph{} where $i \in A$ and $\Gamma \subseteq A$ (subset of all agents).
+
+\paragraph{} Reading for the modalities above are:
+
+\begin{itemize}
+\item $K_i\phi$: "agent $i$ knows $\phi$."
+\item $G_\Gamma \phi$: "everyone in the group $\Gamma$ knows $\phi$."
+\item $D_\Gamma \phi$: "it is distributed knowledge in the group $\Gamma$ knows $\phi$."
+\item $C_\Gamma \phi$: "it is common knowledge in the group $\Gamma$ knows $\phi$."
+\end{itemize}
+
+\subsection{LTLK Semantics}
+
+\paragraph{} Given a formula $\phi$, a system $IS$ and a path $\rho = s_0, ...$ on $IS$, satisfaction for the LTLK connectives is defined as follows:
+
+\begin{itemize}
+\item $(IS, \rho) \models p$ iff $s_0 \in L(p)$
+\item $(IS, \rho) \models X\phi$ iff $(IS, \rho^1) \models \phi$.
+\item $(IS, \rho) \models G\phi$ iff $\forall j \geq 0: (IS, \rho^i) \models \phi$
+\item $(IS, \rho) \models K_i\phi$ iff $\forall p' = s_0',...$ st $l_i(s_0) = l_i(s_0')$ we have $(IS, \rho') \models \phi$
+\end{itemize}
+
+\paragraph{} $l_i: G \rightarrow L_i$ returns the $i^{th}$ local component of a global state.
+
+\paragraph{} Private knowledge is defined as a function on the local states only. Local states characterise what an agent knows about other agents and the environment. Intuitively, if one agent has the same local state in wo different global states, then the agent cannot distinguish between the two. A fact is known by an agent if it is true in all the states that he considers (epistemically) possible, i.e. the fact holds in every possible state of the system that he regards as possible.
+
+\paragraph{} The semantics of $E_\Gamma \phi$, $D_\Gamma \phi$ and $C_\Gamma \phi$ can be extended from $K_i\phi$
+
+\begin{itemize}
+\item $(IS, \rho) \models E_\Gamma \phi$ iff $\forall p' = s_0',...$ st $\exists i \in \Gamma: l_i(s_0) = l_i(s_0')$ we have $(IS, \rho') \models \phi$. The equivalence $E_\Gamma \phi \equiv \land_{i \in \Gamma} K_i \phi$ holds.
+\item $(IS, \rho) \models D_\Gamma \phi$ iff $\forall p' = s_0',...$ st $\forall i \in \Gamma: l_i(s_0) = l_i(s_0')$ we have $(IS, \rho') \models \phi$. There is no equivalence for $D_\Gamma \phi$ in terms of $K_i \phi$ holds.
+\item $(IS, \rho) \models C_\Gamma \phi$ iff $\forall \bar{p} = \bar{s_0},...$ st there is a $p^{(1)} = s_0^{(1)},...$; $p^{(2)} = s_0^{(2)},...$; ...; $p^{(m)} = s_0^{(m)},...$ with $l_i(s_0) = l_i(s_0^{(1)}); l_j(s_0^{(1)}) = l_j(s_0^{(2)});...;l_k(s_0^{(m)}) = l_k(\bar{s_0})$, $\forall i,j,k \in \Gamma$ we have $(IS, \bar{\rho}) \models \phi$. Common knowledge for agents in $\Gamma$ is defined on the transitive closure of the union of the relations induced by the equality of local states. Common knowledge is equivalent to the unbounded conjunction of everyone knows formula: $$C_\Gamma \phi = E_\Gamma \phi \land E_\Gamma E_\Gamma \phi \land ...$$
+\end{itemize}
+
+\paragraph{} LTLK satisfaction at states is defined as in the case of LTL: $$(IS, s) \models \phi\text{ iff } \forall \rho(s): (IS, \rho(s)) \models \phi$$
+
+\subsection{CTLK: Branching temporal-epistemic models}
+
+\paragraph{} Interpreted systems can also be used to give a semantics to CTLK, the logic obtained by combining CTL with epistemic modalities discussed in LTLK. 
+
+\paragraph{} Given a formula $\phi$, an interpreted system $IS$ and a state $s_0 \in IS$, satisfaction of $\phi$ at $s \in IS$ (denoted $(IS, s) \models \phi$) is defined inductively by adding the following clause to the CTL satisfaction definition:
+
+$$(IS, s) \models K_i \phi\text{ iff } \forall s'[s \mathtt{\sim}_i s' \implies (IS, s') \models \phi]$$
+
+\noindent where $s \mathtt{\sim}_i s' \Leftrightarrow l_i(s) = l_i'(s')$. Observe that this definition is equivalent to the one given for LTLK. We complete the remaining semantics of CTLK for $E_\Gamma \phi$, $D_\Gamma \phi$ and $C_\Gamma \phi$:
+
+\begin{itemize}
+\item $(IS, \rho) \models E_\Gamma \phi$ iff $\forall s'\ [s(\cup_{i \in \tau}\ \mathtt{\sim}_i)]s' \implies (IS, s') \models \phi$. 
+\item $(IS, \rho) \models D_\Gamma \phi$ iff $\forall s'\ [s(\cap_{i \in \tau}\ \mathtt{\sim}_i)]s' \implies (IS, s') \models \phi$. 
+\item $(IS, \rho) \models C_\Gamma \phi$ iff $\forall s'\ [s(\cup_{i \in \tau}\ \mathtt{\sim}_i)]^+s' \implies (IS, s') \models \phi$. 
+\end{itemize}
+
+\paragraph{} Note that the $+$ in $s'\ [s(\cup_{i \in \tau}\ \mathtt{\sim}_i)]^+s$ of the definition of $(IS, \rho) \models C_\Gamma \phi$ refers to a transitive closure on the union of relations.
 
 \end{multicols}
 \end{document}

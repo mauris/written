@@ -1,0 +1,19 @@
+digraph {
+  rankdir=LR;
+  start [style=invis, height=0.01, width=0.01];
+  
+  node [shape=circle];
+  s0 [label="s0"];
+  s1 [label="s1"];
+  
+  node [shape=doublecircle];
+  s2 [label="s2"];
+  
+  start -> s0;
+  
+  s0 -> s0 [headlabel="0.4: a", labeldistance=2.4];
+  s0 -> s1 [headlabel="0.6: b", labeldistance=1.8, labelangle=40];
+  
+  s1 -> s1 [headlabel="0.7: b", labeldistance=2.4];
+  s1 -> s2 [headlabel="0.3: c", labeldistance=1.8, labelangle=40];
+}

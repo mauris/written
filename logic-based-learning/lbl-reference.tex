@@ -487,7 +487,7 @@ $$G_0 \underset{C_0}{\implies} G_1 \underset{C_1}{\implies} ...  \underset{C_{n-
 
 \subsection{Learning from Interpretation}
 
-\paragraph{} In \textit{Learning from Interpretation}, the set of examples contain a full description nad all the information that belongs to the example is represented in the example, not in the background knowledge. The Background only contains general information concerning the domain, not concerning specific examples. Hence a definite clause theory $H$ is a solution iff $e \in E^+$ is a model of $H$ (i.e. $e \models H$).
+\paragraph{} In \textit{Learning from Interpretation}, the set of examples contain a full description, and all the information that belongs to the example is represented in the example, not in the background knowledge. The Background only contains general information concerning the domain, not concerning specific examples. Hence a definite clause theory $H$ is a solution iff $e \in E^+$ is a model of $H$ (i.e. $e \models H$).
 
 \subsection{Learning from Entailment}
 
@@ -1534,6 +1534,105 @@ ep04_4(A, B) $\leftarrow$ skip1(A, C),
 \subsection{Language Class \& Complexity}
 
 \paragraph{} The cardinality of hypothesis space $O(m^n p^{3n})$, given $m$ metarules, $n$ clauses, and $p$ predicate symbols. The complexity is on the exponent which is the number of clauses. By reducing the number of clauses we could greatly reduce the hypothesis space.
+
+\section{Stochastic Logic Programs}
+
+\paragraph{} A stochastic\footnote{Having a random probability distribution / pattern that may be analysed statistically but may not be predicted exactly.} logic program provides a means to structurally defining a probability distribution that can be used to represent a machine learning algorithm's bias over the hypothesis and instance space\cite{muggleton96}. 
+
+\paragraph{} Stochastic automaton can be represented using a Markov model, for example in Figure \ref{fig:StochasticAutomaton} below.
+
+\begin{figure}[H]
+\includegraphics[scale=0.6]{graphics/stochastic-automaton}
+\caption{An example of a stochastic automaton. Probabilities of all edges going out of a single node sum to one because at each node, a decision is made based on the probabilities to decide with path to take.}\label{fig:StochasticAutomaton}
+\end{figure}
+
+\paragraph{} We can for example determine the probability of obtaining the string "abbc" from the automaton described in Figure \ref{fig:StochasticAutomaton} as such: 
+
+$$P(abbc) = (0.4)(0.6)(0.7)(0.3) \approx 0.05$$
+
+\noindent The sum of all strings possible in the automaton described in Figure \ref{fig:StochasticAutomaton} sums up to one: $$\sum_{s \in L} P(s) = 1$$
+
+\paragraph{} The same concept in the stochastic automaton Figure \ref{fig:StochasticAutomaton} can also be described in terms of stochastic grammar as follows:
+
+\begin{align*}
+&0.4: S_0 \rightarrow aS_0\\
+&0.6: S_0 \rightarrow bS_1\\
+\\
+&0.7: S_1 \rightarrow bS_1\\
+&0.3: S_1 \rightarrow cS_2\\
+\\
+&1.0: S_2 \rightarrow \lambda\\
+\end{align*}
+
+\paragraph{} With this grammar, we can rewrite it into a Stochastic Logic Program (SLP) as such:
+
+\begin{lstlisting}
+0.4: s0([a|X], Y) :- s0(X, Y).
+0.6: s0([b|X], Y) :- s1(X, Y).
+
+0.7: s1([b|X], Y) :- s1(X, Y).
+0.3: s1([c|X], Y) :- s2(X, Y).
+
+1.0: s0([], []).
+\end{lstlisting}
+
+\paragraph{Applications of SLPs} There are a few application of SLPs:
+
+\begin{itemize}
+\item Sampling: It can be used to perform SLD resolution with random clause selection.
+\item Information Content: We can perform proof of log probability goal using a SLP
+\item Condition: Prove goal and update frequency counts on clauses in the proof.
+\end{itemize}
+
+\subsection{Fair Coin}\label{sec:SLPFairCoin}
+
+\paragraph{} Considering the following SLP $S$ that describes a fair coin:
+
+\begin{lstlisting}
+0.5: coin(0).
+0.5: coin(1).
+\end{lstlisting}%
+
+\subsection{Natural Numbers - Exponential}
+
+\paragraph{} Consider the following SLP $P$ over natural numbers:
+
+\begin{align*}
+&0.5: nate(0) \leftarrow\\
+&0.5: nate(s(N)) \leftarrow nate(N)
+\end{align*}
+
+\noindent The probability of any $N$ is given by: $$P(nate(N)|P) = 2^{-N-1}$$
+
+\paragraph{} For example consider the refutation of the goal $\leftarrow nate(s(s(0)))$:
+
+{\footnotesize \begin{align*}
+&\leftarrow nate(s(s(0))) && \text{\% resolves with 2nd clause, prob } = \frac{1}{2}\\
+&\leftarrow nate(s(0)) && \text{\% resolves with 2nd clause, prob } = \frac{1}{2}\\
+&\leftarrow nate(0) && \text{\% resolves with 1st clause, prob }= \frac{1}{2}
+\end{align*}}
+
+\paragraph{} The probability of this derivation is $$P(nate(s(s(0)))|P) = \left(\frac{1}{2}\right)^3 = \frac{1}{8}$$
+
+\subsection{Natural Numbers - Polynomial }
+
+\paragraph{} It is also possible to build a SLP $Q$ that describes a polynomial distribution over natural numbers in reverse binary form\cite[pp. 8-9]{muggleton96}. Numbers are constructed by
+
+\begin{enumerate}
+\item Choosing the length of its binary representation
+\item Filling out the binary expression by repeated tossing of a fair coin (see Section \ref{sec:SLPFairCoin})
+\end{enumerate}
+
+\paragraph{} The following is program $Q$:
+
+\begin{align*}
+&1.0: natp(N) \leftarrow nate(U), bin(U, N)\\
+\\
+&0.5: bin(0, [1]) \leftarrow\\
+&0.5: bin(s(U), [C|N]) \leftarrow coin(C), bin(U, N)
+\end{align*}
+
+\paragraph{} The probability of choosing a number of length $L = log_2(N)$ is approximately $2^{-L}$ and there are $2^L$ such numbers, each with equal probability of $P(natp(N)|Q) \approx 2^{-2log_2(N)} = N^{-2}$.
 
 \end{multicols}
 

@@ -151,7 +151,7 @@ p(X, Y)\theta &= p(a, g(b, Z))
 
 \begin{defn}Facts are Definite Clauses that have no negative literals. e.g. $h$. We omit the $\leftarrow$  or \lstinline{:-} symbols as with convention for facts.\end{defn}
 
-\subsection{Resolution}
+\subsection{Resolution}\label{sec:Resolution}
 
 \paragraph{} Resolution is a proof strategy to determine if a proposition can be satisfied by a clausal theory. Essentially, we will see that resolution is actually proof by contradiction (or in Latin, \textit{reductio ad absurdum} abbreviated as RAA).
 
@@ -481,9 +481,115 @@ $$G_0 \underset{C_0}{\implies} G_1 \underset{C_1}{\implies} ...  \underset{C_{n-
 
 \subsection{General-to-Specific Traversal}
 
-\paragraph{Shapiro Operator} is a refinement / specialisation operator. The basic idea is to start from a set of positive and negative examples of a new concept and compute a set of Horn clauses that correctly represent this concept by traversing a lattice (i.e. a special version space) of possible hypothesis by means of the Shapiro ($\rho$) operator. The key idea is to add a litteral in the body of the current clause or apply a substitution $\theta$.
+\paragraph{Shapiro Operator} is a refinement / specialisation operator. The basic idea is to start from a set of positive and negative examples of a new concept and compute a set of Horn clauses that correctly represent this concept by traversing a lattice (i.e. a special version space) of possible hypothesis by means of the Shapiro ($\rho$) operator. The key idea is to add a literal in the body of the current clause or apply a substitution $\theta$.
 
-\paragraph{} TODO: Here I miss out Specific to General Traversal: Plotkin's least general generalisation of two clauses and Muggleton's inverse resolution.
+\subsection{Specific-to-General Traversal}
+
+\paragraph{} There are two main operators developed in ILP that allow specific-to-general traversal over the lattice space of hypotheses:
+
+\begin{itemize}
+\item Plotkin's least general generalisation (lgg) of two clauses
+\item Muggleton's inverse resolution
+\end{itemize}
+
+\subsubsection{Plotkin's Least General Generalisation}
+
+\paragraph{} Plotkin's least general generalisation (lgg)\cite{plotkin70} takes two clauses and tries to compute a third clause that is the \textit{most specific of all the clauses}, but yet still more general than both given clauses.
+
+\paragraph{} The lgg the two \textit{terms} is given by the following examples:
+
+\begin{itemize}
+\item $lgg(a, b) = X$
+\item $lgg(f(a), f(b)) = f(lgg(a, b)) = f(Z)$
+\item $lgg(f(X), g(Y)) = Z$
+\item $lgg(f(a, b, a), f(c, c, c)) = f(X, Y, X)$
+\end{itemize}
+
+\paragraph{} The lgg of two \textit{literals} of the same predicate name and number of arguments are given by:
+
+\begin{align*}
+lgg(p(s_1, \dots, s_n), p(t_1, \dots, t_n)) =\\
+	p(lgg(s_1, t_1),\dots,lgg(s_n, t_n))
+\end{align*}
+
+\paragraph{}The lgg of two \textit{clauses} are given by:
+
+\begin{align*}
+lgg(c_1, c_2) = \{lgg(l_1, l_2)\ |\ l_1 \in c_1 \land l_2 \in c_2 \\
+\land\ lgg(l_1, l_2) \text{ is defined}\}
+\end{align*} 
+
+\paragraph{} Consider the example of the following two clauses:
+
+\begin{align*}
+c_1 = \{f(t,a)\lor\lnot p(t, a); \lnot m(t); \lnot m(a)\}\\
+c_2 = \{f(j,p)\lor\lnot p(j, p); \lnot m(j); \lnot f(p)\}
+\end{align*} 
+
+\noindent Then the lgg of $c_1$ and $c2$ given above would be the set:
+
+$$\{f(X,Y) \lor \lnot p(X, Y); \lnot m(X); \lnot m(Z)\}$$
+
+\paragraph{} Note that there are two literals $\lnot m(X)$ and $\lnot m(Z)$ because $\lnot m(j)$ in $c_2$ gets matched to two different "$\lnot m(X)$"s in $c_1$.
+
+\subsubsection{Muggleton's Inverse Resolution}
+
+\paragraph{} The method for searching hypotheses from specific to general is the use of inverse resolution proposed by Muggleton\cite{muggleton95} as a mechanism for computing relative generality relation between clauses. In his paper, the generality relation was computed relative to a given background knowledge.
+
+\paragraph{} The idea of inverse resolution is to compute clauses from given clauses that reflect an inverse of the standard resolution rules as seen in Section \ref{sec:Resolution}. 
+
+\paragraph{} The following are four main inverse resolution operations on propositional logic:
+
+\paragraph{Absorption} is applied to two clauses $C_1$ and $C_2$ st $C_1$ includes all the body conditions that define a predicate $Y$ in the first clause $C_1$:
+
+\begin{align*}
+& Y \leftarrow C, D, E && \text{Clause } C_1\\
+& X \leftarrow A, B, C, D, E && \text{Clause } C_2\\
+& X \leftarrow A, B, Y && \text{Resulting Clause } C_3
+\end{align*}
+
+\noindent A new clause $C_3$ is generated from $C_2$ by replacing the body literals in $C2$ that are used in $C_1$ with the head of the clause $C_1$. The new clause is a generalisation of the two given clause as it would allow the inference of $X$ by using any other definition of $Y$.
+
+\paragraph{Identification} is used to identify a set of literals common in two clauses and identify a single (leftover) literal (i.e. $Y$ in the example below), with a (leftover) set of literals in the second clause (i.e. $C$, $D$ and $E$) and generate a new clause that contains this leftover literal ($Y$) in terms of the other leftover literals.
+
+\begin{align*}
+& X \leftarrow A, B, Y && \text{Clause } C_1\\
+& X \leftarrow A, B, C, D, E && \text{Clause } C_2\\
+& Y \leftarrow C, D, E && \text{Resulting Clause } C_3
+\end{align*}
+
+\paragraph{} The following two operations do not generalise the current knowledge but attempts to restructure it.
+
+\paragraph{Intra-construction} involve more than two clauses, i.e. inverse of two or more parallel resolutions. It identifies a common set of literals in rules with the same head and defines a new concept using the literals that are not common in the used clauses.
+
+\begin{align*}
+& X \leftarrow A, B, C, D && \text{Clause } C_1\\
+& X \leftarrow A, B, E, F && \text{Clause } C_2\\
+& X \leftarrow A, B, N && \text{Resulting Clause } C_3\\
+& N \leftarrow C, D && \text{Resulting Clause } C_4\\
+& N \leftarrow E, F && \text{Resulting Clause } C_5\\
+\end{align*}
+
+\paragraph{Inter-construction} involve more than two clauses, i.e. inverse of two or more parallel resolutions. It identifies a common set of literals in rules and replace them with a new concept
+
+\begin{align*}
+& X \leftarrow A, B, C, D && \text{Clause } C_1\\
+& X \leftarrow A, B, E, F && \text{Clause } C_2\\
+& N \leftarrow A, B && \text{Resulting Clause } C_3\\
+& X \leftarrow N, C, D && \text{Resulting Clause } C_4\\
+& X \leftarrow N, E, F && \text{Resulting Clause } C_5\\
+\end{align*}
+
+\subsection{Learning as a Search}\label{sec:LearningAsASearch}
+
+\paragraph{} The problem of logic-based learning is a problem of searching over a version space of theories (possible solutions). Given that generality relation between clauses in a version space is expressed as entailment and the hypothesis space consist of definite clauses, we can use several different approaches described earlier.
+
+\paragraph{} There are two main search operators:
+
+\begin{itemize}
+\item \textbf{Using $\theta$-subsumption}: either done top-down by specialising clauses to remove coverage over negative examples (using Shapiro $\rho$ refinement operator) or bottom-up by computing more general clauses (using Plotkin's lgg operator).
+\item \textbf{Using inverse entailment}: defining a logic-based process (using inverse resolution) as the underlying mechanism then define induction on top of a richer logic-based inference mechanism. Inverse resolution is a bottom-up approach as it computes more general clauses from specific one.
+\end{itemize}
 
 \subsection{Learning from Interpretation}
 

@@ -56,7 +56,7 @@
 
 \paragraph{} This reference was made as an condensation from the lecture slides and notes provided by Prof. Alessio R. Lomuscio, Prof. Michael Huth and Prof. Mark D. Ryan in the Imperial College London, Department of Computing's 303: Systems Verification.
 
-\paragraph{} This reference also contain several contributions\footnote{List of contributors in no particular order.} by Michael Akintunde. Thank you!
+\paragraph{} This reference also contain several contributions\footnote{List of contributors in no particular order.} by Michael Akintunde and Aaron Hau. Thank you!
 
 \paragraph{} The ordering of this reference may not correspond to the sequence introduced in the lectures, lecture slides and notes. This order is how I feel I would understand the topic better.
 
@@ -266,7 +266,7 @@ Given a formula $\phi$, a model $M$ and a path $\rho = s_0, s_1, s_2,...$ on $M$
 
 \subsubsection{Satisfaction on States}
 \begin{defn}
-Given a formula $\phi$, a model $M$ and a state $s$ in $M$, $\phi$ is true at $s$ in $M$ (written $(M, s) \models \phi$, if $\forall$ paths $\rho$ originating from $s$, we have $(M, \rho) \models \phi$. Formally, $$\forall \rho(s): (M, \rho) \models \phi \implies (M, s) \models \phi$$
+Given a formula $\phi$, a model $M$ and a state $s$ in $M$, $\phi$ is true at $s$ in $M$ (written $(M, s) \models \phi$, if $\forall$ paths $\rho$ originating from $s$, we have $(M, \rho) \models \phi$. Formally, $$\forall \rho(s): (M, \rho) \models \phi \leftarrow (M, s) \models \phi$$
 \end{defn}
 
 \paragraph{} In the case of LTL, the standard modal satisfaction definition on states involve quantification over \textit{all possible futures}.
@@ -428,7 +428,7 @@ $$M_S \models \phi_P$$
 \begin{itemize}
 \item "A faulty state is never reached":\\ LTL: $\lnot F\ faulty$\\ CTL: $\lnot EF\ faulty$
 \item "It is impossible to get to a state where $started$ holds but $ready$ does not":\\ LTL: $G\lnot(started \land \lnot ready)$\\ CTL: $AG\lnot(started \land \lnot ready)$
-\item "It is possible (i.e. there is a possible computation in which this happens) to get to a state where $started$ holds but $ready$ does not.":\\ LTL: we cannot express this!\\CTL: $EF(started, \lnot ready)$
+\item "It is possible (i.e. there is a possible computation in which this happens) to get to a state where $started$ holds but $ready$ does not.":\\ LTL: we cannot express this!\\CTL: $EF(started \land \lnot ready)$
 \item "Every request will get acknowledged":\\ LTL: $G(req \implies F\ ack)$\\ CTL: $AG(req \implies AF\ ack)$
 \item "An event $p$ happens infinitely often":\\ LTL: $GF\ p$\\ CTL: $AGAF\ p$
 \end{itemize}
@@ -830,9 +830,9 @@ Assume $B_f$ and $B_y$ to be two ROBDDs with compatible variable orderings. If $
 \paragraph{} The canonical representation for BDDs become crucial when we would like to perform certain useful tests on its corresponding Boolean formula. Consider the formulas $f$ and $g$ and their ROBDD representations $B_f$ and $B_g$. We can:
 
 \begin{itemize}
-\item \textbf{Test for validity}: $f$ is valid iff $B_f \equiv B_1$.
-\item \textbf{Test for satisfiability}: $f$ is satisfiable iff $B_f \not\equiv B_0$.
-\item \textbf{Test for semantic equivalence}: $f$ and $g$ are semantically equivalent iff $B_f \equiv B_y$.
+\item \textbf{Test for validity}: $f$ is valid iff $B_f = B_1$.
+\item \textbf{Test for satisfiability}: $f$ is satisfiable iff $B_f \not= B_0$.
+\item \textbf{Test for semantic equivalence}: $f$ and $g$ are semantically equivalent iff $B_f = B_g$.
 \end{itemize}
 
 \section{Symbolic Model Checking with OBDDs}
@@ -1386,7 +1386,7 @@ $$\exists x \lnot E_{we} \lnot E_{we} p(x)$$
 
 \paragraph{} The system evolves synchronously with agents and the environment, selecting and performing an action at each tick of the clock. All actions need to be enabled by the respective protocols ($P_i$ or $P_e$) to be performed. 
 
-\paragraph{} An \textit{interpreted system}\footnote{Introduced in [Fagin et al., 1995]} is then a tuple $IS = \langle {L_i, Act_i, P_i, \tau_i}_{i \in A\cup\{e\}}, I, h \rangle$.
+\paragraph{} An \textit{interpreted system}\footnote{Introduced in [Fagin et al., 1995]} is then a tuple $IS = \langle {L_i, Act_i, P_i, \tau}_{i \in A\cup\{e\}}, I, h \rangle$.
 
 \paragraph{Initial Global States} $I \subseteq S$ is the set of initial global states for the system. There exists initial local states for agent $i$ and the environment $e$.
 
@@ -1406,7 +1406,7 @@ $$\phi ::== p | \lnot \phi | \phi \land \phi | X\phi | G\phi | \phi U \phi | K_i
 
 \begin{itemize}
 \item $K_i\phi$: "agent $i$ knows $\phi$."
-\item $G_\Gamma \phi$: "everyone in the group $\Gamma$ knows $\phi$."
+\item $E_\Gamma \phi$: "everyone in the group $\Gamma$ knows $\phi$."
 \item $D_\Gamma \phi$: "it is distributed knowledge in the group $\Gamma$ knows $\phi$."
 \item $C_\Gamma \phi$: "it is common knowledge in the group $\Gamma$ knows $\phi$."
 \end{itemize}
@@ -1429,8 +1429,8 @@ $$\phi ::== p | \lnot \phi | \phi \land \phi | X\phi | G\phi | \phi U \phi | K_i
 \paragraph{} The semantics of $E_\Gamma \phi$, $D_\Gamma \phi$ and $C_\Gamma \phi$ can be extended from $K_i\phi$
 
 \begin{itemize}
-\item $(IS, \rho) \models E_\Gamma \phi$ iff $\forall p' = s_0',...$ st $\exists i \in \Gamma: l_i(s_0) = l_i(s_0')$ we have $(IS, \rho') \models \phi$. The equivalence $E_\Gamma \phi \equiv \land_{i \in \Gamma} K_i \phi$ holds.
-\item $(IS, \rho) \models D_\Gamma \phi$ iff $\forall p' = s_0',...$ st $\forall i \in \Gamma: l_i(s_0) = l_i(s_0')$ we have $(IS, \rho') \models \phi$. There is no equivalence for $D_\Gamma \phi$ in terms of $K_i \phi$ holds.
+\item $(IS, \rho) \models E_\Gamma \phi$ iff $\forall p' = s_0',...$ st $l_i(s_0) = l_i(s_0')$, $\exists i \in \Gamma$ st $(IS, \rho') \models \phi$. The equivalence $E_\Gamma \phi \equiv \land_{i \in \Gamma} K_i \phi$ holds.
+\item $(IS, \rho) \models D_\Gamma \phi$ iff $\forall p' = s_0',...$ where $l_i(s_0) = l_i(s_0')$, $\forall i \in \Gamma$ st $(IS, \rho') \models \phi$. There is no equivalence for $D_\Gamma \phi$ in terms of $K_i \phi$ holds.
 \item $(IS, \rho) \models C_\Gamma \phi$ iff $\forall \bar{p} = \bar{s_0},...$ st there is a $p^{(1)} = s_0^{(1)},...$; $p^{(2)} = s_0^{(2)},...$; ...; $p^{(m)} = s_0^{(m)},...$ with $l_i(s_0) = l_i(s_0^{(1)}); l_j(s_0^{(1)}) = l_j(s_0^{(2)});...;l_k(s_0^{(m)}) = l_k(\bar{s_0})$, $\forall i,j,k \in \Gamma$ we have $(IS, \bar{\rho}) \models \phi$. Common knowledge for agents in $\Gamma$ is defined on the transitive closure of the union of the relations induced by the equality of local states. Common knowledge is equivalent to the unbounded conjunction of everyone knows formula: $$C_\Gamma \phi = E_\Gamma \phi \land E_\Gamma E_\Gamma \phi \land ...$$
 \end{itemize}
 

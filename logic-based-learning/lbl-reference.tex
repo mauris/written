@@ -599,7 +599,9 @@ $$\{f(X,Y) \lor \lnot p(X, Y); \lnot m(X); \lnot m(Z)\}$$
 
 \paragraph{} Learning from entailment is a different paradigm. Given the examples $E = <E^+, E^->$, each $e \in E$ is a ground fact and $B$ is the background definite clause theory. We want to find hypothesis $H$ st means $\forall e \in E^+\ B \cup H_i \models e$ and $\forall e \in E^-\ B \cup H_i \not\models e$
 
-\section{HAIL}
+\section{HAIL \& Progol}
+
+\paragraph{} As discussed in Section \ref{sec:LearningAsASearch}, the third method of using inverse entailment put forth by Muggleton combines both top-down and bottom-up searches by using the notion of inverse entailment and general-to-specific search. This was put into a system called PROGOL and its focus was to support the learning of concepts whose instances are directly observed (.e. Observation Predicate Learning)
 
 \subsection{Predicate Learning}
 
@@ -614,15 +616,42 @@ $$\{f(X,Y) \lor \lnot p(X, Y); \lnot m(X); \lnot m(Z)\}$$
 
 \subsection{Inverse Entailment}
 
-\paragraph{} Consider the notion of Inverse Entailment\footnote{Introduced by Prof. Muggleton and first implemented in PROGOL}. It combines the advantages of both bottom-up\footnote{narrowing the search by starting from what is known already} and top-down\footnote{refining a general hypothesis to form a new one} searches. We observe that
+\paragraph{} Consider the notion of Inverse Entailment. It combines the advantages of both bottom-up\footnote{narrowing the search by starting from what is known already} and top-down\footnote{refining a general hypothesis to form a new one} searches. We observe that
 
 \[ B \cup H \models E \equiv B \cup \lnot E \models \lnot H \]
 
 \paragraph{} Note that since $H$ and $E$ are set of clauses, their variables are universally quantified. When negating clauses in these sets, the variables becomes existentially quantified - skolemised. 
 
+\subsection{Language Bias}\label{sec:LanguageBias}
+
+\paragraph{} Sometimes we would like to define the language of the hypothesis by using a language bias. It is composed of a set of \textbf{mode declarations}.
+
+\[
+\text{Mode declarations: }
+\begin{cases}
+	modeh(r, s)\\
+	modeb(r, s)
+\end{cases}
+\]
+
+\paragraph{modeh} indicates the predicate may appear as head predicate of the rules to learn.
+\paragraph{modeb} indicates the predicate may appear as body predicate of the rules to learn.
+\paragraph{r} represents a recall, an integer that indicates how many times the predicate may appear in a rule. '*' indicates that the predicate may appear any number of times in a rule.
+\paragraph{s} is the scheme, which is a ground atom with the predicate's name, placemarkers $+t$ (input variable), $-t$ (output variable) and $\#t$ (constants) for unary type $t$. 
+
+\paragraph{Example} For example consider the following mode declarations:
+
+\begin{align*}
+	&\text{modeh}(1, \text{grandfather}(+\text{person}, +\text{person}))\\
+	&\text{modeb}(1, \text{father}(+\text{person}, -\text{person}))\\
+	&\text{modeb}(1, \text{parent}(+\text{person}, +\text{person}))
+\end{align*}
+
+We can build a rule $grandfather(X, Y) \leftarrow father(X, Z), parent(Z, Y)$.
+
 \subsection{Bottom Set}
 
-\paragraph{} Considering a positive example $e^+ \in E^+$, we can compute the (possibly infinite) set of ground literals that are derivable from (or entailed by) $B \land \lnot e^+$. These set of ground literals are considered as the negation of the Bottom Set, denoted $\lnot Bot(B, e^+)$. Let $h$ and $h$ to be single Horn clauses where
+\paragraph{} Considering a positive example $e^+ \in E^+$, we can compute the (possibly infinite) set of ground literals that are derivable from (or entailed by) $B \land \lnot e^+$. These set of ground literals are considered as the negation of the Bottom Set, denoted $\lnot Bot(B, e^+)$. Let $h$ to be a single Horn clause where
 
 \begin{itemize}
 \item $h \equiv l_1 \lor \lnot l_2 \lor ... \lor \lnot l_n$: Note that $l_1$ is the head of the clause.
@@ -679,7 +708,7 @@ h_{\perp} &= \{ hasbeak(X) \}
 
 \subsection{Progol5}
 
-\paragraph{} We observe that the hypothesis in the Learning program above we derive have predicates that are in the examples and does not learn new concepts. Since we want to explain the example in terms of other concepts, the background knowledge needs to provide the links. The key problem is how to compute information that is missing in the given background knowledge and use these new notions to generate new hypotheses. Prof. Muggleton proposed an extension of the Progol system that incorporates the notion of contrapositives used in FOL theorem proving\cite{muggleton00}.
+\paragraph{} We observe that the hypothesis in the Learning program above, we derived predicates that are in the examples and does not learn new concepts. Since we want to explain the examples in terms of other concepts, the background knowledge needs to provide those links. The key problem is how to compute information that is missing in the given background knowledge and use these new notions to generate new hypotheses. Prof. Muggleton proposed an extension of the Progol system that incorporates the notion of contrapositives used in FOL theorem proving\cite{muggleton00}.
 
 \paragraph{} A clause with $n$ number of literals in its body is also equivalent to $n$ number of different clauses generated by contrapositive in the following way:
 
@@ -703,32 +732,17 @@ non\_r &\leftarrow non\_p, q\\
 
 \paragraph{} Now the background knowledge includes their equivalent contrapositive clauses.
 
-\subsection{Language Bias}
+\paragraph{} The proof procedure for a given learning task $\langle B, E^+, E^-, M\rangle$ in Progol5 uses a covering loop where in the loop the steps are as follows:
 
-\paragraph{} Sometimes we would like to define the language of the hypothesis by using a language bias. It is composed of a set of \textbf{mode declarations}.
-
-\[
-\text{Mode declarations: }
-\begin{cases}
-	modeh(r, s)\\
-	modeb(r, s)
-\end{cases}
-\]
-
-\paragraph{modeh} indicates the predicate may appear as head predicate of the rules to learn.
-\paragraph{modeb} indicates the predicate may appear as body predicate of the rules to learn.
-\paragraph{r} represents a recall, an integer that indicates how many times the predicate may appear in a rule. '*' indicates that the predicate may appear any number of times in a rule.
-\paragraph{s} is the scheme, which is a ground atom with the predicate's name, placemarkers $+t$ (input variable), $-t$ (output variable) and $\#t$ (constants) for unary type $t$. 
-
-\paragraph{Example} For example consider the following mode declarations:
-
-\begin{align*}
-	&\text{modeh}(1, \text{grandfather}(+\text{person}, +\text{person}))\\
-	&\text{modeb}(1, \text{father}(+\text{person}, -\text{person}))\\
-	&\text{modeb}(1, \text{parent}(+\text{person}, +\text{person}))
-\end{align*}
-
-We can build a rule $grandfather(X, Y) \leftarrow father(X, Z), parent(Z, Y)$.
+\begin{enumerate}
+\item Pick a seed example $e \in E^+$
+\item Normalise $B$ and $e$
+\item \textbf{StartSet}: Compute a ground head atom $a \in Bot(B, e)$ that is subsumed by some atom in the language of $M$
+\item \textbf{BottomSet}: Compute a set of ground body atoms $b_1, \dots, b_n \in Bot(B, e)$ st $a \leftarrow b_1,\dots,b_n$ is subsumed by some clause in the language of $M$.
+\item \textbf{Search}: Compute compressed hypothesis $h$ in language of $M$ that subsumes $a \leftarrow b_1, \dots, b_n$
+\item Add hypothesis $h$ to $B$ (i.e. $B = B \cup H$) and remove \textit{all} cover from $E^+$ (i.e. $E^+ = \{e \ in E^+\ |\ B \not\models e\}$).
+\item If $E^+$ is non-empty, continue back at step (1).
+\end{enumerate}
 
 \subsection{Kernel Set}
 
@@ -752,18 +766,20 @@ a_k \leftarrow b_{1k}, b_{2k}, ..., b_{hk}
 \end{cases}
 \]
 
-\subsection{Hybrid Abductive Inductive Learning}
+\subsection{HAIL Algorithm}
 
-TODO: complete HAIL algorithm
+\paragraph{} The Hybrid Abductive Inductive Learning (HAIL) algorithm is similar to Progol5 in the sense that it has a covering loop and in each iteration a single positive example is processed.
 
-\paragraph{} We have background knowledge $B$, positive examples $E^+$, negative examples $E^-$ and mocdel $M$. 
+\paragraph{} The proof procedure for a given learning task $\langle B, E^+, E^-, M\rangle$ is as such:
 \begin{enumerate}
-\item Abductive Step (replace STARTSET): What are the abducibles?
-\item Deductive Step
-\item Induction Step
+\item Pick a seed example $e \in E^+$
+\item Normalise $B$ and $e$
+\item \textbf{Abduction}: An abductive proof procedure produces a possible explanation of $e$ using the background knowledge and set of abducibles given by set of mode head declarations in $M$. This possible explanation is represented by a set of positive ground abducibles. 
+\item \textbf{Deduction}: $B$ and $e$ are used to compute ground instances of the mode body predicates according to language bias $M$. This computation is pure deductive inference. We generate the Kernel Set $Kernel(B, e)$. The unground version of the Kernel Set forms the bottom element o the lattice so that we can perform a bottom-up search for a more compressed hypothesis. 
+\item \textbf{Induction}: We search for a more compressed hypothesis that will subsume $Kernel(B, e)$. It will search for a more general hypothesis that will have the same example coverage, but will be more general / compressed. This hypothesis is also known as one that has been derived by Kernel Set Subsumption (KSS).
+\item Add hypothesis $h$ to $B$ (i.e. $B = B \cup H$) and remove \textit{all} cover from $E^+$ (i.e. $E^+ = \{e \ in E^+\ |\ B \not\models e\}$).
+\item If $E^+$ is non-empty, continue back at step (1).
 \end{enumerate}
-
-Kernel is the set of clauses . Generalisation shrinks the Kernel set. Head of clauses are from the abduction proof. In Induction Step can I find a $H$ that $\theta$-subsumes $K$ in the $\theta$-lattice. Generalization increases positive-example coverage but we must check that it does not cover any negative examples.
 
 \section{Top-directed Abductive Learning}
 

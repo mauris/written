@@ -783,7 +783,177 @@ a_k \leftarrow b_{1k}, b_{2k}, ..., b_{hk}
 
 \section{Top-directed Abductive Learning}
 
-TODO: write TAL section
+\paragraph{} In this section we will look at a more recent class of logic-based learning that can cover the learning of normal logic programs with negation as failure\footnote{Not just definite logic programs.}. This class of learning approaches is called \textit{meta-level learning}, characterised by the following:
+
+\begin{itemize}
+\item Mode declarations\footnote{See section \ref{sec:LanguageBias}} are represented as a "meta-level" top-theory, not just predicate statements: We want to also learn the mode declarations; and,
+\item Learning task is computed by means of an inference procedure on the background knowledge extended with this meta-level top-theory.
+\end{itemize}
+
+\paragraph{} The idea of a top-directed learning approach is that the language bias is not expressed as meta-logical statements to guide the search but as a logic itself, hence called top-theory. The computation of a hypothesis that conforms with the give language bias is given by an inference process over this top-theory together with the given background knowledge.
+
+\subsection{TopLog}
+
+\paragraph{} For example, consider the following mode declarations (head and body):
+
+\begin{lstlisting}
+modeh(1, penguin(+any))
+modeb(*, can(+any, #ability))
+\end{lstlisting}
+
+\noindent We first add labels to each of the declarations:
+
+\begin{lstlisting}
+m1: modeh(penguin(+any))
+m2: modeb(can(+any, #ability))
+\end{lstlisting}
+
+\noindent Then from the mode declarations, we can construct the top logic $T$ as such:
+
+\[\footnotesize
+T = \begin{cases}
+T_1: penguin(X) \leftarrow \$body(X)\\
+T_2: \$body(X) \leftarrow\\
+T_3: \$body(X) \leftarrow can(X, C), ability(C), \$body(X).
+\end{cases}
+\]
+
+\paragraph{} Each head mode declaration (i.e. $modeh$) becomes the head of the "start" clause of the top theory in $T$. Non-terminal predicate is used in the body of this first clause, written as $\$body(\dots)$ predicate - a place holder for the possible body construction for the clause.
+
+\paragraph{} The non-terminal predicate $\$body(\dots)$ is then the head of the remaining clauses in $T$, where there is a base case of $\$body(\dots) \leftarrow$ and for each body mode declaration (i.e. $modeb$) is represented as in the body of a recursive clause in $T$ with the non-terminal predicate as the head of that clause.
+
+\paragraph{} In the example above, the predicate $ability(C)$ in $T_3$ of $T$ was added to enforce the type of the arguments in the predicate $can$.
+
+\paragraph{} The TopLog algorithm, proposed by Muggleton at ICLP 2008, considers a $e \in E^+$ and constructs an SLD derivation of $e$ from $B \cup T$. From the multiple hypotheses extracted, a coverage score is calculated for each of these hypotheses by:
+
+$$score(h) = |\{e^+  | B \cup h \models e^+\}| - |\{e^- | B \cup h \models e^-\}|$$
+
+\paragraph{} The coverage score awards on coverage on positive examples and penalizes on coverage of negative examples. The hypothesis of the highest score would be returned as the best hypothesis from the learning task.
+
+\paragraph{} The use of a top-theory allows the computation of hypothesis directly from the positive examples and background knowldge, There is no longer a need to generate a bottom clause first to constraint the lattice space then compute the hypothesis by generalising the bottom clause.
+
+\paragraph{} We also could see that the use of logic program as language bias allows more expressivity compared to use of meta-logical statements. In particular, TopLog can learn recursive programs which are not computable from Progol, and hypothesis from single seed examples that are composed of more than one clause. This is also referred as multi-clause learning. 
+
+\subsection{Limitations of TopLog}
+
+\paragraph{} However, there are limitations to TopLog:
+
+\begin{itemize}
+\item \textbf{Limited to definite logic programs}: we saw that we could not learn negation of a body predicate, which means we could not learn normal logic programs. 
+\item \textbf{Cannot learn from negative examples}: The program only considers the positive examples when building the hypotheses. The negative examples are not considered until scoring takes place. It is possible due to the incompleteness of the background knowledge, some information cannot be proved during computation because of such incompleteness. In situations like this, Toplog will lead to failure of the computation. 
+\item \textbf{Computes mainly OPL}: Cannot perform NOPL.
+\end{itemize}
+
+\subsection{Abductive Logic Programs as Declarative Bias}
+
+\paragraph{} Despite TopLog's limitations, the idea of defining language bias as a declarative program is powerful. Instead of deductive inference (as used in TopLog). taking the abductive inference over a special type of declarative top theories can enable the learning of a much wider class of hypotheses:
+
+\begin{enumerate}[i)]
+\item hypothesis about non-observed predicates
+\item multi-clause hypotheses
+\item recursive programs
+\item normal logic programs
+\end{enumerate}
+
+\paragraph{Top-directed Abductive Learning} The use of abductive inference to search for inductive hypothesis over a top-theory declarative bias can be referred to as Top-directed Abductive Learning (TAL). The underlying idea of TAL is to use abduction to directly compute hypothesis by first transforming a given learning task into an equivalent abductive task. 
+
+\paragraph{} In this approach, abduction is not integrated into the learning program\footnote{as seen in HAIL}, but it is the computational mechanism itself. Learning approaches that is based on this technique is referred as "meta-level" learning.
+
+\paragraph{} In fact, what TAL proposes is a new ILP approach based on an equivalent ALP problem. The key aspect of TAL is how to conjecture a top-theory that allows the computation of abductive solutions that correspond to the inductive soltions of the original learning task compatible with the given mode declarations.
+
+\subsection{Modes as Data Structures}
+
+\paragraph{} The first important idea for generating an abductive top-theory is to define an injective\footnote{one-to-one} translation function that maps rules compatible with given mode declarations into a "data structure" that can be used as terms of abducibles.
+
+\paragraph{} Each mode declaration is given a unique identifier or label so that references to the label can points back to the original mode declaration. The data structure also captures all the information given by a mode declaration and is a tuple of 4 elements.
+
+\paragraph{} Consider the following mode declaration format whose label is $m1$: $$m1: mode(load(+type1, \#type2, -type3))$$
+
+\noindent The structure for literal $load(X, a, Y)$ the would be: $\langle m1, [a], [X], [Y]\rangle$. This is in the format $\langle modeDec,\ const,\ inputVars,\ outputVars \rangle$.
+
+\paragraph{} A rule that is comaptible with a given set of mode declarations can then be expressed as a sequence of such tuples, with one tuple per literal in the rule. Consider the following example mode declaration:
+
+\[
+M = \begin{cases}
+m1: modeh(p(+any))\\
+m2: modeb(r(+any, \#any))\\
+m2: modeb(q(+any, -any))
+\end{cases}
+\]
+
+\noindent The tuple representation of the clause $p(X) \leftarrow q(X, Y), r(Y, a)$ would then be given by the tuples: $\langle m1, [], [X], []\rangle, \langle m3, [], [X], [Y] \rangle, \langle m2, [a], [Y], [] \rangle$
+
+\paragraph{Compaction} Note that as each output variable is a new variable in a rule, given the mode declarations that already specify the arity of each predicate, it is possible to further simplify the representation. 
+
+\paragraph{} We assume that in a rule, all its distinct variables are numbered from left to right, so we can omit the list of output variables and only keep track of the input variables by maintaining the position of in the rule where that variable occurs first.
+
+\paragraph{} The data structure that corresponds to a literal in a rule is now reduced to just a tuple of three elements. The tuple for a head predicate will always be a tuple that just contains the mode identifier,  and the list of constants and list of input variables are empty. The other tuples correspond to the body of a rule. 
+
+\paragraph{} Using the example above, we number $X$ to be 1 and $Y$ to be 2. The corresponding compact representation would then be: $\langle m1, [], []\rangle, \langle m3, [], [1] \rangle, \langle m2, [a], [2] \rangle$
+
+\paragraph{} To rebuild the rules, we look up the mode declarations $M$ using the labels in the tuple.
+
+\subsection{Abductive Top-Theory}
+
+\paragraph{} The list of tuples for a rule can be used in an abducible predicate $rule(rid, \dots)$, where $rid$ refers to the unique identifier for the rule. This predicate is essentially a meta-predicate that states the existence of a rule whose structure is captured by its term. 
+
+\paragraph{} We can now represent the hypothesis space as an abductive top-theory that, when executed, captures the construction of hypothesis by reasoning about what can be added to a currently partial hypothesis\footnote{We refer to such a partial hypothesis as "RuleSoFar"} in order to get a solution that is complete and consistent.
+
+\paragraph{} The generation of an abductive top-theory is an automatic process that takes in as a set of mode declarations as input. Each mode declaration is assumed to be transformed into an unground or possibly negated atom where each argument is replaced with a new variable name, regardless of the type of the argument. This is also known as variabilisation.
+
+\paragraph{Notation Remark} The argument of the mode declaration statement is referred to as schema $s$. Its variabilisation is referred to as $s^*$. Its constant arguments, input arguments and output arguments are denoted as lists $con(s^*)$, $inp(s^*)$ and $out(s^*)$ respectively.
+
+\paragraph{Constructing Head Mode Declarations} For each head mode declaration: $mh: modeh(sh)$, we add the following rule to our top-theory:
+
+$$sh^* \leftarrow body(inp(sh^*), [\langle mh, con(sh^*), [] \rangle])$$
+
+
+\paragraph{Constructing Body Mode Declarations} For each body mode declaration: $mb: modeh(sb)$, we add the following rule to our top-theory:
+
+{\footnotesize
+\begin{align*}
+body&(InputSoFar, RuleSoFar) \leftarrow\\
+& sb*,\\
+& link(inp(sb*), InputSoFar, Links),\\
+& append(RuleSoFar, \langle mb, con(sb^*), Links\rangle, NewRule),\\
+& append(InputSoFar, out(sb^*), newInputs),\\
+& body(NewInputs, NewRule)\\
+\\
+body&(InputSoFar, RuleSoFar) \leftarrow rule(RuleSoFar)
+\end{align*}
+}
+
+\paragraph{} The utility predicate $link/3$ is defined as follows:
+
+\begin{align*}
+link&([H|T], InpList, [N|TN]) \leftarrow\\
+& nth1(N, H, InpList),\\
+& link(T, InpList, TN)\\
+\\
+link&([], List, [])
+\end{align*}
+
+\subsection{TAL Algorithm}
+
+\paragraph{} A TAL learning task $\langle E, B, M, IC\rangle$ where $E$ is the set of examples, $B$ is the background knowledge, $M$ is the mode declarations and $IC$ is the set of integrity constraints. The output will be a hypothesis. The algorithm is as follows:
+
+\begin{align*}
+T_M &= \text{Preprocessing}(E, B, M)\\
+\Delta &= \text{Abduce}(B \cup T_M, \{rule(.)\}, IC) \text{ with goal }E\\
+H &= \text{Postprocessing}(\Delta, M)
+\end{align*}
+
+\paragraph{Step 1} The first step generates an abductive top-theory from the given mode declarations. Once the $T_M$ top-theory has been generated, this can be seen as an abductive theory as it will include a predicate $rule(\dots)$ that is yet to be defined. Deductive inference would fail if applied to this theory. This is one of the main differences between a top-theory in the TopLog approach vs a top-theory in TAL.
+
+\paragraph{Step 2} The second step performs a pure abductive inference. The background knowledge for the abductive reasoning is $B \cup T_M$ and it is used to infer predicates that may appear in the body of the hypothesis, similar to the case of inverse entailment. The step can be considered as: $$B \cup T_M \cup \Delta \vdash_\text{abductive} E$$
+
+\paragraph{} In NOPL, the first rule of the top-theory will only be considered once some resolution steps have been applied between the examples and $B$. The non-observed predicate has been reached as unknown predicate that has to be learned.
+
+\paragraph{} The set of abducibles of this task is given by all possible ground instances of the atom $rule(\dots)$. The set of integrity constraints is the same set that might appear already on the given initial  learning task. The goal of the abductive inference is the entire set of examples, where negative examples are written as negated literals.
+
+\paragraph{} All the examples are considered in one go, because the learning being non-monotonic, TAL cannot use the usual covering-loop mechanism we saw in Progol and HAIL. The final abductive answer (or alternative answers) will explain all given positive example and non of the negative examples (taken in their positive form). No generalisation step is required for this approach.
+
+\paragraph{Step 3} In the final step, we apply the inverse transformation to the abductive answer $\Delta$ and generate the corresponding hypothesis. $\Delta$ can be a set of abduced facts of type $rule(\dots)$. This will correspond to a hypothesis having multiple clauses. Alternative $\Delta$s could be computed, which means that the learning task may have alternative inductive solutions.
 
 \section{Stable Model Semantics}
 

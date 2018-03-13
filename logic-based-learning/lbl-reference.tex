@@ -1253,6 +1253,8 @@ To limit the the hypothesis search space, we introduce two constraints in additi
 
 \paragraph{} ASPAL constructs a set of skeleton rules $S_M$ - we call this set the hypothesis space. $S_M$ is maximal given language constraints $<M_h, M_b>, L_\text{max}, V_\text{max}$ if any rule which can be constructed respecting the constraints is equivalent to a rule already in $S_M$. We need to maximize this hypothesis space because we want to include all possible rules allowed by the language constraints, before we later prune off inconsistent instances of the skeleton rules later using a choice rule.
 
+\paragraph{} Constants replaced with variables do not count towards the $V_\text{max}$ limit. \cite[p. 6]{lawnonmonotonic} The constant "variables" in skeleton rules should be considered as placeholders for constants rather than real variables that count towards $V_\text{max}$.
+
 \subsection{Hypothesis Space}\label{sec:ASPALHypothesisSpace}
 
 \paragraph{} Given the following background knowledge $B$:
@@ -1925,6 +1927,63 @@ $$P(abbc) = (0.4)(0.6)(0.7)(0.3) \approx 0.05$$
 \end{align*}
 
 \paragraph{} The probability of choosing a number of length $L = log_2(N)$ is approximately $2^{-L}$ and there are $2^L$ such numbers, each with equal probability of $P(natp(N)|Q) \approx 2^{-2log_2(N)} = N^{-2}$.
+
+\section{Bayesian Meta-Interpretive Learning}
+
+\subsection{Stochastic Refinement Tree}
+
+\paragraph{} With the notion of SLP, we can consider hypotheses constructed with SLP as ones derived from Stochastic Refinement\cite{muggleton11}. If we consider all the possible construction, we would build a tree called Stochastic Refinement Tree (SRT),  where each branch is associated with the probabilities described in the SLP. The deeper the tree we go, the smaller the probability. Each node in the tree represents a Finite State Automata.
+
+\paragraph{} As the SRT contains all possible construction, we need to knock out inconsistent branches against the given example.
+
+\paragraph{} The low probability on deep branches (also higher probability on shallower branches) in the SRT reflect the realistic desire for favouring simpler hypothesis over complicated (or redundant) ones.
+
+\subsection{MetaBayes Refinement Framework}
+
+\paragraph{} In the MetaBayes Refinement Framework\cite{muggleton14}, we can use SLP and Bayes' Theorem to help us select the  optimal hypothesis. We look at the following:
+
+\paragraph{Setting} Inverse entailment: $B, \lnot E \models \lnot H$
+
+\paragraph{Meta-Rule} $\exists \mathcal{S}\ \forall\mathcal{T}\ P(s_1, \dots, s_n) \leftarrow Q(t_1, \dots, t_m)$
+
+\paragraph{Stochastic Refinement} 
+
+{\footnotesize
+$$\sigma^*(C) = \{\langle D_i, p_i \rangle\ |\ D_i \in \rho^*(C), p_i \in [0, 1], \sum_{i \in [1, |\rho^*(C)|]} p_i = 1 \}$$}
+
+\paragraph{Prior} The probability of a hypothesis given a background knowledge is $P(H|B) = \sum_{\langle H, p \rangle \in \sigma^*(\lnot B)} p$ and $P(H) = P(H|\emptyset)$
+
+\paragraph{Likelihood} We also set the likelihood according to consistency to filter out inconsistent hypothesis:
+
+\[
+P(E|B,H) = \begin{cases}
+1 & \text{if } B,H \models E\\
+0 & \text{otherwise}
+\end{cases}
+\]
+
+\paragraph{Posterior} Using Bayes' Theorem, the posterior probability\footnote{I am using notation consistent with 493 Data Analysis and Probabilistic Inference} would be given by:
+
+$$P(H|B,E) = \alpha P(H|B)P(E|B,H)$$
+
+\noindent where $\alpha$ is a normalising constant. A hypothesis $H$ is said to have maximum a posteriori (MAP) estimate if it is the case that $H \in argmax_H P(H|B,E)$.
+
+\subsection{Implementation and Variants}
+
+\paragraph{} There are three variants of generalised meta-interpreter with uniform distribution stochastic refinement of meta-rules:
+
+\paragraph{MetaBayes${}_{SR}$} Model averaging prediction based on sampling hypotheses \textit{with replacement}.
+
+\paragraph{MetaBayes${}_{RS}$} Model averaging prediction based on sampling hypotheses \textit{without replacement}.
+
+\paragraph{MetaBayes${}_{MAP}$} Prediction based on leftmost maximum a posteriori estimation (i.e. leftmost MAP Estimator).
+
+\subsection{MetaBayes${}_{RS}$ - Without Replacement}
+
+\paragraph{} If we have chosen a hypothesis and we do not choose it again (replacement), we would reduce the amount of computation needed. Sampling without replacement is more efficient since it avoids generating
+repeated hypotheses. This method is also known as Regular Sampling.
+
+\paragraph{} Also, in without replacement, given a target probability, we can decide which branch to descend in the SRT based on the cumulative frequencies as each subtree of a node in the SRT is partitioned into equally sized interval.
 
 \end{multicols}
 

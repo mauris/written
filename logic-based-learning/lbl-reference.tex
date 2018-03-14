@@ -244,13 +244,13 @@ $$S = \forall X, Y [\lnot p(b, Y) \land p(c, l) \land (p(b, X) \lor \lnot p(X, l
 \begin{align*}
 ground(C) &= \{\\
 	&\lnot p(b, b),\\
-	&p(b, b), \lor \lnot p(b, l),\\
+	&p(b, b) \lor \lnot p(b, l),\\
 	&\lnot p(b, c),\\
 	&p(b, c) \lor \lnot p(c, l),\\
 	&\lnot p(b, l),\\
 	&p(b, l) \lor \lnot p(l, l),\\
 	&p(c, l)\\
-	\}&
+	\}\ \ \ \ &
 \end{align*}
 
 \paragraph{} In Example \ref{exmp:HerbrandTheorem}, $ground(C)$ is not satisfiable because of a contradicting subset of the ground clauses: $\{\lnot p(b, c), p(c, l), p(b, c) \lor\lnot p(c, l)\}$. Hence the set of clauses $C$ is unsatisfiable.
@@ -276,7 +276,7 @@ Th &= \{\\
 \subsection{SLD Derivation}
 \paragraph{} A pure Prolog program is a set of definite clauses and hence its semantics is given by its Least Herbrand Model\footnote{Defined by Luc De Raedt in his book.}. The inference procedure used by Prolog is a special version of resolution that exploits the fact that the given clausal theory is a set of definite clauses and not general clauses. 
 
-\paragraph{} Queries to a Prolog program are not any arbitrary clauses but denial clauses\footnote{We want to proof by refutation.}. Arbitrary clauses must be rewritten in a certain way to accomodate this syntactic restriction of Prolog. 
+\paragraph{} Queries to a Prolog program are not any arbitrary clauses but denial clauses\footnote{We want to proof by refutation.}. Arbitrary clauses must be rewritten in a certain way to accommodate this syntactic restriction of Prolog. 
 
 \paragraph{} Given a set of definite clauses and a denial clause, there can be many resolution proofs that can be constructed. Prolog uses a special form of resolution - SLD resolution - to systematically explore all possible derivations. The SLD derivation is a linear sequence of application of an SLD inference rule that is applied between a denial clause and a definite clause in the original $Th$ clausal theory. SLD is a resolution proof method and as such is still refutation based. Hence the denial clause is the given query expressed in denial form. 
 

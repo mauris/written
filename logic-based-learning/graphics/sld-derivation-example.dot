@@ -7,7 +7,7 @@ digraph {
   2 [label=<{X<SUB>0</SUB>/Z}> fontcolor="blue"];
   0 -> 2;
   1 -> 2;
-  3 [label=<G<SUB>1</SUB>: &larr; parent(Z, Y<SUB>0</SUB>), newborn(Y<SUB>0</SUB>>];
+  3 [label=<G<SUB>1</SUB>: &larr; parent(Z, Y<SUB>0</SUB>), newborn(Y<SUB>0</SUB>)>];
   2 -> 3;
   
   4 [label=<C<SUB>1</SUB>: parent(X<SUB>1</SUB>, Y<SUB>1</SUB>) &larr; father(X<SUB>1</SUB>, Y<SUB>1</SUB>)>];

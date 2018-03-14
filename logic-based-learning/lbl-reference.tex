@@ -494,7 +494,18 @@ $$G_0 \underset{C_0}{\implies} G_1 \underset{C_1}{\implies} ...  \underset{C_{n-
 
 \subsection{Lattice of Clauses}
 
-\paragraph{} ILP for definite clauses can be described by i) Structure of the hypothesis space based on generality relation and ii) Search strategy (or prune strategy) by $\theta$-subsumption. The subsumption relation over definite clauses defines a lattice structure. There are two types of traversal over the lattice of hypotheses: specialization (going down the lattice to find a more specific hypothesis) and generalization (going up the lattice to find a more general hypothesis). Hence, ILP learning programs for definite clauses have been classified into either \textit{top-down} or \textit{bottom-up} learners.
+\paragraph{} ILP for definite clauses can be described by i) Structure of the hypothesis space based on generality relation and ii) Search strategy (or prune strategy) by $\theta$-subsumption. The subsumption relation over definite clauses defines a lattice structure.
+
+\paragraph{} There are two types of traversal over the lattice of hypotheses:
+
+\begin{itemize}
+\item Specialization: going down the lattice to find a more specific hypothesis
+\item Generalization: going up to lattice to find a more general hypothesis
+\end{itemize}
+
+\paragraph{} ILP learning programs for definite clauses have been classified into either \textit{top-down} or \textit{bottom-up} learners.
+
+\paragraph{Lattice Boundaries} The lattice is bounded at the top by the "inconsistency" clause and is not bounded at the bottom i.e. we can construct clauses infinitely long and repetitive. Later we will explore how LBL algorithms will define a boundary at the bottom to prevent meaningless or redundant searches beyond this boundary. 
 
 \subsection{General-to-Specific Traversal}
 
@@ -597,11 +608,9 @@ $$\{f(X,Y) \lor \lnot p(X, Y); \lnot m(X); \lnot m(Z)\}$$
 & X \leftarrow N, E, F && \text{Resulting Clause } C_5\\
 \end{align*}
 
-\subsection{Learning as a Search}\label{sec:LearningAsASearch}
+\subsection{Lattice Search Operators}\label{sec:LearningAsASearch}
 
-\paragraph{} The problem of logic-based learning is a problem of searching over a version space of theories (possible solutions). Given that generality relation between clauses in a version space is expressed as entailment and the hypothesis space consist of definite clauses, we can use several different approaches described earlier.
-
-\paragraph{} There are two main search operators:
+\paragraph{} The problem of logic-based learning is a problem of searching over a version space of theories (possible solutions). Given that generality relation between clauses in a version space can be expressed as entailment and the hypothesis space consist of definite clauses, we can use the approaches described earlier in our search for hypotheses. There are two main search operators:
 
 \begin{itemize}
 \item \textbf{Using $\theta$-subsumption}: either done top-down by specialising clauses to remove coverage over negative examples (using Shapiro $\rho$ refinement operator) or bottom-up by computing more general clauses (using Plotkin's lgg operator).
@@ -610,11 +619,11 @@ $$\{f(X,Y) \lor \lnot p(X, Y); \lnot m(X); \lnot m(Z)\}$$
 
 \subsection{Learning from Interpretation}
 
-\paragraph{} In \textit{Learning from Interpretation}, the set of examples contain a full description, and all the information that belongs to the example is represented in the example, not in the background knowledge. The Background only contains general information concerning the domain, not concerning specific examples. Hence a definite clause theory $H$ is a solution iff $e \in E^+$ is a model of $H$ (i.e. $e \models H$).
+\paragraph{} In \textit{Learning from Interpretation}, the set of examples contain a full description, and all the information that belongs to the example is represented in the example, not in the background knowledge. The Background only contains general information concerning the domain, not concerning specific examples. Hence a definite clause theory $H$ is a solution to such a learning task iff $e \in E^+$ is a model of $H$ (i.e. $e \models H$).
 
 \subsection{Learning from Entailment}
 
-\paragraph{} Learning from entailment is a different paradigm. Given the examples $E = <E^+, E^->$, each $e \in E$ is a ground fact and $B$ is the background definite clause theory. We want to find hypothesis $H$ st means $\forall e \in E^+\ B \cup H_i \models e$ and $\forall e \in E^-\ B \cup H_i \not\models e$
+\paragraph{} Learning from entailment is a different paradigm. Given the examples $E = \langle E^+, E^- \rangle$, each $e \in E$ is a ground fact and $B$ is the background definite clause theory. We want to find hypothesis $H$ st $\forall e \in E^+:\ B \cup H_i \models e$ and $\forall e \in E^-:\ B \cup H_i \not\models e$.
 
 \section{HAIL \& Progol}
 
@@ -633,11 +642,11 @@ $$\{f(X,Y) \lor \lnot p(X, Y); \lnot m(X); \lnot m(Z)\}$$
 
 \subsection{Inverse Entailment}
 
-\paragraph{} Consider the notion of Inverse Entailment. It combines the advantages of both bottom-up\footnote{narrowing the search by starting from what is known already} and top-down\footnote{refining a general hypothesis to form a new one} searches. We observe that
+\paragraph{} Consider the notion of Inverse Entailment where it combines the advantages of both bottom-up\footnote{narrowing the search by starting from what is known already} and top-down\footnote{refining a general hypothesis to form a new one} searches, we observe that
 
 \[ B \cup H \models E \equiv B \cup \lnot E \models \lnot H \]
 
-\paragraph{} Note that since $H$ and $E$ are set of clauses, their variables are universally quantified. When negating clauses in these sets, the variables becomes existentially quantified - skolemised. 
+\paragraph{} Since $H$ and $E$ are set of clauses, their variables are universally quantified. When negating clauses in these sets, the variables becomes existentially quantified - skolemised. 
 
 \subsection{Language Bias}\label{sec:LanguageBias}
 

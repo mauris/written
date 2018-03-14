@@ -221,13 +221,13 @@ Kb &= \{\\
 
 \paragraph{} As we take the negation of the entailment, the existential quantifiers becomes universal quantifier, and during skolemisation, they get eliminated, i.e. we show $Kb \cup \{\lnot on(X,Y)\lor \lnot green(X) \lor green(Y)\} \models [\ ]$.
 
-\paragraph{Answers to Query} Answer to the query may also return unification values (substitution). However, it is possible to construct resolutions that never terminate.
+\paragraph{Answers to Query} Answers to the query may also return unification values (substitution). However, it is possible to construct resolutions that never terminate (e.g. in recursive cases).
 
 \subsection{Herbrand Theorem}
 
-\paragraph{} It is possible to handle some predicate logic cases by converting them into propositional logic form. Consider $Th$ be a set of clauses (a clausal theory).
+\paragraph{} It is possible to handle some predicate logic cases by converting them into propositional logic form. Consider $Th$ to be a set of clauses (i.e. a clausal theory).
 
-\paragraph{Herbrand Domain}\footnote{Also known as Herbrand Universe.} The set of all ground terms formed only using constants and function symbols that appear in $Th$.
+\paragraph{Herbrand Domain} The set of all ground terms formed only using constants and function symbols that appear in $Th$.\footnote{Herbrand Domain is also known as Herbrand Universe.}
 
 \paragraph{Herbrand Base} The set of all ground atoms that can be formed using the predicate symbols in $Th$ and terms in the Herbrand Domain.
 
@@ -237,9 +237,9 @@ Kb &= \{\\
 
 \begin{exmp}\label{exmp:HerbrandTheorem} Consider FOL sentence $S$ whose language $\mathcal{L}$ includes only the constants $b$, $c$, $l$:\end{exmp}
 
-$$S = \forall X, Y [\lnot p(b, Y) \lor p(c, l) \lor (p(b, X)\lor \lnot p(X, l))]$$
+$$S = \forall X, Y [\lnot p(b, Y) \land p(c, l) \land (p(b, X) \lor \lnot p(X, l))]$$
 
-\noindent From $S$ we can build the set $C$ of clauses st $C = \{\lnot p(b, Y); p(c,l); p(b, X) \lor \lnot p(X, l)\}$. The \textit{Herbrand Domain of $C$} is $\{b, c, l\}$ while the grounding is:
+\noindent From $S$ we can build the set $C$ of clauses st $C = \{\lnot p(b, Y); p(c,l); p(b, X) \lor \lnot p(X, l)\}$. The \textit{Herbrand Domain} of $C$ is $\{b, c, l\}$, while the grounding is given by:
 
 \begin{align*}
 ground(C) &= \{\\

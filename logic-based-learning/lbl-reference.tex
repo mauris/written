@@ -1248,7 +1248,9 @@ $$B \cup H \models_c (e_1^+ \land ... \land e_n^+ \land \text{not}\ e_1^- \land 
 coin(c1).
 \end{lstlisting}
 
-\paragraph{} The only atom that is true in all Answer Sets of the program that we are trying to learn would be $coin(c1)$. Neither atoms $value(c1, heads)$ nor $value(c1, tails)$ is false in all Answer Sets. Hence this would cause us to learn only $coin(c1)$. This is not what we are aiming for as we want to learn a program with two distinct Answer Sets, which corresponds to the coin $c1$ being $heads$ or $tails$. Cautious entailment of all examples in such a case may be a requirement that is too strong. Hence, in such situation, a Brave ILP learning task would be able to give what is true in some Answer Sets but not all Answer Sets of the learned program.
+\paragraph{} The only atom that is true in all Answer Sets of the program that we are trying to learn would be $coin(c1)$. Neither atoms $value(c1, heads)$ nor $value(c1, tails)$ is false in all Answer Sets. Hence this would cause us to learn only $coin(c1)$. This is not what we are aiming for as we want to learn a program with two distinct Answer Sets, which corresponds to the coin $c1$ being $heads$ or $tails$.
+
+\paragraph{} Cautious entailment of all examples in such a case may be a requirement that is too strong. Hence, in such situation, a Brave ILP learning task would be able to give what is true in some Answer Sets but not all Answer Sets of the learned program.
 
 \section{ASP Abductive Learning}
 
@@ -1321,7 +1323,7 @@ penguin(V1) :- bird(V1), not can(V1, fly), not can(V1, swim).
 
 \subsubsection{Rule Encoding}
 
-\paragraph{} ASPAL encodes an ILP task as a meta level ASP program. The Answer Sets would contain atoms that represent each of the rules in the hypothesis. To help us map the Answer Set of the meta level program back to an inductive solution of the ILP task, we assign a unique rule identifier $R_\text{ID}$ to each skeleton rule in $S_M$. The atom $rule(R_\text{ID}, c_1, ..., c_n)$ represents the skeleton rule $R$ with each constant variables replaced with constants $c_1, ..., c_n$.
+\paragraph{} ASPAL encodes an ILP task as a meta level ASP program. The Answer Sets would contain atoms that represent each of the rules in the hypothesis. To help us map the Answer Set of the meta level program back to an inductive solution of the ILP task, we assign a unique rule identifier $R_\text{ID}$ to each skeleton rule in $S_M$. The atom $rule(R_\text{ID}, c_1, \dots, c_n)$ represents the skeleton rule $R$ with each constant variables replaced with constants $c_1, \dots, c_n$.
 
 \paragraph{} We can then use the choice rule (See Section \ref{sec:ASPChoiceRules}) on the set of rules and the combination of constants to let the ASP solver help us find the solutions to the ILP task.
 
@@ -1354,7 +1356,7 @@ goal :- e1+, ..., en+, e1-, ..., em-.
 
 \subsection{Optimization}
 
-\paragraph{} ASLAP uses an optimisation statement st the optimal Answer Sets of the meta level program will correspond exactly to the optimally inductive solutions of the task. We can do this using the \lstinline{#minimize} statement in ASP (See Section \ref{sec:ASPExtendedConstructs}) and by weighing each of the rules by its length:
+\paragraph{} ASPAL uses an optimisation statement st the optimal Answer Sets of the meta level program will correspond exactly to the optimally inductive solutions of the task. We can do this using the \lstinline{#minimize} statement in ASP (See Section \ref{sec:ASPExtendedConstructs}) and by weighing each of the rules by its length:
 
 \begin{lstlisting}
 #minimize[rule(1, c1, ..., cn) = Rlen, ...].
@@ -1376,7 +1378,7 @@ goal :- e1+, ..., en+, e1-, ..., em-.
 
 \subsection{Learning}
 
-\paragraph{} A LAS task is a tuple $\langle B, S_M, E^+, E^- \rangle$. Unlike ASPAL and similar systems, as LAS is aimed at learning ASP rather than Prolog, LAS has no concept of input and output variables. The only restriction is that the rules in $S_M$ are safe. 
+\paragraph{} A LAS task, denoted $\text{ILP}_\text{LAS}$, is a tuple $\langle B, S_M, E^+, E^- \rangle$. Unlike ASPAL and similar systems, as LAS is aimed at learning in ASP rather than Prolog, LAS has no concept of input and output variables. The only restriction is that the rules in $S_M$ are safe. 
 
 \paragraph{} A hypothesis $H$ is an inductive solution, written $H \in \text{ILP}_\text{LAS}\langle B, S_M, B^+, B^- \rangle$, iff it is constructed from the rules in $S_M$ (i.e. $H \subseteq S_M$) and each positive example is extended by at least one Answer Set of $B \cup H$ (this can be different Answer Set for each positive example) and none of the negative examples are extended by any Answer Set of $B \cup H$. Formally,
 

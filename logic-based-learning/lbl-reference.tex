@@ -223,7 +223,7 @@ Kb &= \{\\
 
 \paragraph{Answers to Query} Answers to the query may also return unification values (substitution). However, it is possible to construct resolutions that never terminate (e.g. in recursive cases).
 
-\subsection{Herbrand Theorem}
+\subsection{Herbrand Theorem}\label{sec:HerbrandTheorem}
 
 \paragraph{} It is possible to handle some predicate logic cases by converting them into propositional logic form. Consider $Th$ to be a set of clauses (i.e. a clausal theory).
 
@@ -858,7 +858,7 @@ $$score(h) = |\{e^+  | B \cup h \models e^+\}| - |\{e^- | B \cup h \models e^-\}
 
 \paragraph{} The coverage score awards on coverage on positive examples and penalizes on coverage of negative examples. The hypothesis of the highest score would be returned as the best hypothesis from the learning task.
 
-\paragraph{} The use of a top-theory allows the computation of hypothesis directly from the positive examples and background knowldge, There is no longer a need to generate a bottom clause first to constraint the lattice space then compute the hypothesis by generalising the bottom clause.
+\paragraph{} The use of a top-theory allows the computation of hypothesis directly from the positive examples and background knowledge, There is no longer a need to generate a bottom clause first to constraint the lattice space then compute the hypothesis by generalising the bottom clause.
 
 \paragraph{} We also could see that the use of logic program as language bias allows more expressivity compared to use of meta-logical statements. In particular, TopLog can learn recursive programs which are not computable from Progol, and hypothesis from single seed examples that are composed of more than one clause. This is also referred as multi-clause learning. 
 
@@ -887,7 +887,7 @@ $$score(h) = |\{e^+  | B \cup h \models e^+\}| - |\{e^- | B \cup h \models e^-\}
 
 \paragraph{} In this approach, abduction is not integrated into the learning program\footnote{as seen in HAIL}, but it is the computational mechanism itself. Learning approaches that is based on this technique is referred as "meta-level" learning.
 
-\paragraph{} In fact, what TAL proposes is a new ILP approach based on an equivalent ALP problem. The key aspect of TAL is how to conjecture a top-theory that allows the computation of abductive solutions that correspond to the inductive soltions of the original learning task compatible with the given mode declarations.
+\paragraph{} In fact, what TAL proposes is a new ILP approach based on an equivalent ALP problem. The key aspect of TAL is how to conjecture a top-theory that allows the computation of abductive solutions that correspond to the inductive solutions of the original learning task compatible with the given mode declarations.
 
 \subsection{Modes as Data Structures}
 
@@ -899,7 +899,7 @@ $$score(h) = |\{e^+  | B \cup h \models e^+\}| - |\{e^- | B \cup h \models e^-\}
 
 \noindent The structure for literal $load(X, a, Y)$ the would be: $\langle m1, [a], [X], [Y]\rangle$. This is in the format $\langle modeDec,\ const,\ inputVars,\ outputVars \rangle$.
 
-\paragraph{} A rule that is comaptible with a given set of mode declarations can then be expressed as a sequence of such tuples, with one tuple per literal in the rule. Consider the following example mode declaration:
+\paragraph{} A rule that is compatible with a given set of mode declarations can then be expressed as a sequence of such tuples, with one tuple per literal in the rule. Consider the following example mode declaration:
 
 \[
 M = \begin{cases}
@@ -944,7 +944,7 @@ body&(InputSoFar, RuleSoFar) \leftarrow\\
 & sb*,\\
 & link(inp(sb*), InputSoFar, Links),\\
 & append(RuleSoFar, \langle mb, con(sb^*), Links\rangle, NewRule),\\
-& append(InputSoFar, out(sb^*), newInputs),\\
+& append(InputSoFar, out(sb^*), NewInputs),\\
 & body(NewInputs, NewRule)\\
 \\
 body&(InputSoFar, RuleSoFar) \leftarrow rule(RuleSoFar)
@@ -987,7 +987,7 @@ H &= \text{Postprocessing}(\Delta, M)
 
 \subsection{Definitions}
 
-\paragraph{} A Normal Logic Program is set of rules / clauses, where each rule $R$ is in the form
+\paragraph{} Recall in Section \ref{sec:NormalClausalLogic}, we discussed the notion of a normal clause. A Normal Logic Program is set of normal clauses, where each rule $R$ is in the form
 
 \begin{lstlisting}
 h :- b1, ..., bn, not c1, ..., not cm.
@@ -1005,37 +1005,41 @@ h :- b1, ..., bn, not c1, ..., not cm.
 
 \subsection{Prolog and Negation}
 
-\paragraph{} Consider the following program:
+\paragraph{} Consider the following program in Prolog:
 
 \begin{lstlisting}
 p :- not q.
 q :- not p.
 \end{lstlisting}
 
-\paragraph{} What should Prolog return if queried "$p$"? While Prolog will loop infinitely, there are in fact multiple answers to the query. The value of p depends on q and the value of q depends on p. The stable model semantics\cite{gelfond88} is a different approach to solving normal logic programs. Instead of providing solutions to specific queries, the stable model semantics defines the set of "stable" models of the program. we will see that the example program above has the stable models $\{p\}$ and $\{q\}$.
+\paragraph{} What should Prolog return if queried "$p$"? While Prolog will loop infinitely, there are in fact multiple answers to the query. The value of $p$ depends on $q$ and the value of $q$ depends on $p$.
+
+\paragraph{} The stable model semantics\cite{gelfond88} is a different approach to solving normal logic programs. Instead of providing solutions to specific queries, the stable model semantics defines the set of "stable" models of the program. we will see that the example program above has the stable models $\{p\}$ and $\{q\}$.
 
 \subsection{Grounding}
 
-\paragraph{} The solving any normal logic program is to first ground the logic program. For any program $P$ with function symbols, there are infinitely many ground instances of each rule in $P$ (consider function symbol compositions and there can be infinitely many different compositions). We write $ground(P)$ to refer to the grounding of logic program $P$.
+\paragraph{} To solve any normal logic program is to first ground the logic program. For any program $P$ with function symbols, there are infinitely many ground instances of each rule in $P$ (consider function symbol compositions and there can be infinitely many different compositions).
+
+\paragraph{} We consider the same notation for ground as with Section \ref{sec:HerbrandTheorem}, where we write $ground(P)$ to refer to the grounding of logic program $P$.
 
 \paragraph{} Most of these grounding instances of each rule may be redundant instances whose bodies could never be satisfied. ASP solvers do not generate these redundant rules.
 
 \subsection{Safety}
 
-\paragraph{} In Prolog, floundering (see section \ref{sec:NormalClausalLogic}) is a problem because negative literals may contain a variable which is only ground by a positive literal occurring later in the body of the rule. Recall that in Prolog, rule evaluation is ordered top to bottom and left to right. For example, the following logic program flounders in Prolog as $X$ and $Y$ only gets instantiated in $r(X, Y)$, which happens after $not\ q(X, Y)$:
+\paragraph{} In Prolog, floundering (see Section \ref{sec:NormalClausalLogic}) is a problem because negative literals may contain a variable which is only grounded by a positive literal occurring later in the body of the rule\footnote{Recall that in Prolog, rule evaluation is ordered top to bottom and left to right.}. For example, the following logic program flounders in Prolog as $X$ and $Y$ only gets instantiated in $r(X, Y)$, which happens after the negated literal "$not\ q(X, Y)$":
 
 \begin{lstlisting}
 p(X) :- not q(X, Y), r(X, Y).
 r(a, b).
 \end{lstlisting}
 
-\paragraph{} ASP does not consider the ordering of the literals in a rule and hence safety is less of a problem in ASP.  However, ASP needs to ground the entire program and another form of safety is needed. ASP Solvers are restricted to working with "safe" rules only.
+\paragraph{} ASP does not consider the ordering of the literals in a rule and hence safety is less of a problem in ASP.  However, ASP still needs to ground the entire program and another form of safety is needed. ASP Solvers are restricted to working with "safe" rules only.
 
 \begin{defn}\label{defn:SafeRule}
 A rule $R$ is safe, if every variable in $R$ occurs in at least one atom in $body^+(R)$. 
 \end{defn}
 
-\paragraph{} Considering Definition \ref{defn:SafeRule}, take a look at the following examples:
+\paragraph{} Considering Definition \ref{defn:SafeRule}, we look at the following examples:
 
 \begin{itemize}
 \item \lstinline{p(Z) :- not q(X, Y), r(X, Y).} - This rule is unsafe because the variable $Z$ does not occur in any of the atoms in $body^+(R)$.
@@ -1062,7 +1066,7 @@ p(1).
 \item $head(R)$ is true in $I$
 \end{itemize}
 
-\paragraph{} We can construct the Least Herbrand Model for a definite logic program $P$, denoted $M(P)$ by starting with the empty set $M = {}$. We then repeatedly add any atom $h$ to $M$M st $h$ is the head of a rule $R$ whose body is a subset of $M$, i.e. we add $head(R)$ to $M$ if $body(R) \subseteq M$. \textit{For definite programs with no loops, this is the same as what is provable using Prolog.}
+\paragraph{} We can construct the Least Herbrand Model for a definite logic program $P$, denoted $M(P)$ by starting with the empty set $M = \emptyset$. We then repeatedly add any atom $h$ to $M$ st $h$ is the head of a rule $R$ whose body is a subset of $M$, i.e. we add $head(R)$ to $M$ if $body(R) \subseteq M$. \textit{For definite programs with no loops, this is the same as what is provable using Prolog.}
 
 \subsubsection{Normal Logic Programs}
 

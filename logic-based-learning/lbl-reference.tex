@@ -650,7 +650,7 @@ $$\{f(X,Y) \lor \lnot p(X, Y); \lnot m(X); \lnot m(Z)\}$$
 
 \subsection{Language Bias}\label{sec:LanguageBias}
 
-\paragraph{} Sometimes we would like to define the language of the hypothesis by using a language bias. It is composed of a set of \textbf{mode declarations}.
+\paragraph{} Sometimes we would like to define the language of the hypothesis by using a language bias. It is composed of a set of \textbf{mode declarations} and there are two types:
 
 \[
 \text{Mode declarations: }
@@ -673,7 +673,7 @@ $$\{f(X,Y) \lor \lnot p(X, Y); \lnot m(X); \lnot m(Z)\}$$
 	&\text{modeb}(1, \text{parent}(+\text{person}, +\text{person}))
 \end{align*}
 
-We can build a rule $grandfather(X, Y) \leftarrow father(X, Z), parent(Z, Y)$.
+We can build a rule that says $grandfather(X, Y) \leftarrow father(X, Z), parent(Z, Y)$ because it conforms to the mode declarations.
 
 \subsection{Bottom Set}
 
@@ -695,15 +695,15 @@ We can build a rule $grandfather(X, Y) \leftarrow father(X, Z), parent(Z, Y)$.
 
 $$Bot(B, e^+) = \{\lnot l_1\theta, \lnot l_2\theta, ..., \lnot l_n\theta\}$$
 
-\paragraph{} The Bottom Set is the \textbf{most specific ground set of clauses} that is at the bottom of an hypothesis search space that explains the example $e^+$. Let $g(\lnot h_{\perp}) \subseteq \lnot Bot(B, e^+)$ and consequently $\lnot Bot(B, e^+) \models g(\lnot h_{\perp})$. Remember that all variables in the sets $g(\lnot h_{\perp})$ and $\lnot Bot(B, e^+)$ are existentially quantified. By contrapositive, we have $g(h_{\perp}) \models Bot(B, e^+)$. If we replace every constant in $g(h_{\perp})$ with a unique variable, we obtain a universally quantified clause $h_{\perp}$. This clause $h_{\perp}$ $\theta$-subsumes the Bottom Set (and hence $h_{\perp} \models Bot(B, e^+)$).
+\paragraph{} The Bottom Set is the \textbf{most specific ground set of clauses} that is at the bottom of an hypothesis search space that explains the example $e^+$. Let $ground(\lnot h_{\perp}) \subseteq \lnot Bot(B, e^+)$ and consequently $\lnot Bot(B, e^+) \models g(\lnot h_{\perp})$. Remember that all variables in the sets $ground(\lnot h_{\perp})$ and $\lnot Bot(B, e^+)$ are existentially quantified. By contrapositive, we have $ground(h_{\perp}) \models Bot(B, e^+)$. If we replace every constant in $ground(h_{\perp})$ with a unique variable, we obtain a universally quantified clause $h_{\perp}$. This clause $h_{\perp}$ $\theta$-subsumes the Bottom Set (and hence $h_{\perp} \models Bot(B, e^+)$).
 
 \paragraph{} $h_{\perp}$ corresponds to the \textbf{most specific unground hypothesis} at the bottom of the hypothesis search space (or lattice) that $\theta$-subsumes $Bot(B, e^+)$. 
 
 \paragraph{} Computing the Bottom Set first allows for a more efficient search for hypotheses, as the search space can be limited to the sub-lattice space delimited by the $Bot(B, e^+)$ as the bottom-most element and the empty clause as the top element. Solutions will be clauses that $\theta$-subsume the Bottom Set $Bot(B, e^+)$.
 
-\paragraph{} We can look at the Least Herbrand Model of the set of $B \cup {\lnot e^+}$ for the list of literals that can be entailed from $B \cup \{\lnot e^+\}$. Alternatively to prove that the set satisfy a clause $h$, we can also use proof by resolution to show that $B \land \lnot e^+ \land \lnot h \vdash_{res} [\ ]$.
+\paragraph{} We can look at the Least Herbrand Model of the set of $B \cup \{\lnot e^+\}$ for the list of literals that can be entailed from $B \cup \{\lnot e^+\}$. Alternatively, to prove that the set satisfy a clause $h$, we can also use proof by resolution to show that $B \land \lnot e^+ \land \lnot h \vdash_{res} [\ ]$.
 
-\paragraph{Learning by Bottom Generalisation} Using the computed Bottom Set to generate the bottom clause $h_{\perp}$, the next step would be to compute a more generate clause that subsume these bottom set through top-down refinement. We say that an hypothesis $H$ is derivable from the bottom generalisation from $B$ and $e^+$ iff $H \geq_g Bot(B, e^+)$. 
+\paragraph{Learning by Bottom Generalisation} Using the computed Bottom Set to generate the bottom clause $h_{\perp}$, the next step would be to compute a more generate clause that subsume the Bottom Set through top-down refinement. We say that an hypothesis $H$ is derivable from the bottom generalisation from $B$ and $e^+$ iff $H \geq_g Bot(B, e^+)$. 
 
 \subsection{Inverse Entailment \& NOPL}
 

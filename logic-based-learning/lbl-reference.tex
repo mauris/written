@@ -401,7 +401,7 @@ $$G_0 \underset{C_0}{\implies} G_1 \underset{C_1}{\implies} ...  \underset{C_{n-
 
 \subsubsection{Abductive Model}
 
-\paragraph{} An abductive model of a problem domain is defined as a tuple $<KB, Ab, IC>$ where $KB$ is the knowledge base (set of normal clauses), $Ab$ is the vocabulary of plausible explanations (set of ground undefined literals), and $IC$ is the set of constraints (set of normal details).
+\paragraph{} An abductive model of a problem domain is defined as a tuple $\langle KB, Ab, IC \rangle$ where $KB$ is the knowledge base (set of normal clauses), $Ab$ is the vocabulary of plausible explanations (set of ground undefined literals), and $IC$ is the set of constraints (set of normal details).
 
 \paragraph{Abductive Solution} Given an abductive model, an \textit{abductive solution} (or explanation) of a given observation $O$ is a set $\Delta$ of ground literals st:
 
@@ -416,15 +416,17 @@ $$G_0 \underset{C_0}{\implies} G_1 \underset{C_1}{\implies} ...  \underset{C_{n-
 
 \subsection{Abductive Proof Procedure}
 
+\paragraph{} The \textit{Abductive Proof Procedure} consists of two phases: \textit{Abductive Phase} and \textit{Consistency Phase}. The Abductive Phase builds the set of assumptions while the Consistency Phase ensures the consistency of the assumptions.
+
 \subsubsection{Abductive Phase}\label{sec:AbductiveProofProcedureAbductivePhase}
 
-\paragraph{} Let $<KB, Ab, IC>$ be an abductive model expressed in Normal Clausal Logic and let $O$ be a ground observation. To start the procedure, we let $G_1 = O$ and $\Delta_0$ initially be $\emptyset$:
+\paragraph{} Let $\langle KB, Ab, IC \rangle$ be an abductive model expressed in Normal Clausal Logic and let $O$ be a ground observation. To start the procedure, we let $G_1 = O$ and $\Delta_0$ initially be $\emptyset$:
 
 \paragraph{} Select a subgoal $L \in G_i$, then let $G_i' = G_i - \{L\}$:
 \begin{itemize}
 \item $L \not\in Ab$ and $L$ is a non-negative atom:\\ If $\exists [(H \Leftarrow B) \in KB]$ st $L = H\theta$,\\ then $G_{i+1} = B\theta \cup G_i$ and $\Delta_{k+1} = \Delta_k$
 \item $L \in \Delta_i$: $G_{i+1} = G_i$ and $\Delta_{k+1} = \Delta_k$
-\item $L \in Ab$ and $L \not\in \Delta_k$ and $(\text{not}\ L) \not\in \Delta_k$: $L$ can be assumed but needs to go through \textit{Consistency Phase} (Section \ref{sec:AbductiveProofProcedureConsistencyPhase}) to verify that assumption does not introduce inconsistency. If the consistency phase succeeds\footnote{Succeds with a failure in derivation.}, then $\Delta_{k+1} = \Delta_k \cup {L}$.
+\item $L \in Ab$ and $L \not\in \Delta_k$ and $(\text{not}\ L) \not\in \Delta_k$: $L$ can be assumed but needs to go through \textit{Consistency Phase} (Section \ref{sec:AbductiveProofProcedureConsistencyPhase}) to verify that assumption does not introduce inconsistency. If the consistency phase succeeds\footnote{Succeeds with a failure in derivation.}, then $\Delta_{k+1} = \Delta_k \cup {L}$.
 \end{itemize}
 
 \subsubsection{Consistency Phase}\label{sec:AbductiveProofProcedureConsistencyPhase}
@@ -437,7 +439,7 @@ $$G_0 \underset{C_0}{\implies} G_1 \underset{C_1}{\implies} ...  \underset{C_{n-
 \item $L \not\in Ab$: Perform SLDNF failure with L as a subgoal.
 \item $L \in \Delta_k$: $\phi' = \phi - \{L\}$ and consider the new constraint $\Leftarrow \phi'$\
 \item $L \in Ab$ and $(\text{not}\ L) \in \Delta_k$, then continue consistency phase with the next denial in $F_1$ to check.
-\item $L \in Ab$ and $L \not\in \Delta_k$ and $(\text{not}\ L) \not\in \Delta_k$: As the literal has to fail, we perform an abductive derivation of its negation to check for its success (i.e. we go back to Abductive Phase, Section \ref{sec:AbductiveProofProcedureAbductivePhase}, with the subgoal $\text{not} L$). 
+\item $L \in Ab$ and $L \not\in \Delta_k$ and $(\text{not}\ L) \not\in \Delta_k$: As the literal has to fail, we perform an abductive derivation of its negation to check for its success (i.e. we go back to Abductive Phase, Section \ref{sec:AbductiveProofProcedureAbductivePhase}, with the subgoal $\text{not}\ L$). 
 \end{itemize}
 
 \section{Inductive Logic Programming}
@@ -482,7 +484,13 @@ $$G_0 \underset{C_0}{\implies} G_1 \underset{C_1}{\implies} ...  \underset{C_{n-
 
 \paragraph{$\theta$-subsumption} Given two sets of clauses where $H_1 = \{C_1,... , C_n\}$ and $H_2 = \{D_0,... , D_m\}$, to show that $H_1$ $\theta$-subumes $H_2$, we need to show that $\forall D_i$ clause $\in H_2$, $\exists C_i$ clause $\in H_1$ that subsumes $D_i$.
 
-\paragraph{} A clause $C$ can $\theta$-subsume itself as the $\theta$-substitution would be $\theta = \{\}$. If an hypothesis is consistent (i.e. does not cover any negative example) then any specialisation of this hypothesis will also be consistent. Similarly if an hypothesis is complete (i.e. covers every positive example), then every generalisation of this hypothesis will also be complete. Recall we aim to find hypotheses that are complete and consistent.
+\paragraph{Self-subsumption} A clause $C$ can $\theta$-subsume itself as the $\theta$-substitution would be $\theta = \emptyset$.
+
+\paragraph{} If an hypothesis is \textit{consistent} (i.e. does not cover any negative example) then any specialisation of this hypothesis will also be \textit{consistent}.
+
+\paragraph{} Similarly if an hypothesis is \textit{complete} (i.e. covers every positive example), then every generalisation of this hypothesis will also be \textit{complete}.
+
+\paragraph{} Recall that our aim is to find hypotheses that are both complete and consistent.
 
 \subsection{Lattice of Clauses}
 
@@ -535,7 +543,7 @@ c_1 = \{f(t,a)\lor\lnot p(t, a); \lnot m(t); \lnot m(a)\}\\
 c_2 = \{f(j,p)\lor\lnot p(j, p); \lnot m(j); \lnot f(p)\}
 \end{align*} 
 
-\noindent Then the lgg of $c_1$ and $c2$ given above would be the set:
+\noindent Then the lgg of $c_1$ and $c_2$ given above would be the set:
 
 $$\{f(X,Y) \lor \lnot p(X, Y); \lnot m(X); \lnot m(Z)\}$$
 
@@ -543,7 +551,7 @@ $$\{f(X,Y) \lor \lnot p(X, Y); \lnot m(X); \lnot m(Z)\}$$
 
 \subsubsection{Muggleton's Inverse Resolution}
 
-\paragraph{} The method for searching hypotheses from specific to general is the use of inverse resolution proposed by Muggleton\cite{muggleton95} as a mechanism for computing relative generality relation between clauses. In his paper, the generality relation was computed relative to a given background knowledge.
+\paragraph{} The method for searching hypotheses from specific to general is the use of inverse resolution proposed by Muggleton\cite{muggleton95} as a mechanism for computing relative generality relation between clauses. In his paper, the generality relation is computed relative to a given background knowledge.
 
 \paragraph{} The idea of inverse resolution is to compute clauses from given clauses that reflect an inverse of the standard resolution rules as seen in Section \ref{sec:Resolution}. 
 

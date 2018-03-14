@@ -711,7 +711,7 @@ $$Bot(B, e^+) = \{\lnot l_1\theta, \lnot l_2\theta, ..., \lnot l_n\theta\}$$
 
 \[
 B = \begin{cases}
-haspeak(X) \leftarrow bird(X)\\
+hasbeak(X) \leftarrow bird(X)\\
 bird(X) \leftarrow vulture(X)
 \end{cases}
 \]
@@ -728,7 +728,7 @@ B \land \lnot e^+ &= \{\\
 Bot(B, e^+) &= hasbeak(tweety)\\
 & \lor bird(tweety)\\
 & \lor vulture(tweety)\\
-g(h_{\perp}) &= \{ hasbeak(tweety) \}\\
+ground(h_{\perp}) &= \{ hasbeak(tweety) \}\\
 h_{\perp} &= \{ hasbeak(X) \}
 \end{align*}
 

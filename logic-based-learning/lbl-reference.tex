@@ -1177,7 +1177,7 @@ expresses that every coin $C$ must either take the value "h" or "t" (but not bot
 r.
 \end{lstlisting}
 
-\paragraph{} Since $| \{ p, q \} \cup X | \geq 1$, we compute the reduct $P^X$ of the program by replacing the head with $\perp$:
+\paragraph{} Since $| \{ p, q \} \cap X | \geq 1$, we compute the reduct $P^X$ of the program by replacing the head with $\perp$:
 
 \begin{lstlisting}[mathescape=true]
 $\perp$ :- r.
@@ -1191,7 +1191,7 @@ r.
 r.
 \end{lstlisting}
 
-\paragraph{} Now that $| \{ p, q \} \cup X | = 2$, we can compute the reduct $P^X$ of the program to be as such:
+\paragraph{} Now that $| \{ p, q \} \cap X | = 2$, we can compute the reduct $P^X$ of the program to be as such:
 
 \begin{lstlisting}
 p :- r.
@@ -1220,7 +1220,7 @@ r.
 \paragraph{} For a definite program $P$, since there is always a unique LHM (written $M(P)$), entailment is defined in terms of this LHM. The task of ILP is therefore to find a hypothesis $H$ st $M(B \cup H)$ contains all of a set of positive examples and none of a set of negative examples. There are two different kind of entailments: \textit{brave} and \textit{cautious}. 
 
 \subsection{Brave Induction}
-\paragraph{} An atom $A$ is bravely entailed by a program $P$ if it is true in \textbf{at least one stable model} of $P$ (written $P \models_b A$).
+\paragraph{Brave Entailment} An atom $A$ is bravely entailed by a program $P$ if it is true in \textbf{at least one stable model} of $P$ (written $P \models_b A$).
 
 \paragraph{} Based on the semantics of brave entailment, we can construct the concept of Brave Induction  \cite{sakama08}. Given a Brave ILP (denoted $\text{ILP}_\text{B}$) task as the tuple $\langle B, E^+, E^- \rangle$, we want to search for a hypothesis $H$ st $B \cup H$ has \textbf{at least one Answer Set} which contains all of the positive examples and none of the negative examples i.e. $\exists A$ of $B \cup H$ st $\forall e^+ \in E^+: e^+ \in A$ and $\forall e^- \in E^-: e^- \not\in A$. We can also write it as:
 
@@ -1233,7 +1233,7 @@ $$B \cup H \models_b (e_1^+ \land ... \land e_n^+ \land \text{not}\ e_1^- \land 
 \paragraph{} In particular, a brave ILP task will never have, as an optimal solution, a hypothesis containing a constraint. If the hypothesis is a solution for the brave ILP task, it must have at least one Answer Set that contains all of the positive examples and none of the negative examples. As constraints only rule out Answer Sets, this Answer Sets will still be an Answer Set of the program without the constraint.
 
 \subsection{Cautious Induction}
-\paragraph{} An atom $A$ is cautiously entailed by a program $P$ if it is true in \textbf{all stable models} of $P$ (written $P \models_c A$).
+\paragraph{Cautious Entailment} An atom $A$ is cautiously entailed by a program $P$ if it is true in \textbf{all stable models} of $P$ (written $P \models_c A$).
 
 \paragraph{} Based on the semantics of cautious entailment, we can construct the concept of Cautious Induction  \cite{sakama08}. Given a Cautious ILP (denoted $\text{ILP}_\text{C}$) task as the tuple $\langle B, E^+, E^- \rangle$, we want to search for a hypothesis $H$ st $B \cup H$ has at least one Answer Set and \textbf{all of its Answer Sets} contain all of the positive examples and none of the negative examples i.e. $\forall A$ of $B \cup H$ st $\forall e^+ \in E^+: e^+ \in A$ and $\forall e^- \in E^-: e^- \not\in A$. We can also write it as:
 
@@ -1270,7 +1270,7 @@ can(a, fly).
 can(b, swim).
 \end{lstlisting}
 
-\paragraph{} For every variable, ASPAL will add the type of the variable to the body of the rule. In he case of $penguin(+bird)$, $bird(V1)$ is added to the body of the rule. This enforces that the rules only apply to terms of these types and will also mean that ASPAP would not need to worry about the safety of the rules. All variables will certainly appear in at least one positive literal in the body of the rule. The rule  \lstinline{penguin(V1) :- bird(V1), not can(V1, C1).} represents:
+\paragraph{} For every variable, ASPAL will add the type of the variable to the body of the rule. In the case of $penguin(+bird)$, $bird(V1)$ is added to the body of the rule. This enforces that the rules only apply to terms of these types and will also mean that ASPAP would not need to worry about the safety of the rules. All variables will certainly appear in at least one positive literal in the body of the rule. The rule  \lstinline{penguin(V1) :- bird(V1), not can(V1, C1).} represents:
 
 \begin{lstlisting}
 penguin(V1) :- bird(V1), not can(V1, fly).

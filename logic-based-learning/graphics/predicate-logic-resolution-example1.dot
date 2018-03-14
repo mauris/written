@@ -3,7 +3,7 @@ digraph {
   ranksep=0.4;
   node [shape=none, height=0.1]
   0 [label=<&not;on(X, Y)&or;&not;green(X)&or;green(Y)>];
-  1 [label=<on(a, b)>];
+  1 [label=<on(b, c)>];
   2 [label=<&theta; = {X/b, Y/c}> fontcolor="blue"];
   0 -> 2;
   1 -> 2;

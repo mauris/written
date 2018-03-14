@@ -219,7 +219,7 @@ Kb &= \{\\
 \caption{The resolution takes the two substitutions (labelled blue) two create equally opposing literals for $on(X, Y)$.}
 \end{figure}
 
-\paragraph{} As we take the negation of the entailment, the existential quantifiers get eliminated and hence there is no need for skolemisation.
+\paragraph{} As we take the negation of the entailment, the existential quantifiers becomes universal quantifier, and during skolemisation, they get eliminated, i.e. we show $Kb \cup \{\lnot on(X,Y)\lor \lnot green(X) \lor green(Y)\} \models [\ ]$.
 
 \paragraph{Answers to Query} Answer to the query may also return unification values (substitution). However, it is possible to construct resolutions that never terminate.
 

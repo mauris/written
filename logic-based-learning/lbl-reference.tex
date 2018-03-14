@@ -312,15 +312,17 @@ $$G_0 \underset{C_0}{\implies} G_1 \underset{C_1}{\implies} ...  \underset{C_{n-
 \caption{By SLD derivation, we determine that $Z = \text{adam}$.}
 \end{figure}
 
-\paragraph{} However we can see that at $C_2$, another clause $\text{parent}(X, Y) \Leftarrow mother(X, Y)$ could have been picked instead for the reservation. When each sub-goal can unify with more clauses, more than one SLD derivations can be computed. Alternative choices can then be represented as a tree, with each leaf as a possible derivation.
+\paragraph{} However we can see that at $G_2$, another clause $\text{parent}(X, Y) \Leftarrow mother(X, Y)$ could have been picked for the resolution instead of $C_2$. When each subgoal can unify with more clauses, more than one SLD derivation can be computed. Alternative choices can then be represented as a tree, with each leaf as a possible derivation.
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.4\textwidth]{graphics/sld-tree.png}
-\caption{Each time there is a choice of clauses can be be used to resolve the subgoals, branches are created in the tree to represent the different possible derivations. In this case, picking $\Leftarrow \text{mother}(X, Y), \text{newborn}(Y)$ as $G_2$ would lead to a non-empty derivation. }
+\caption{Each time there is a choice of clauses can be be used to resolve the subgoals, branches are created in the tree to represent the different possible derivations. In this case, picking $\Leftarrow \text{mother}(X, Y), \text{newborn}(Y)$ as $C_2$ would lead to a non-empty derivation. }
 \end{figure}
 
-\paragraph{} The SLD Tree represents the search space of all possible derivations. Each path from the original denial $G_0$ to the leaf node is the SLD computation / refutation. The tree is then traversed in a depth-first search to provide each refutation in order. For a finite SLD-tree, this strategy is complete. Whenever the traversal reaches a leaf node of an empty clause, the substitution of the completed refutation is returned. As mentioned before, it is also possible for SLD derivation to generate an infinite sequence of denials and hence an infinite SLD-tree, which explains why sometimes Prolog computations do not terminate.
+\paragraph{} The SLD Tree represents the search space of all possible derivations. Each path from the original denial $G_0$ to the leaf node is the SLD computation / refutation. The tree is then traversed in a depth-first search to provide each refutation in order. For a finite SLD-tree, this strategy is complete. Whenever the traversal reaches a leaf node of an empty clause, the substitution of the completed refutation is returned.
+
+\paragraph{} As mentioned before, it is also possible for SLD derivation to generate an infinite sequence of denials and hence an infinite SLD-tree, which explains why some Prolog computations do not terminate.
 
 \subsection{Normal Clausal Logic}\label{sec:NormalClausalLogic}
 
@@ -332,7 +334,7 @@ $$G_0 \underset{C_0}{\implies} G_1 \underset{C_1}{\implies} ...  \underset{C_{n-
 \item[] \textbf{Normal Denials}:\\ $\Leftarrow b_1, ... b_n, \text{not}\ b_{n+1}, ..., \text{not}\ b_m$
 \end{itemize}
 
-\paragraph{} The \textit{not} operator in Prolog is known as $\backslash+$. The computational meaning of $\text{not}\ p$ is: i) $\text{not}\ p$ succeeds iff $p$ fails finitely and ii) $\text{not}\ p$ fails iff $p$ succeeds. When evaluating $\Leftarrow \text{not} p(X)$, the atom $p$ must be ground: otherwise the derivation is "floundered"\footnote{The answer is unknown.}. The variable $X$ should have already been grounded in previous steps of the derivation.
+\paragraph{} The \textit{not} operator in Prolog is known as $\backslash+$. The computational meaning of $\text{not}\ p$ is: i) $\text{not}\ p$ succeeds iff $p$ fails finitely and ii) $\text{not}\ p$ fails iff $p$ succeeds. When evaluating $\Leftarrow \text{not } p(X)$, the atom $p$ must be ground: otherwise the derivation is "floundered"\footnote{The answer is unknown.}. The variable $X$ should have already been grounded in previous steps of the derivation.
 
 \paragraph{} In Normal Clausal Logic, the fail operator never appears in the head of a rule. Putting the fail operator in the head of a rule would be asking to prove what should not be proved, whereas clausal theories define what should be provable.
 
@@ -356,7 +358,7 @@ $$G_0 \underset{C_0}{\implies} G_1 \underset{C_1}{\implies} ...  \underset{C_{n-
 \caption{ In the example, we need to prove that $\Leftarrow unconnected$ fails in order to prove the second denial / sub-goal "$\Leftarrow \text{not}\ unconnected$". $\Leftarrow unconnected$ fails iff all all possible outcomes of $\Leftarrow unconnected$ comes to a failure / non-empty clause. The two possible outcomes, for $X = a \text{or} b$: $\Leftarrow \text{not}\ succ(X)$, are proven to to fail since each of $\Leftarrow succ(X)$ succeeds.}
 \end{figure}
 
-\paragraph{Floundering} If we make a slight modification to the knowledge base of the example by replacing $unconnected \Leftarrow node(X), \text{not}\ succ(X)$ with $unconnected \Leftarrow node(X), \text{not} arc(X, Y)$, the SLDNF would not be possible to evaluate even though the knowledge bases are equivalent. Figure \ref{fig:sldnf-example2} shows the resolution tree.
+\paragraph{Floundering} If we make a slight modification to the knowledge base of the example by replacing $unconnected \Leftarrow node(X), \text{not}\ succ(X)$ with $unconnected \Leftarrow node(X), \text{not}\ arc(X, Y)$, the SLDNF would not be possible to evaluate, even though the knowledge bases are "equivalent". Figure \ref{fig:sldnf-example2} shows the resolution tree with the modification.
 
 \begin{figure}[H]
 \centering
@@ -386,7 +388,14 @@ $$G_0 \underset{C_0}{\implies} G_1 \underset{C_1}{\implies} ...  \underset{C_{n-
 \label{fig:abduction-example1}
 \end{figure}
 
-\paragraph{} Abductive reasoning computes explanations that are consistent with the given knowledge base to explain (or satisfy) the given observations. The list of explanations can be generated and some may be subset of others. They should not be unnecessarily strong\footnote{i.e. including more ground literals than needed} or unnecessarily weak \footnote{too few to prove the observations in all circumstances}. Abductive algorithms for Normal clauses aim to generate a minimal set of explanations that, together with the given theory, proves the goal.
+\paragraph{} The following two sets of abducibles are equally good explanations (i.e. hypothesis) of the query "What would explain $soreElbow$?":
+
+\begin{itemize}
+\item $\Delta_1 = \{tennisElbow\}$
+\item $\Delta_2 = \{arithritis, untreated\}$
+\end{itemize}
+
+\paragraph{} Abductive reasoning compute explanations that are consistent with the given knowledge base to explain (or satisfy) the given observations. The list of explanations can be generated and some may be subset of others. They should not be unnecessarily strong\footnote{i.e. including more ground literals than needed} or unnecessarily weak \footnote{too few to prove the observations in all circumstances}. Abductive algorithms for Normal clauses aim to generate a minimal set of explanations that, together with the given theory, proves the goal.
 
 \paragraph{Abducibles} When modelling a problem domain in an abductive term, we need to think about a vocabulary of what are considered to be plausible explanations for the given types of observations - and we refer this vocabulary as the set of \textit{abducibles}.
 

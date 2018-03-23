@@ -687,13 +687,13 @@ We can build a rule that says $grandfather(X, Y) \leftarrow father(X, Z), parent
 \paragraph{} We then have their negation with skolemisation:
 
 \begin{itemize}
-\item $\lnot h \equiv \lnot l_1 \land l_2\theta \land ... \land l_n\theta$: $\theta$ is a grounding by existential quantifier for $h$.
+\item $\lnot h \equiv \lnot l_1\theta \land l_2\theta \land ... \land l_n\theta$: $\theta$ is a grounding by existential quantifier for $h$.
 \item $\lnot e^+ \equiv \lnot a_1\delta \land a_2\delta \land ... \land a_m\delta$: $\delta$ is a grounding by existential quantifier for $h$.
 \end{itemize}
 
 \paragraph{} The Bottom set is then defined as:
 
-$$Bot(B, e^+) = \{\lnot l_1\theta, \lnot l_2\theta, ..., \lnot l_n\theta\}$$
+$$Bot(B, e^+) = \{l_1\theta, \lnot l_2\theta, ..., \lnot l_n\theta\}$$
 
 \paragraph{} The Bottom Set is the \textbf{most specific ground set of clauses} that is at the bottom of an hypothesis search space that explains the example $e^+$. Let $ground(\lnot h_{\perp}) \subseteq \lnot Bot(B, e^+)$ and consequently $\lnot Bot(B, e^+) \models g(\lnot h_{\perp})$. Remember that all variables in the sets $ground(\lnot h_{\perp})$ and $\lnot Bot(B, e^+)$ are existentially quantified. By contrapositive, we have $ground(h_{\perp}) \models Bot(B, e^+)$. If we replace every constant in $ground(h_{\perp})$ with a unique variable, we obtain a universally quantified clause $h_{\perp}$. This clause $h_{\perp}$ $\theta$-subsumes the Bottom Set (and hence $h_{\perp} \models Bot(B, e^+)$).
 
@@ -780,7 +780,7 @@ non\_r &\leftarrow non\_p, q\\
 \begin{align*}
 & Kernel(B, E) \\
 &= \{a | a \in \Delta \land B \cup \Delta \models e\} \cup \{\lnot b_i | B \cup \{\lnot e\} \models b_i\} \\
-&= \bigwedge \{b_i | B \cup \{\lnot e\} \models b_i\} \rightarrow \bigvee \{a | a \in \Delta \land B \cup \Delta \models e\} \models b_i\}
+&= \bigwedge \{b_i | B \cup \{\lnot e\} \models b_i\} \rightarrow \bigvee \{a | a \in \Delta \land B \cup \Delta \models e\}
 \end{align*}}
 
 \paragraph{} Note from above that the body literals are still generated the same way as it did by Progol5, i.e. $B \cup \{\lnot e\} \models b$. From the Kernel Set (that is ground), we then construct the Kernel Set hypothesis (that is ungrounded) given by
@@ -1272,7 +1272,7 @@ can(a, fly).
 can(b, swim).
 \end{lstlisting}
 
-\paragraph{} For every variable, ASPAL will add the type of the variable to the body of the rule. In the case of $penguin(+bird)$, $bird(V1)$ is added to the body of the rule. This enforces that the rules only apply to terms of these types and will also mean that ASPAP would not need to worry about the safety of the rules. All variables will certainly appear in at least one positive literal in the body of the rule. The rule  \lstinline{penguin(V1) :- bird(V1), not can(V1, C1).} represents:
+\paragraph{} For every variable, ASPAL will add the type of the variable to the body of the rule. In the case of $penguin(+bird)$, $bird(V1)$ is added to the body of the rule. This enforces that the rules only apply to terms of these types and will also mean that ASPAL would not need to worry about the safety of the rules. All variables will certainly appear in at least one positive literal in the body of the rule. The rule  \lstinline{penguin(V1) :- bird(V1), not can(V1, C1).} represents:
 
 \begin{lstlisting}
 penguin(V1) :- bird(V1), not can(V1, fly).

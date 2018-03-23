@@ -296,7 +296,7 @@ Given a formula $\phi$, a model $M$ and a state $s$ in $M$, $\phi$ is true at $s
 \begin{itemize}
 \item[] We assume that $Fp \implies Fq \equiv F(p \implies q)$. We use the definition of $\implies$ to derive:\\ $Fp \implies Fq \equiv \lnot Fp \lor Fq$ and\\ $F(p \implies q) \equiv F(\lnot p \lor q) \equiv F\lnot p \lor Fq$.
 \item[] To reach a contradiction, we need a model that satisfies one formula but not the other. Since we need $Fq$ to be false (otherwise $Fq$ would make both formulae true), we must never reach a point in the model where $q$ holds. We choose to eliminate $q$ from any counterexample we construct.
-\item[] We're left with $\lnot Fp$ and $F\lnot q$. One must be true and the other false.
+\item[] We're left with $\lnot Fp$ and $F\lnot p$. On our counterexample, it must be the case that one is true and the other is false.
 \item[] We can try to make $\lnot Fp$ true and $F\lnot p$ false, but in order to make $F\lnot p$ false, we need to $Gp$ in the model to be true, which is impossible when we're already making $\lnot Fp$ true.
 \item[] Alternatively, we make $\lnot Fp$ false and $F\lnot p$ true in the same model. We construct a model such that $p$ starts off as true, and at some other point $p$ becomes false. 
 \end{itemize}
@@ -1097,7 +1097,7 @@ $$\prod_{i = 1,...,n} x'_i \leftrightarrow f_i(x_1, ..., x_n)$$
 
 \section{NuSMV Model Checking}
 
-\paragraph{} We want to describe the model $M_S$ of a system $S$ by means of writing a program and use a specialised tool to determine if $M_S \models \phi_P$. A \textit{model checker} is a tool supporting both requirements. It provides a programming language to describe the model succinctly and performs the specification checks automatically. The $phi_P$ checked by the model checker usually corresponds with the specification $P$ that needs checking.
+\paragraph{} We want to describe the model $M_S$ of a system $S$ by means of writing a program and use a specialised tool to determine if $M_S \models \phi_P$. A \textit{model checker} is a tool supporting both requirements. It provides a programming language to describe the model succinctly and performs the specification checks automatically. The $\phi_P$ checked by the model checker usually corresponds with the specification $P$ that needs checking.
 
 \subsection{Model Checkers}
 
